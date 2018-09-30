@@ -82,4 +82,9 @@ public class CMD extends VarexpVariable {
     public ArrayList<List<String>> getArrayList() {
         return this.cmdList;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "cmd" + ID;
+    }
 }

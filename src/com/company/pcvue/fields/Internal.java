@@ -74,4 +74,9 @@ public class Internal extends VarexpVariable {
         fieldMap.put("Broadcast Indication", new VarexpTuple(18, "CB", new String[]{"Update of the internal variable on the other stations", "Not Used"}, new String[]{"1", "0"}, true, 1));
         return fieldMap;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "internal" + ID;
+    }
 }

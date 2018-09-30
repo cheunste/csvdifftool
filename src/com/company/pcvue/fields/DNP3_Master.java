@@ -113,4 +113,9 @@ public class DNP3_Master extends VarexpVariable {
         fieldMap.put("Add_AOB", new VarexpTuple(229, "TF", new String[]{""}, new String[]{""}, true, 4));
         return fieldMap;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "dnp3_master" + ID;
+    }
 }

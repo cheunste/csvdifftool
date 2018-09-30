@@ -93,4 +93,8 @@ public class ACM extends VarexpVariable {
         return fieldMap;
     }
 
+    @Override
+    public String getVariableIdName() {
+        return "acm" + ID;
+    }
 }

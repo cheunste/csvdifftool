@@ -83,4 +83,9 @@ public class CXT extends VarexpVariable {
     public ArrayList<List<String>> getArrayList() {
         return this.cxtList;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "cxt" + ID;
+    }
 }

@@ -91,4 +91,9 @@ public class OPC extends VarexpVariable {
 
         return fieldMap;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "opc" + ID;
+    }
 }

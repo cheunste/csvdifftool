@@ -85,4 +85,9 @@ public class IEC61850_Master extends VarexpVariable {
         //TODO: Impliment this when user actually uses this
         return null;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "iec61850" + ID;
+    }
 }

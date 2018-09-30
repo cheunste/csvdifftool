@@ -78,4 +78,9 @@ public class TXT extends VarexpVariable {
     public ArrayList<List<String>> getArrayList() {
         return this.txtList;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "txt" + ID;
+    }
 }

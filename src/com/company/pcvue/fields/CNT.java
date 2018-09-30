@@ -111,5 +111,10 @@ public class CNT extends VarexpVariable {
         fieldMap.put("VCR", new VarexpTuple(157, "CB", new String[]{"N", "Y"}, new String[]{"0", "1"}, true, 2));
         return fieldMap;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "chr" + ID;
+    }
 }
 

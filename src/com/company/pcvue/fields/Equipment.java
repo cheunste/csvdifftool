@@ -96,4 +96,10 @@ public class Equipment extends VarexpVariable {
 
         return fieldMap;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "equipment" + ID;
+    }
 }
+

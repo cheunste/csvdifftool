@@ -87,4 +87,9 @@ public class All_Alarms extends VarexpVariable {
         fieldMap.put("", new VarexpTuple(177, "TF", new String[]{""}, new String[]{"-2", "29"}, true, 2));
         return fieldMap;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "all_alarms" + ID;
+    }
 }

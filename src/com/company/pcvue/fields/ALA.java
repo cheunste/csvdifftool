@@ -91,5 +91,11 @@ public class ALA extends VarexpVariable {
 
     public ArrayList<List<String>> getArrayList() {
         return this.alaList;
+
+    }
+
+    @Override
+    public String getVariableIdName() {
+        return "ala" + ID;
     }
 }

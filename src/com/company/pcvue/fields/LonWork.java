@@ -84,4 +84,9 @@ public class LonWork extends VarexpVariable {
         //TODO: Impliment this when user actually uses this
         return null;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "lonwork" + ID;
+    }
 }

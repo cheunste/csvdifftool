@@ -72,4 +72,9 @@ public class External extends VarexpVariable {
         fieldMap.put("Number of station", new VarexpTuple(19, "TF", new String[]{""}, new String[]{"1", "253"}, true, 3));
         return fieldMap;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "external" + ID;
+    }
 }

@@ -109,4 +109,9 @@ public class ATS extends VarexpVariable {
 
         return fieldMap;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "ats" + ID;
+    }
 }

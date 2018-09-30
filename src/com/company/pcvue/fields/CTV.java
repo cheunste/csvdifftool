@@ -97,4 +97,9 @@ public class CTV extends VarexpVariable {
     public ArrayList<List<String>> getArrayList() {
         return this.ctvList;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "ctv" + ID;
+    }
 }

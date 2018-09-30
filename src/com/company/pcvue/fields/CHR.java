@@ -111,4 +111,9 @@ public class CHR extends VarexpVariable {
     public ArrayList<List<String>> getArrayList() {
         return this.chrList;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "chr" + ID;
+    }
 }

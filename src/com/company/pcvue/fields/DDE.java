@@ -91,4 +91,9 @@ public class DDE extends VarexpVariable {
 
         return fieldMap;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "dde" + ID;
+    }
 }

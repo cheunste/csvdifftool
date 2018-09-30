@@ -195,4 +195,8 @@ public class Common extends VarexpVariable {
         return this.commonList;
     }
 
+    @Override
+    public String getVariableIdName() {
+        return "common" + ID;
+    }
 }

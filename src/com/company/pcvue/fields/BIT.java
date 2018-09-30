@@ -81,4 +81,9 @@ public class BIT extends VarexpVariable {
     public ArrayList<List<String>> getArrayList() {
         return this.bitList;
     }
+
+    @Override
+    public String getVariableIdName() {
+        return "bit" + ID;
+    }
 }

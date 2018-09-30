@@ -11,8 +11,8 @@ import java.util.Map;
  * 1) Fields (or parameters ) that are common to all Varexp Variables. This is known as the **common** fields
  * 2) Command fields.
  * 3) Source fields.
- *
- *  In a varexp's common field contains the information for the command and source field as well
+ * <p>
+ * In a varexp's common field contains the information for the command and source field as well
  *
  * <p>
  * IMPORTANT: This is an abstract class that is meant to be inheritaned from other class, but have its own methods
@@ -25,27 +25,30 @@ import java.util.Map;
  */
 
 public abstract class VarexpVariable {
+    //Member variable. This represents the maximum amount of fields that PcVue will have.
+    //IMPORTANT: If you do by chance need to add additional functionality, you MUST expand this FIELD_NUM field
+    private static int FIELD_NUM = 250;
+    //This is a member variable to the VarexpMap, fieldMap. This is used to store and pass certain details of the VarexpVariable
+    public Map<String, VarexpTuple> fieldMap = new LinkedHashMap<>();
     //The name of the table. This is limited to 12 options (BIT, CMD, ALA, ACM, TSH, ATS, REG, CTV, CNT, CHR, TXT ,CXT), etc. Refer to the SQL file for details
     protected String tableName;
     //This is the list you'll be using to keep track of what position a varexp variable uses;
     //TODO: Implement the associated method
     protected List<Integer> varexpPositionList = new ArrayList<Integer>();
-    //Member variable. This represents the maximum amount of fields that PcVue will have.
-    //IMPORTANT: If you do by chance need to add additional functionality, you MUST expand this FIELD_NUM field
-    private static int FIELD_NUM = 250;
-
     //This is the same varexpArrayList, but splitted based on ','
     private ArrayList<String> varexpArrayList = new ArrayList<>(FIELD_NUM);
+
+    //return command and source positions
+    //THis is used for the getVariableIdName. I'm too lazy to constantly type _variable_id over and over again
+    protected String ID = "_variable_id";
 
     //return FIELD_NUM
     public int getFieldNum() {
         return FIELD_NUM;
     }
 
-    //return command and source positions
-
-    //This is a member variable to the VarexpMap, fieldMap. This is used to store and pass certain details of the VarexpVariable
-    public Map<String, VarexpTuple> fieldMap = new LinkedHashMap<>();
+    //return the "variable id name". This is needed for SQL queries and it varies by subclasses. It should return something like "acm_variable_id"
+    public abstract String getVariableIdName();
 
     //Returns the varexp Array List
     public List<String> getVarexpList() {
