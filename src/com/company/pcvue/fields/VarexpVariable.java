@@ -28,6 +28,9 @@ public abstract class VarexpVariable {
     //Member variable. This represents the maximum amount of fields that PcVue will have.
     //IMPORTANT: If you do by chance need to add additional functionality, you MUST expand this FIELD_NUM field
     private static int FIELD_NUM = 250;
+    public static int SOURCE_FIELD_NUM = 17;
+    public static int COMMAND_FIELD_NUM = 1;
+
     //This is a member variable to the VarexpMap, fieldMap. This is used to store and pass certain details of the VarexpVariable
     public Map<String, VarexpTuple> fieldMap = new LinkedHashMap<>();
     //The name of the table. This is limited to 12 options (BIT, CMD, ALA, ACM, TSH, ATS, REG, CTV, CNT, CHR, TXT ,CXT), etc. Refer to the SQL file for details

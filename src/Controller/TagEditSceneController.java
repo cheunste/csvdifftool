@@ -27,10 +27,10 @@ import java.util.Map;
 
 /**
  * Created by Stephen on 8/25/2018.
- *
+ * <p>
  * This is a controller class that is responsible for setting up various textfields, combo boxes and other widget
  * listeners for the TagEidt.fxml. Sadly, there are a LOT of widgets on this page.
- *
+ * <p>
  * To future me, for the love of Arceus, break this down somehow
  */
 public class TagEditSceneController {
@@ -241,11 +241,14 @@ public class TagEditSceneController {
     /*
     TODO:
         1) Get the Common Variable data from the DB using the id
-        2) from 1) Get the source and command field of the Common Varexp Variable and reconstruct the Varexp Variable array
-        3) Compile the data from the three tables into an array
-        4) Set a pointer called "currentValue" to this array.
+        2) from 1) Get the source and command field name of the Common Varexp Variable
+        3) Create a factory for the source and the command and using the tablename and variableIdName, query their tables
+        4) Pass the three noted resultStrings into a method and reconstruct the Varexp Variable array in this method
+
+        5) Compile the returned data from the three tables into an array
+        6) Set a pointer called "currentValue" to this array.
         You will create a "newValue" pointer when the save button is hit, but that's much MUCH later in the project
-        5) Each of the textfields or combobox has an unique ID that's associated with the position of the VarexpArray
+        7) Each of the textfields or combobox has an unique ID that's associated with the position of the VarexpArray
         HOWEVER, remember that "user display text" is different than the value of the variable
 
      */
@@ -254,9 +257,30 @@ public class TagEditSceneController {
         dbConnector connector = new dbConnector();
 
         String commonResult = connector.sqlQuery(databaseName, "SELECT * FROM COMMON WHERE variable_id=" + id + ";");
+        String[] commonStringArray = commonResult.split(",");
+        String commandVariable = commonStringArray[Integer.parseInt(VARIABLE_TYPE_COMBOBOX)];
+        String sourceVariable = commonStringArray[Integer.parseInt(SOURCE_OF_VARIABLE_COMBOBOX)];
+
+        VarexpFactory factory = new VarexpFactory();
+
+        /***************COMMAND***************/
+        VarexpVariable command = factory.declareNewVariable(commandVariable);
+        String commandResult = connector.sqlQuery(databaseName, "SELECT * FROM " + command.getTableName() + " WHERE " +
+                command.getVariableIdName() +
+                "=" + id + ";");
+        String[] commandStringArray = commandResult.split(",");
+
+        /***************SOURCE***************/
+        VarexpVariable source = factory.declareNewVariable(sourceVariable);
+        String sourceResult = connector.sqlQuery(databaseName, "SELECT * FROM " + source.getTableName() + " WHERE " +
+                source.getVariableIdName() +
+                "=" + id + ";");
+        String[] sourceStringArray = sourceResult.split(",");
 
 
-        List<String> commonFields = VarexpReconstructor.reconstructVarexpArray(commonResult, "", "");
+        List<String> reconstructVarexpArray = VarexpReconstructor.reconstructVarexpArray(commonStringArray, sourceStringArray, commandStringArray);
+        String temp = VarexpReconstructor.ListToString(reconstructVarexpArray);
+        System.out.println(temp);
     }
 
     /**
@@ -556,7 +580,7 @@ public class TagEditSceneController {
 
         //This method clears the CSS highlight for the textfield
         public void clear() {
-            textField.getStyleClass().removeAll("error","warning");
+            textField.getStyleClass().removeAll("error", "warning");
         }
 
         public void addError() {
