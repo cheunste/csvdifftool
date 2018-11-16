@@ -1,42 +1,64 @@
 package com.company.pcvue.fields;
 
+import java.util.Arrays;
 import java.util.List;
 
 public class VarexpReconstructor {
 
 
+    public static String ListToString(List<String> reconstructedList) {
+        String result = "";
+        for (String temp : reconstructedList) {
+            result += temp + ",";
+        }
+
+        return result;
+    }
     /**
      * This function reconstructs a Varexp Array from the database. It takes three Strings for each piece of the varexp.
-     * @param commonVariable  The common varexp String from the database
-     * @param sourceVariable  The source String. Can vary in length depending on variable
-     * @param commandVariable The command String. Can vary in length depending on variable
+     * @param commonResult  The common varexp String from the database...along with its ID
+     * @param sourceResult  The source String. Can vary in length depending on variable
+     * @param  sourceVariableName The name of the source variable. This is so I don't have to perform another rquery
+     * @param commandResult The command String. Can vary in length depending on variable
+     * @param commandVariableName The name of the command variable.
+     * @param allAlarmResult This is the all_alarms string from the all_alamrms table
      */
-    public static List<String> reconstructVarexpArray(String[] commonVariable, String[] sourceVariable, String[] commandVariable) {
-
-
+    public static List<String> reconstructVarexpArray(String commonResult,
+                                                      String commandResult, String commandVariableName,
+                                                      String sourceResult, String sourceVariableName,
+                                                      String allAlarmResult) {
         /*
         TODO:
         1) Populate the reconstructedVarexpArray with empty Strings. Remember the FIELD_NUM member variable
         2) Fetch the position array (varexpPositionList) from the common Varexp subclass and then stuff the common
         variables into it
-        3) Determine the source and command that was set up in Coomon. Remember that Source and Command can be empty
-        if it is a new variable and user haven't implemented it yet
-        4)
+
+        3) Remove the variable Id from commandResult and sourceResult. this one is very debatable
+
+        4) fetch teh position array from the source variable
+        5) populate reconsturctedVarexpArray with the source data. Remember that Source can be empty (newly created)
+
+        6)fetch teh position array from the command variable
+        7) populate reconsturctedVarexpArray with the source data. Remember that Command variable can be empty (newly created)
+
+        8) return the reconstructecVarexpArray
          */
 
-
+        /***************COMMON***************/
         VarexpFactory factory = new VarexpFactory();
-
         VarexpVariable common = factory.declareNewVariable("COMMON");
 
         common.initializeVarexpArray();
-        //Create an empty Varexp array
         List<String> reconstructedVarexpArray = common.getVarexpList();
 
         //Get the positino list of the Common Variable
         List<Integer> commonPositionList = common.getVarexpPositionList();
 
-        int tempIndexCounter = 1;
+        String[] temp = commonResult.split(",");
+
+        int tempIndexCounter = 0;
+        String[] commonVariable = Arrays.copyOfRange(temp, 1, temp.length);
+
 
         //Traverse the common variables pulled from the database
         for (String commonField : commonVariable) {
@@ -47,17 +69,16 @@ public class VarexpReconstructor {
         }
 
         /***************COMMAND***************/
-        //Note that for tempIndexCounter starts at 1 in this case because you need to ignore the extra variable_ID that is at the begining
         tempIndexCounter = 0;
-        String commandName = commonVariable[VarexpVariable.COMMAND_FIELD_NUM];
-        VarexpVariable command = factory.declareNewVariable(commandName);
+        VarexpVariable command = factory.declareNewVariable(commandVariableName);
         List<Integer> commandPositionList = command.getVarexpPositionList();
 
+        temp = commandResult.split(",");
+        String[] commandVariable = Arrays.copyOfRange(temp, 1, temp.length);
+
         for (String commandField : commandVariable) {
-            if (tempIndexCounter > 0 && (tempIndexCounter != commandVariable.length)) {
-                //And insert them into the reconstructedVarexpArray
-                reconstructedVarexpArray.set(commandPositionList.get(tempIndexCounter - 1), commandField);
-            }
+            //And insert them into the reconstructedVarexpArray
+            reconstructedVarexpArray.set(commandPositionList.get(tempIndexCounter), commandField);
             //Increment the temp counter
             tempIndexCounter++;
         }
@@ -65,29 +86,35 @@ public class VarexpReconstructor {
 
         /***************SOURCE***************/
         tempIndexCounter = 0;
-        String sourceName = commonVariable[VarexpVariable.SOURCE_FIELD_NUM];
-        VarexpVariable source = factory.declareNewVariable(sourceName);
+        VarexpVariable source = factory.declareNewVariable(sourceVariableName);
         List<Integer> sourcePositionList = source.getVarexpPositionList();
 
+        temp = sourceResult.split(",");
+        String[] sourceVariable = Arrays.copyOfRange(temp, 1, temp.length);
+
         for (String sourceField : sourceVariable) {
-            if (tempIndexCounter > 0 && (tempIndexCounter != sourceVariable.length)) {
-                //And insert them into the reconstructedVarexpArray
-                reconstructedVarexpArray.set(sourcePositionList.get(tempIndexCounter - 1), sourceField);
-            }
+            //And insert them into the reconstructedVarexpArray
+            reconstructedVarexpArray.set(sourcePositionList.get(tempIndexCounter), sourceField);
+            //Increment the temp counter
+            tempIndexCounter++;
+        }
+
+        /***************ALL_ALARMS***************/
+        tempIndexCounter = 0;
+        VarexpVariable allAlarms = factory.declareNewVariable("ALL");
+        List<Integer> allAlarmsPositionList = allAlarms.getVarexpPositionList();
+
+        temp = allAlarmResult.split(",");
+        String[] allAlarmsVariable = Arrays.copyOfRange(temp, 1, temp.length);
+
+        for (String alarmField : allAlarmsVariable) {
+            //And insert them into the reconstructedVarexpArray
+            reconstructedVarexpArray.set(allAlarmsPositionList.get(tempIndexCounter), alarmField);
             //Increment the temp counter
             tempIndexCounter++;
         }
 
         //In the reconstructed Variable
         return reconstructedVarexpArray;
-    }
-
-    public static String ListToString(List<String> reconstructedList) {
-        String result = "";
-        for (String temp : reconstructedList) {
-            result += temp + ",";
-        }
-
-        return result;
     }
 }

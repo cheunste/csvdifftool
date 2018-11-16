@@ -253,13 +253,13 @@ public class TagEditSceneController {
 
      */
     private void populateTagValues(String id) {
-        //TODO: Verify how much you can leverage out of the Export function
         dbConnector connector = new dbConnector();
 
         String commonResult = connector.sqlQuery(databaseName, "SELECT * FROM COMMON WHERE variable_id=" + id + ";");
-        String[] commonStringArray = commonResult.split(",");
-        String commandVariable = commonStringArray[Integer.parseInt(VARIABLE_TYPE_COMBOBOX)];
-        String sourceVariable = commonStringArray[Integer.parseInt(SOURCE_OF_VARIABLE_COMBOBOX)];
+        String[] temp = commonResult.split(",");
+
+        String commandVariable = temp[Integer.parseInt(VARIABLE_TYPE_COMBOBOX)];
+        String sourceVariable = temp[Integer.parseInt(SOURCE_OF_VARIABLE_COMBOBOX)];
 
         VarexpFactory factory = new VarexpFactory();
 
@@ -268,19 +268,25 @@ public class TagEditSceneController {
         String commandResult = connector.sqlQuery(databaseName, "SELECT * FROM " + command.getTableName() + " WHERE " +
                 command.getVariableIdName() +
                 "=" + id + ";");
-        String[] commandStringArray = commandResult.split(",");
 
         /***************SOURCE***************/
         VarexpVariable source = factory.declareNewVariable(sourceVariable);
         String sourceResult = connector.sqlQuery(databaseName, "SELECT * FROM " + source.getTableName() + " WHERE " +
                 source.getVariableIdName() +
                 "=" + id + ";");
-        String[] sourceStringArray = sourceResult.split(",");
 
+        /***************ALL_ALARMS***************/
+        VarexpVariable allAlarms = factory.declareNewVariable("ALL");
+        String allAlarmResult = connector.sqlQuery(databaseName, "SELECT * FROM " + allAlarms.getTableName() + " WHERE " +
+                allAlarms.getVariableIdName() +
+                "=" + id + ";");
 
-        List<String> reconstructVarexpArray = VarexpReconstructor.reconstructVarexpArray(commonStringArray, sourceStringArray, commandStringArray);
-        String temp = VarexpReconstructor.ListToString(reconstructVarexpArray);
-        System.out.println(temp);
+        List<String> reconstructVarexpArray = VarexpReconstructor.reconstructVarexpArray(commonResult,
+                commandResult, commandVariable,
+                sourceResult, sourceVariable,
+                allAlarmResult);
+        String temp2 = VarexpReconstructor.ListToString(reconstructVarexpArray);
+        System.out.println(temp2);
     }
 
     /**
