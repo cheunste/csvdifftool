@@ -1,5 +1,6 @@
 package com.company.Database;
 
+import com.company.matrikon.MatrikonVariable;
 import com.company.pcvue.fields.VarexpFactory;
 import com.company.pcvue.fields.VarexpVariable;
 
@@ -188,6 +189,19 @@ public class dbConnector {
 
     }
 
+    public void sqlExeucte(String databaseName, String sqlCmd) {
+        try {
+            openConnection(databaseName);
+            setStatement(connect);
+            boolean rs = statement.execute(sqlCmd);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        } finally {
+            close(connect);
+        }
+    }
+
     public String getTableSize(String databaseName) {
         openConnection(databaseName);
         setStatement(connect);
@@ -251,6 +265,45 @@ public class dbConnector {
             close(this.connect);
         }
     }
+
+    //This method creates a table specifically for the Matrikon tags
+    public void createMatrikonDB(String dbName) {
+        String createDBStatement = "CREATE DATABASE " + dbName;
+        MatrikonVariable matrikonVariable = new MatrikonVariable(dbName);
+        String createTableStatement;
+        try {
+            connect = newConnection(dbName);
+            statement = connect.createStatement();
+            statement.executeUpdate(createDBStatement);
+            connect = openConnection(dbName);
+            statement = connect.createStatement();
+
+            createTableStatement = matrikonVariable.createTableCmd();
+            statement.executeUpdate(createTableStatement);
+
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (statement != null)
+                    connect.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (connect != null)
+                    connect.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+
+    }
+
 
     public void createDB(String dbName) {
         String createDBStatement = "CREATE DATABASE " + dbName;
