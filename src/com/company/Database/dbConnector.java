@@ -96,6 +96,8 @@ public class dbConnector {
 
     public Connection openConnection(String databaseName) {
         try {
+
+            //TODO: Put the getConnection information into a config file
             Class.forName("com.mysql.jdbc.Driver");
             this.connect = DriverManager
                     //.getConnection("jdbc:mysql://localhost/" + databaseName + "?" + "user=production&password=ZAQ!xsw2CDE#&useSSL=false");
@@ -169,6 +171,20 @@ public class dbConnector {
         } catch (Exception e) {
             e.printStackTrace();
 
+        }
+    }
+
+    public ResultSet sqlQueryResult(String databaseName, String sqlCmd) {
+        try {
+            openConnection(databaseName);
+            setStatement(connect);
+            ResultSet rs = statement.executeQuery(sqlCmd);
+            return rs;
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        } finally {
+            close(connect);
         }
     }
 
@@ -305,7 +321,7 @@ public class dbConnector {
     }
 
 
-    public void createDB(String dbName) {
+    public void createVarexpDB(String dbName) {
         String createDBStatement = "CREATE DATABASE " + dbName;
         VarexpFactory factory = new VarexpFactory();
         String createTableStatement;

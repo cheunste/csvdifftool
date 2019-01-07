@@ -54,7 +54,7 @@ public class ALA extends VarexpVariable {
                 "	ala_Log_bit_1_to_0 TEXT(50) NULL," +
                 "	ala_reserved TEXT(50) NULL," +
                 "	ala_Alarm_Level TEXT(50) NULL," +
-                "	ala_acm_Alarm TEXT(50) NULL," +
+                "	ala_Alarm TEXT(50) NULL," +
                 "	ala_Name_of_mask_bit TEXT(50) NULL," +
                 "	alarm_temporization TEXT(50) NULL," +
                 "	ala_VCR TEXT(50) NULL);";

@@ -53,7 +53,7 @@ public class ACM extends VarexpVariable {
                 "	acm_Log_bit_1_to_0 TEXT(50) NULL," +
                 "	acm_reserved TEXT(50) NULL," +
                 "	acm_Authoisation_Level TEXT(50) NULL," +
-                "	acm_acm_Alarm_Level TEXT(50) NULL," +
+                "	acm_Alarm_Level TEXT(50) NULL," +
                 "	acm_Alarm TEXT(50) NULL," +
                 "	acm_Name_of_mask_bit TEXT(50) NULL," +
                 "	acm_VCR TEXT(50) NULL);";
