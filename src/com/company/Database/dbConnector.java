@@ -205,7 +205,7 @@ public class dbConnector {
 
     }
 
-    public void sqlExeucte(String databaseName, String sqlCmd) {
+    public void sqlExecute(String databaseName, String sqlCmd) {
         try {
             openConnection(databaseName);
             setStatement(connect);

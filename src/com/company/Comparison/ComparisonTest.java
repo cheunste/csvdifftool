@@ -1,5 +1,7 @@
 package com.company.Comparison;
 
+import com.company.Database.dbConnector;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -7,9 +9,11 @@ public class ComparisonTest {
 
     private static List<String> testList = new ArrayList<String>();
 
-    private String oldConfigDB;
-    private String newConfigDB;
-    private String matrikonDB;
+    private static String oldConfigDB;
+    private static String newConfigDB;
+    private static String matrikonDB;
+    private static String resultDB;
+    private static List<String> databaseList;
 
 
     private String tagMatchTest = "insert into resultOutput.resultTable (TagName,`Tag Name Test`)\n" +
@@ -455,11 +459,19 @@ public class ComparisonTest {
             "where result.tagName = ProducerTable.tagName;";
 
 
-    public ComparisonTest(String matrikonDB, String newConfigDB, String oldConfigDB) {
+    public ComparisonTest(String matrikonDB, String newConfigDB, String oldConfigDB, String resultDB) {
 
-        this.matrikonDB = matrikonDB;
-        this.newConfigDB = newConfigDB;
-        this.oldConfigDB = oldConfigDB;
+        ComparisonTest.matrikonDB = matrikonDB;
+        ComparisonTest.newConfigDB = newConfigDB;
+        ComparisonTest.oldConfigDB = oldConfigDB;
+        ComparisonTest.resultDB = resultDB;
+
+        databaseList = new ArrayList<>();
+
+        databaseList.add(matrikonDB);
+        databaseList.add(newConfigDB);
+        databaseList.add(oldConfigDB);
+        databaseList.add(resultDB);
 
         testList.add(tagMatchTest);
         testList.add(descriptionTest);
@@ -474,22 +486,25 @@ public class ComparisonTest {
 
     }
 
+    /*
+    This calls the dbConnector class and executes all the statements in the testList array
+     */
     public static void executeTest() {
-
-        //testList.add(tagMatchTest);
-        //testList.add(descriptionTest);
-        //testList.add(digitalsTest);
-        //testList.add(unitsTest);
-        //testList.add(analogRatioTest);
-        //testList.add(dnp3TypeTest);
-        //testList.add(sourceTest);
-        //testList.add(ctvRangeTest);
-        //testList.add(internalTest);
-        //testList.add(producerTest);
-
+        dbConnector dbConnector = new dbConnector();
+        for (String test : testList) {
+            dbConnector.sqlExecute(resultDB, test);
+        }
     }
 
-    public void checkDBExistance() {
-
+    /*
+    Checks to see if the databases in this class (as in set up in the constructuor) exists or not
+     */
+    public boolean checkDBExistance() {
+        boolean databaseRequirement = true;
+        dbConnector dbConnector = new dbConnector();
+        for (String database : databaseList) {
+            databaseRequirement = databaseRequirement && dbConnector.verifyDBExists(database);
+        }
+        return databaseRequirement;
     }
 }
