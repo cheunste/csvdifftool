@@ -51,18 +51,16 @@ public class MatrikonVariable {
 
                 "matrikon_hiRaw   SMALLINT NULL," +
                 "matrikon_lowRaw  SMALLINT NULL," +
-                "matrikon_hiScaled  SMALLINT NULL," +
-                "matrikon_loScaled  SMALLINT NULL" +
+                "matrikon_hiScaled  FLOAT NULL," +
+                "matrikon_loScaled  FLOAT NULL" +
                 ");";
     }
 
     public void importMatrikonVariable(List<String> data) {
 
         String insertCmd = "";
-
         List<String> newDataList = new ArrayList<String>();
 
-        System.out.println(data);
         if (data.size() < this.maxDataSize) {
 
             for (int i = 0; i < data.size(); i++) {
@@ -105,11 +103,9 @@ public class MatrikonVariable {
                     data.get(matrikonMap.get("loScaled")) +
                     ");";
         }
-        System.out.println(insertCmd);
 
         dbConnector db = new dbConnector();
-        System.out.println(insertCmd);
-        db.sqlExeucte(this.dbName, insertCmd);
+        db.sqlExecute(this.dbName, insertCmd);
     }
 
 }

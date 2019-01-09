@@ -59,7 +59,7 @@ public class ImportSceneController {
 
         dbConnector dbc = new dbConnector();
 
-        dbc.createDB(databaseName);
+        dbc.createVarexpDB(databaseName);
 
         //create a database
         //TODO: Consider inserting another alert here

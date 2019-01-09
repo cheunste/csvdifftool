@@ -210,6 +210,8 @@ public class dbConnector {
             openConnection(databaseName);
             setStatement(connect);
             boolean rs = statement.execute(sqlCmd);
+            System.out.println(rs);
+
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -245,7 +247,7 @@ public class dbConnector {
             ResultSet rs = this.connect.getMetaData().getCatalogs();
             while (rs.next()) {
                 String databaseName = rs.getString(1);
-                if (databaseName.equals(dbName)) {
+                if (databaseName.equalsIgnoreCase(dbName)) {
                     return true;
                 }
             }
@@ -339,6 +341,41 @@ public class dbConnector {
                 createTableStatement = temp.createTableCmd();
                 statement.executeUpdate(createTableStatement);
             }
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (statement != null)
+                    connect.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (connect != null)
+                    connect.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+    }
+
+    /*
+    This is a generic function used to create a database given a name
+     */
+    public void createDatabase(String databaseName) {
+        String createDBStatement = "CREATE DATABASE " + databaseName;
+        try {
+            connect = newConnection(databaseName);
+            statement = connect.createStatement();
+            statement.executeUpdate(createDBStatement);
+
+            connect = openConnection(databaseName);
+            statement = connect.createStatement();
+
         } catch (SQLException se) {
             //Handle errors for JDBC
             se.printStackTrace();

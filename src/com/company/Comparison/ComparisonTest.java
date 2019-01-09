@@ -16,7 +16,7 @@ public class ComparisonTest {
     private static List<String> databaseList;
 
 
-    private String tagMatchTest = "insert into resultOutput.resultTable (TagName,`Tag Name Test`)\n" +
+    private String tagMatchTest = "insert into " + Result.resultDatabaseName() + " (TagName,`Tag Name Test`)\n" +
             "#select newTagName,if(newTagName=oldTagName and newTagName=matrikonTagName,'PASS','FAIL') as remark, \"\" from\n" +
             "select newTagName,if(newTagName=oldTagName and newTagName=matrikonTagName,'PASS','FAIL') as remark  from\n" +
             "(\n" +
@@ -30,16 +30,16 @@ public class ComparisonTest {
             "\t\t\tfrom newvarexpdb.common as common\n" +
             "\t\tgroup by newTagName\n" +
             "\t\t) as newConfigTable\n" +
-            "\t\tinner join  \n" +
+            "\t\tleft join  \n" +
             "\t\t(\n" +
             "\t\t\tselect variable_id as oldVariableId,trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as oldTagName\n" +
             "\t\t\tfrom oldvarexpdb.common as common\n" +
             "\t\tgroup by oldTagName\n" +
             "\t\t) as oldConfigTable\n" +
             "\t\ton oldConfigTable.oldTagName = newConfigTable.newTagName\n" +
-            "\tgroup by oldConfigTable.oldTagName asc\n" +
+            "\tgroup by oldConfigTable.oldTagName\n" +
             "\t) as tempTable1\n" +
-            "\tinner join\n" +
+            "\tleft join\n" +
             "\t(\n" +
             "\t\tselect matrikon.matrikon_id as matrikonID,concat(matrikon.matrikon_group_name,\".\",matrikon_name) as matrikonTagName\n" +
             "\tfrom matrikondb.matrikon as matrikon\n" +
@@ -47,7 +47,7 @@ public class ComparisonTest {
             "\ton tempTable1.newTagName = matrikonTagName\n" +
             ") as tempTable2;\n";
 
-    private String descriptionTest = "Update resultOutput.resultTable result,\n" +
+    private String descriptionTest = "Update " + Result.resultDatabaseName() + " result,\n" +
             "(\n" +
             "\tselect newConfigTable.tagName, newConfigTable.desc_1st_lang as newConfigDesc1, newConfigTable.desc_2nd_lang as newConfigDesc2, oldConfigTable.desc_1st_lang as oldConfigDesc1,oldConfigTable.desc_2nd_lang as oldConfigDesc2 from\n" +
             "\t(\n" +
@@ -71,7 +71,7 @@ public class ComparisonTest {
             "where result.tagName = DescriptionTable.tagName;\n";
 
 
-    private String digitalsTest = "Update resultOutput.resultTable result,\n" +
+    private String digitalsTest = "Update " + Result.resultDatabaseName() + " result,\n" +
             "(\n" +
             "select t2.tagName, t2.variable_id, t1.bit_log_bit_0_to_1 as bitLog01_1, t1.bit_log_bit_1_to_0 as bitLog10_1, t1.bit_reserved bitReserved1, t1.authorisation_level as authorisationLevel1, t1.alarm_level as alarmLevel1, \n" +
             "\tt2.bit_log_bit_0_to_1 as bitLog01_2, t2.bit_log_bit_1_to_0 as bitLog10_2, t2.bit_reserved as bitReserved2, t2.authorisation_level authorisationLevel2, t2.alarm_level as alarmLevel2 from\n" +

@@ -1,10 +1,10 @@
 package com.company;
 
+import com.company.Comparison.Result;
 import com.company.Database.*;
 
 import java.io.IOException;
 import java.sql.SQLException;
-import java.util.Scanner;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -20,16 +20,18 @@ public class MainCmd {
 
         if (dbExists) {
 
-            System.out.println("Database already exists. Overwrite? (Y/N)");
-            Scanner sc = new Scanner(System.in);
-            String choice = sc.next().toLowerCase();
-            if (choice.equals("userText")) {
-                deleteDB(databaseName);
-                createDB(databaseName);
-                importHelper(fileLocation, databaseName);
-            } else {
-                System.out.println("No change will be made. Exiting tool");
-            }
+            //System.out.println("Database already exists. Overwrite? (Y/N)");
+            //Scanner sc = new Scanner(System.in);
+            //String choice = sc.next().toLowerCase();
+
+            deleteDB(databaseName);
+            createVarexpDB(databaseName);
+            importHelper(fileLocation, databaseName);
+
+            //if (choice.equals("yes")) {
+            //} else {
+            //    System.out.println("No change will be made. Exiting tool");
+            //}
         } else {
             importHelper(fileLocation, databaseName);
         }
@@ -80,52 +82,74 @@ public class MainCmd {
         db.close();
     }
 
-    private static void createDB(String databaseName) {
+    private static void createVarexpDB(String databaseName) {
         dbConnector db = new dbConnector();
-        db.createDB(databaseName);
+        db.createVarexpDB(databaseName);
         db.close();
     }
 
     //Overloaded method solely used for Matrikon imports
-    private static void createDB(String databaseName, boolean isMatrikon) {
-        if (isMatrikon) {
-            dbConnector db = new dbConnector();
-            db.createMatrikonDB(databaseName);
-            db.close();
-        }
+    private static void createMatrikonDB(String databaseName) {
+        dbConnector db = new dbConnector();
+        db.createMatrikonDB(databaseName);
+        db.close();
+    }
+
+    private static void createOuptutDB(String databaseName) {
+
+        dbConnector db = new dbConnector();
+        db.close();
+
     }
 
     public static void main(String[] args) throws IOException, ArrayIndexOutOfBoundsException, SQLException {
+        String oldDB = "oldVarexpDB";
+        String newDB = "newVarexpDB";
+        String matrikonDB = "matrikonDB";
 
+        String resultDB = "resultoutput";
         //Import the Old Varexp and New Varexp into a newVarexpDB and oldVarexpDB and create a finalVarexpDB
-        deleteDB("oldVarexpDB");
-        deleteDB("newVarexpDB");
-        deleteDB("outputVarexpDB");
-        deleteDB("matrikonDB");
+        deleteDB(oldDB);
+        deleteDB(newDB);
+        deleteDB(resultDB);
+        deleteDB(matrikonDB);
 
-        createDB("oldVarexpDB");
-        createDB("newVarexpDB");
-        createDB("outputVarexpDB");
-        createDB("matrikonDB", true);
+        createVarexpDB(oldDB);
+        createVarexpDB(newDB);
+        createVarexpDB(resultDB);
+        createMatrikonDB(matrikonDB);
         System.out.println("DBs created");
 
         //Read three files in the current directory
+        //TODO: Remove the hardcoded file names when you impelment the GUI. Throw this in a config file somewhere
         String fileDirectory = "C:\\Users\\Stephen\\Documents\\ComparisonTool\\";
-        //importFile(fileDirectory+"Varexp_FE03_SHILO_OLD.csv", "oldVarexpDB");
-        //importFile(fileDirectory+"Varexp_FE03_SHILO_NEW.csv", "newVarexpDB");
+
+
+        importFile(fileDirectory + "Varexp_FE03_SHILO_OLD.csv", oldDB);
+        importFile(fileDirectory + "Varexp_FE03_SHILO_NEW.csv", newDB);
 
         //Import the MatrikonFactory file
-        importMatrikon(fileDirectory + "Matrikon_FE03_SHILO.csv", "matrikonDB");
+        importMatrikon(fileDirectory + "Matrikon_FE03_SHILO.csv", matrikonDB);
 
+        //Get the number of items from the DB. If they do not match, then throw a warning and end the program.
+        boolean equalLines = Merge.compareLines(oldDB, newDB, matrikonDB);
+        if (!equalLines) {
+            //End the program
+        } else {
 
-        //Get the number of lines in each file. If they do not match, end the program.
+        }
 
+        //Create a result Database and a  Result Table.
+        Result result = new Result();
+
+        try {
+            Thread.sleep(5000);
+            Result.executeTests(matrikonDB, newDB, oldDB);
+        } catch (InterruptedException e) {
+        }
+        //result.executeTests(matrikonDB,newDB,oldDB);
 
         //Drop the databases (becaues at this point, you're done)
-        //deleteDB("oldVarexpDB");
-        //deleteDB("newVarexpDB");
-        //deleteDB("outputVarexpDB");
-        //deleteDB("matrikonDB");
         System.out.println("DBs deleted");
     }
 
