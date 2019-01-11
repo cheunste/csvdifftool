@@ -16,9 +16,15 @@ public class ComparisonTest {
     private static List<String> databaseList;
 
 
-    private String tagMatchTest = "insert into " + Result.resultDatabaseName() + " (TagName,`Tag Name Test`)\n" +
-            "#select newTagName,if(newTagName=oldTagName and newTagName=matrikonTagName,'PASS','FAIL') as remark, \"\" from\n" +
-            "select newTagName,if(newTagName=oldTagName and newTagName=matrikonTagName,'PASS','FAIL') as remark  from\n" +
+    //This is an initial insert. All it does is insert all the tags from the new config to the output DB.
+    //Must be executed before all the others
+    private String initialInsert = "insert into resultOutput.resultTable (TagName,\n" +
+            "\t`Tag Name Test`,`Description Test`,`Digitals Test`,\n" +
+            "    `Units Test`,`Analogs Minimum Ratio Test`,`Analogs Maximum Ratio Test`,\n" +
+            "    `Type Test`,`OPC DNP3 Source Test`,`Commandable Range Test`,\n" +
+            "    `Internal Type Check Test`,`Producer Test`,`Comment`)\n" +
+            "\n" +
+            "select newTagName,'','','','','','','','','','','','' from\n" +
             "(\n" +
             "\tselect *\n" +
             "\tfrom\n" +
@@ -28,16 +34,16 @@ public class ComparisonTest {
             "\t\t(\n" +
             "\t\t\tselect variable_id as newVariableId,trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as newTagName\n" +
             "\t\t\tfrom newvarexpdb.common as common\n" +
-            "\t\tgroup by newTagName\n" +
+            "\t\torder by newTagName\n" +
             "\t\t) as newConfigTable\n" +
             "\t\tleft join  \n" +
             "\t\t(\n" +
             "\t\t\tselect variable_id as oldVariableId,trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as oldTagName\n" +
             "\t\t\tfrom oldvarexpdb.common as common\n" +
-            "\t\tgroup by oldTagName\n" +
+            "\t\torder by oldTagName\n" +
             "\t\t) as oldConfigTable\n" +
             "\t\ton oldConfigTable.oldTagName = newConfigTable.newTagName\n" +
-            "\tgroup by oldConfigTable.oldTagName\n" +
+            "\torder by oldConfigTable.oldTagName asc\n" +
             "\t) as tempTable1\n" +
             "\tleft join\n" +
             "\t(\n" +
@@ -45,9 +51,47 @@ public class ComparisonTest {
             "\tfrom matrikondb.matrikon as matrikon\n" +
             "\t) as matrikonTable\n" +
             "\ton tempTable1.newTagName = matrikonTagName\n" +
-            ") as tempTable2;\n";
+            ") as tempTable2;";
 
-    private String descriptionTest = "Update " + Result.resultDatabaseName() + " result,\n" +
+    //This matches the tags from the new config, old config and matrkon config and PASSES or fails them accordingly
+    private String tagMatchTest = "Update resultOutput.resultTable result,\n" +
+            "(\n" +
+            "\tselect *\n" +
+            "\tfrom\n" +
+            "\t(\n" +
+            "\t\tselect newConfigTable.newVariableId, oldConfigTable.oldVariableId,newConfigTable.newTagName, oldConfigTable.oldTagName\n" +
+            "\t\tfrom\n" +
+            "\t\t(\n" +
+            "\t\t\tselect variable_id as newVariableId,trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as newTagName\n" +
+            "\t\t\tfrom newvarexpdb.common as common\n" +
+            "\t\torder by newTagName\n" +
+            "\t\t) as newConfigTable\n" +
+            "\t\tleft join  \n" +
+            "\t\t(\n" +
+            "\t\t\tselect variable_id as oldVariableId,trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as oldTagName\n" +
+            "\t\t\tfrom oldvarexpdb.common as common\n" +
+            "\t\torder by oldTagName\n" +
+            "\t\t) as oldConfigTable\n" +
+            "\t\ton oldConfigTable.oldTagName = newConfigTable.newTagName\n" +
+            "\torder by oldConfigTable.oldTagName asc\n" +
+            "\t) as tempTable1\n" +
+            "\tleft join\n" +
+            "\t(\n" +
+            "\t\tselect matrikon.matrikon_id as matrikonID,concat(matrikon.matrikon_group_name,\".\",matrikon_name) as matrikonTagName\n" +
+            "\tfrom matrikondb.matrikon as matrikon\n" +
+            "\t) as matrikonTable\n" +
+            "\ton tempTable1.newTagName = matrikonTagName\n" +
+            ") as TagNameTable\n" +
+            "set \n" +
+            "\tresult.`Tag Name Test` = if(newTagName = oldTagName and newTagName = matrikonTagName ,'PASS','FAIL'),\t\n" +
+            "    result.`Comment` = if(matrikonTagName is null, concat(result.`Comment`,\"\\nTag doesn't exist in matrikon config\"), result.`Comment`),\n" +
+            "    result.`Comment` = if(oldTagName is null, concat(result.`Comment`,\"\\nTag doesn't exist in old config\"), result.`Comment`),\n" +
+            "    result.`Comment` = if(newTagName != oldTagName and oldTagName is not null,concat(result.`Comment`,\"\\nNew Tag doesn't match with old config\"), result.`Comment`),\n" +
+            "    result.`Comment` = if(newTagName != matrikonTagName and matrikonTagName is not null,concat(result.`Comment`,\"\\nNew Tag doesn't match with matrikon config\"), result.`Comment`)\n" +
+            "where result.tagName = TagNameTable.newTagName;";
+
+    //Matches the description between the old config and the new config
+    private String descriptionTest = "Update resultOutput.resultTable result,\n" +
             "(\n" +
             "\tselect newConfigTable.tagName, newConfigTable.desc_1st_lang as newConfigDesc1, newConfigTable.desc_2nd_lang as newConfigDesc2, oldConfigTable.desc_1st_lang as oldConfigDesc1,oldConfigTable.desc_2nd_lang as oldConfigDesc2 from\n" +
             "\t(\n" +
@@ -67,10 +111,13 @@ public class ComparisonTest {
             "\t) as newConfigTable\n" +
             "\ton oldConfigTable.tagName = newConfigTable.tagName\n" +
             ") DescriptionTable\n" +
-            "set result.`Description Test` = if(DescriptionTable.newConfigDesc1 =DescriptionTable.oldConfigDesc1 and DescriptionTable.newConfigDesc2 =DescriptionTable.oldConfigDesc2,'PASS','FAIL')\n" +
-            "where result.tagName = DescriptionTable.tagName;\n";
+            "set result.`Description Test` = if(DescriptionTable.newConfigDesc1 =DescriptionTable.oldConfigDesc1 and DescriptionTable.newConfigDesc2 =DescriptionTable.oldConfigDesc2,'PASS','FAIL'),\n" +
+            "    result.`Comment` = if(newConfigDesc1 != oldConfigDesc1, concat(result.`Comment`,\"\\n New Tag description doesn't match old config's description\"), result.`Comment`),\n" +
+            "    result.`Comment` = if(newConfigDesc2 != oldConfigDesc2, concat(result.`Comment`,\"\\n New Tag description (lang2) doesn't match old config's description (lang2)\"), result.`Comment`)\n" +
+            "where result.tagName = DescriptionTable.tagName;";
 
 
+    //Test for the digital bits. Only for digital tags
     private String digitalsTest = "Update " + Result.resultDatabaseName() + " result,\n" +
             "(\n" +
             "select t2.tagName, t2.variable_id, t1.bit_log_bit_0_to_1 as bitLog01_1, t1.bit_log_bit_1_to_0 as bitLog10_1, t1.bit_reserved bitReserved1, t1.authorisation_level as authorisationLevel1, t1.alarm_level as alarmLevel1, \n" +
@@ -186,8 +233,14 @@ public class ComparisonTest {
             "\tDigitalTable.authorisationLevel2 <=> DigitalTable.authorisationLevel2 and\n" +
             "\tDigitalTable.alarmLevel2         <=> DigitalTable.alarmLevel2 \n" +
             "\t,'PASS','FAIL')\n" +
+            "    result.`Comment` = if(DigitalTable.bitLog01_2          <> DigitalTable.bitLog01_2, concat(result.`Comment`,\"\\n bitlog01 does not match between old and new config\"), result.`Comment`),\n" +
+            "    result.`Comment` = if(DigitalTable.bitLog10_2          <> DigitalTable.bitLog10_2, concat(result.`Comment`,\"\\n bitlog10 does not match between old and new config\"), result.`Comment`),\n" +
+            "    result.`Comment` = if(DigitalTable.bitReserved2        <> DigitalTable.bitReserved2, concat(result.`Comment`,\"\\n bitReserved does not match between old and new config\"), result.`Comment`),\n" +
+            "    result.`Comment` = if(DigitalTable.authorisationLevel2 <> DigitalTable.authorisationLevel2, concat(result.`Comment`,\"\\n authorization level does not match between old and new config\"), result.`Comment`),\n" +
+            "    result.`Comment` = if(DigitalTable.alarmLevel2         <> DigitalTable.alarmLevel2 , concat(result.`Comment`,\"\\n alarm leveldoes not match between old and new config\"), result.`Comment`)\n" +
             "where result.tagName = DigitalTable.tagName;";
 
+    //Matches the units column for analog tags
     private String unitsTest = "Update resultOutput.resultTable result,\n" +
             "(\n" +
             "\tselect new_table.tagName as tagName, old_table.reg_Measurement_Units as MeasurementUnits1, new_table.reg_Measurement_Units as MeasurementUnits2 from\n" +
@@ -261,9 +314,11 @@ public class ComparisonTest {
             "set result.`Units Test` = if(\n" +
             "\n" +
             "\tUnitsTable.MeasurementUnits1          <=> UnitsTable.MeasurementUnits2\n" +
+            "result.`Comment` = if(UnitsTable.MeasurementUnits1 <> UnitsTable.MeasurementUnits2, concat(result.`Comment`,\"\\n Units do not match between new and old configs\"), result.`Comment`)\n" +
             "\t,'PASS','FAIL')\n" +
             "where result.tagName = UnitsTable.tagName;";
 
+    //This tests the analog max and min ratios
     private String analogRatioTest = "Update resultOutput.resultTable result,\n" +
             "(\n" +
             "select matrikonTag as tagName, matrikonLowRatio,matrikonHiRatio,round(minEquipmentVal/minDisplayVal,2) as newConfigMinRatio, round(maxEquipmentVal/maxDisplayVal,2) as newConfigMaxRatio from\n" +
@@ -321,8 +376,13 @@ public class ComparisonTest {
             "\t\t(AnalogsRatioTable.matrikonHiRatio <=> AnalogsRatioTable.newConfigMaxRatio),'PASS','FAIL'\n" +
             "    )\n" +
             "\n" +
+            "    result.`Comment` = if(AnalogsRatioTable.newConfigMinRatio is null, concat(result.`Comment`,\"\\n min display value (62) is zero\"), result.`Comment`),\n" +
+            "    result.`Comment` = if(AnalogsRatioTable.newConfigMinRatio = 0, concat(result.`Comment`,\"\\n min equipment value (65) is zero\"), result.`Comment`),\n" +
+            "    result.`Comment` = if(AnalogsRatioTable.newConfigMinRatio <> AnalogsRatioTable.matrikonLowRatio, concat(result.`Comment`,\"\\n min equipment val and min display val does not match between new nad matrikon config\"), result.`Comment`),\n" +
+            "    result.`Comment` = if(AnalogsRatioTable.matrikonHiRatio <> AnalogsRatioTable.newConfigMaxRatio, concat(result.`Comment`,\"\\n max equipment val and max display val does not match between new and matrikon config\"), result.`Comment`)\n" +
             "where result.tagName = AnalogsRatioTable.tagName;";
 
+    //This test is to update DNP3 Type. It checks to see if the oldSource is 'O' and for the same tags, check if the new source in the new config is '3'
     private String dnp3TypeTest = "Update resultOutput.resultTable result,\n" +
             "(\n" +
             "\tselect newConfigTable.variable_id, newTagName as tagName, newConfigTable.source as newSource, oldConfigTable.source as oldSource\n" +
@@ -346,9 +406,11 @@ public class ComparisonTest {
             "set result.`Type Test` = if(\n" +
             "\toldSource = 'O' and\n" +
             "    newSource = '3'\n" +
-            "\t,'PASS','FAIL')\n" +
+            "\t,'PASS','FAIL'),\n" +
+            "result.`Comment` = if(oldSource ='O' and newSource <> '3', concat(result.`Comment`,\"\\n Source hasn't been updated to '3' in new config\"), result.`Comment`)\n" +
             "where result.tagName = Dnp3TypeTable.tagName;";
 
+    //This tests to see if  the item paths for DNP3 is the same (This is the SEL path)
     private String sourceTest = "Update resultOutput.resultTable result,\n" +
             "(\n" +
             "\tselect * from\n" +
@@ -377,10 +439,12 @@ public class ComparisonTest {
             ") SourceTable\n" +
             "set result.`OPC DNP3 Source Test` = if(\n" +
             "\tnewConfigItemPath = itemPath\n" +
-            "\t,'PASS','FAIL')\n" +
+            "\t,'PASS','FAIL'),\n" +
+            "result.`Comment` = if(newConfigItemPath <> itemPath, concat(result.`Comment`,\"\\n SEL item path does not match for tag\"), result.`Comment`)\n" +
             "where result.tagName = SourceTable.tagName;";
 
 
+    //This tests for the commandable range. This should only work for CTV tags
     private String ctvRangeTest = "Update resultOutput.resultTable result,\n" +
             "(\n" +
             "\tSelect commonTable.tagName,commonTable.variable_id, ctvTable.ctv_Minimium_display_value as minDisplayValue, ctvTable.ctv_Maximum_display_value as maxDisplayValue, \n" +
@@ -402,7 +466,9 @@ public class ComparisonTest {
             "set result.`Commandable Range Test` = if(\n" +
             "\t\tminControlValue = minDisplayValue and \n" +
             "        maxDisplayValue = maxControlValue\n" +
-            "\t,'PASS','FAIL')\n" +
+            "\t,'PASS','FAIL'),\n" +
+            "    result.`Comment` = if( minControlValue <> minDisplayValue , concat(result.`Comment`,\"\\n min commandable ranges does not match\"), result.`Comment`),\n" +
+            "    result.`Comment` = if( maxDisplayValue <> maxControlValue , concat(result.`Comment`,\"\\n max commandable ranges does not match\"), result.`Comment`)\n" +
             "where result.tagName = RangeTable.tagName;";
 
     private String internalTest = "Update resultOutput.resultTable result,\n" +
@@ -455,7 +521,9 @@ public class ComparisonTest {
             "set result.`Producer Test` = if(newSource=\"I\",\n" +
             "\tif(newSource = oldSource,'PASS','FAIL'),\n" +
             "    if(regexp_substr(newProducer, '[:alpha:]+') = 'ST','PASS','FAIL')\n" +
-            "\t)\n" +
+            "\t),\n" +
+            "\tresult.`Comment` = if(regexp_substr(newClient,'[:digit:]+') <> regexp_substr(oldClient,'[:digit:]+'), concat(result.`Comment`,\"\\n Check Producer. Stations does not match \"), result.`Comment`),\n" +
+            "    result.`Comment` = if( newSource = \"I\" and newSource <> oldSource , concat(result.`Comment`,\"\\n Source types does not match\"), result.`Comment`)" +
             "where result.tagName = ProducerTable.tagName;";
 
 
@@ -473,6 +541,7 @@ public class ComparisonTest {
         databaseList.add(oldConfigDB);
         databaseList.add(resultDB);
 
+        testList.add(initialInsert);
         testList.add(tagMatchTest);
         testList.add(descriptionTest);
         testList.add(digitalsTest);
