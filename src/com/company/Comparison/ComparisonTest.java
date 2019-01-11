@@ -232,7 +232,7 @@ public class ComparisonTest {
             "\tDigitalTable.bitReserved2        <=> DigitalTable.bitReserved2 and \n" +
             "\tDigitalTable.authorisationLevel2 <=> DigitalTable.authorisationLevel2 and\n" +
             "\tDigitalTable.alarmLevel2         <=> DigitalTable.alarmLevel2 \n" +
-            "\t,'PASS','FAIL')\n" +
+            "\t,'PASS','FAIL'),\n" +
             "    result.`Comment` = if(DigitalTable.bitLog01_2          <> DigitalTable.bitLog01_2, concat(result.`Comment`,\"\\n bitlog01 does not match between old and new config\"), result.`Comment`),\n" +
             "    result.`Comment` = if(DigitalTable.bitLog10_2          <> DigitalTable.bitLog10_2, concat(result.`Comment`,\"\\n bitlog10 does not match between old and new config\"), result.`Comment`),\n" +
             "    result.`Comment` = if(DigitalTable.bitReserved2        <> DigitalTable.bitReserved2, concat(result.`Comment`,\"\\n bitReserved does not match between old and new config\"), result.`Comment`),\n" +
@@ -314,8 +314,8 @@ public class ComparisonTest {
             "set result.`Units Test` = if(\n" +
             "\n" +
             "\tUnitsTable.MeasurementUnits1          <=> UnitsTable.MeasurementUnits2\n" +
+            "\t,'PASS','FAIL'),\n" +
             "result.`Comment` = if(UnitsTable.MeasurementUnits1 <> UnitsTable.MeasurementUnits2, concat(result.`Comment`,\"\\n Units do not match between new and old configs\"), result.`Comment`)\n" +
-            "\t,'PASS','FAIL')\n" +
             "where result.tagName = UnitsTable.tagName;";
 
     //This tests the analog max and min ratios
@@ -374,7 +374,7 @@ public class ComparisonTest {
             "result.`Analogs Maximum Ratio Test` =\n" +
             "    if(\n" +
             "\t\t(AnalogsRatioTable.matrikonHiRatio <=> AnalogsRatioTable.newConfigMaxRatio),'PASS','FAIL'\n" +
-            "    )\n" +
+            "    ),\n" +
             "\n" +
             "    result.`Comment` = if(AnalogsRatioTable.newConfigMinRatio is null, concat(result.`Comment`,\"\\n min display value (62) is zero\"), result.`Comment`),\n" +
             "    result.`Comment` = if(AnalogsRatioTable.newConfigMinRatio = 0, concat(result.`Comment`,\"\\n min equipment value (65) is zero\"), result.`Comment`),\n" +
@@ -495,12 +495,13 @@ public class ComparisonTest {
     private String producerTest = "Update resultOutput.resultTable result,\n" +
             "(\n" +
             "\tselect newTable.tagName as TagName, \n" +
-            "\tnewTable.topology_server as newProducer, newTable.source as newSource,\n" +
-            "\toldTable.topology_server as oldProducer, oldTable.source as oldSource\n" +
+            "\tnewTable.topology_server as newProducer, newTable.source as newSource, newTable.topology_client as newClient,\n" +
+            "\toldTable.topology_server as oldProducer, oldTable.source as oldSource, oldTable.topology_client as oldClient\n" +
             "\tfrom  \n" +
             "\t(\n" +
             "\t\tselect\n" +
             "\t\t\tregexp_substr(common.topology_server, '[[:digit:]]+') as temp,\n" +
+            "            common.topology_client,\n" +
             "\t\t\tcommon.topology_server, \n" +
             "\t\t\tcommon.variable_id, \n" +
             "\t\t\tcommon.source, trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) \n" +
@@ -510,6 +511,7 @@ public class ComparisonTest {
             "\tinner join\n" +
             "\t(\n" +
             "\t\tselect common.topology_server, \n" +
+            "\t\t\tcommon.topology_client,\n" +
             "\t\t\tcommon.variable_id, \n" +
             "\t\t\tcommon.source, trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) \n" +
             "\t\t\t\t\tas tagName \n" +
@@ -520,10 +522,10 @@ public class ComparisonTest {
             ") ProducerTable\n" +
             "set result.`Producer Test` = if(newSource=\"I\",\n" +
             "\tif(newSource = oldSource,'PASS','FAIL'),\n" +
-            "    if(regexp_substr(newProducer, '[:alpha:]+') = 'ST','PASS','FAIL')\n" +
+            "    if(regexp_substr(newProducer, '[:alpha:]+') = 'ST' and regexp_substr(newClient,'[:digit:]+')=regexp_substr(oldClient,'[:digit:]+'),'PASS','FAIL')\n" +
             "\t),\n" +
             "\tresult.`Comment` = if(regexp_substr(newClient,'[:digit:]+') <> regexp_substr(oldClient,'[:digit:]+'), concat(result.`Comment`,\"\\n Check Producer. Stations does not match \"), result.`Comment`),\n" +
-            "    result.`Comment` = if( newSource = \"I\" and newSource <> oldSource , concat(result.`Comment`,\"\\n Source types does not match\"), result.`Comment`)" +
+            "    result.`Comment` = if( newSource = \"I\" and newSource <> oldSource , concat(result.`Comment`,\"\\n Source types does not match\"), result.`Comment`)\n" +
             "where result.tagName = ProducerTable.tagName;";
 
 
