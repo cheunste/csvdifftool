@@ -18,7 +18,7 @@ public class ComparisonTest {
 
     //This is an initial insert. All it does is insert all the tags from the new config to the output DB.
     //Must be executed before all the others
-    private String initialInsert = "insert into resultOutput.resultTable (TagName,\n" +
+    private String initialInsert = "insert into " + Result.resultDatabaseName() + " (TagName,\n" +
             "\t`Tag Name Test`,`Description Test`,`Digitals Test`,\n" +
             "    `Units Test`,`Analogs Minimum Ratio Test`,`Analogs Maximum Ratio Test`,\n" +
             "    `Type Test`,`OPC DNP3 Source Test`,`Commandable Range Test`,\n" +
@@ -54,7 +54,7 @@ public class ComparisonTest {
             ") as tempTable2;";
 
     //This matches the tags from the new config, old config and matrkon config and PASSES or fails them accordingly
-    private String tagMatchTest = "Update resultOutput.resultTable result,\n" +
+    private String tagMatchTest = "Update " + Result.resultDatabaseName() + " result,\n" +
             "(\n" +
             "\tselect *\n" +
             "\tfrom\n" +
@@ -91,7 +91,7 @@ public class ComparisonTest {
             "where result.tagName = TagNameTable.newTagName;";
 
     //Matches the description between the old config and the new config
-    private String descriptionTest = "Update resultOutput.resultTable result,\n" +
+    private String descriptionTest = "Update " + Result.resultDatabaseName() + " result,\n" +
             "(\n" +
             "\tselect newConfigTable.tagName, newConfigTable.desc_1st_lang as newConfigDesc1, newConfigTable.desc_2nd_lang as newConfigDesc2, oldConfigTable.desc_1st_lang as oldConfigDesc1,oldConfigTable.desc_2nd_lang as oldConfigDesc2 from\n" +
             "\t(\n" +
@@ -101,7 +101,7 @@ public class ComparisonTest {
             "\t\tgroup by tagName \n" +
             "        order by tagName asc\n" +
             "\t) as oldConfigTable\n" +
-            "\tinner join\n" +
+            "\tright join\n" +
             "\t(\n" +
             "\t\tselect variable_id, desc_1st_lang, desc_2nd_lang, \n" +
             "\t\t\ttrim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th))  as tagName\n" +
@@ -116,360 +116,493 @@ public class ComparisonTest {
             "    result.`Comment` = if(newConfigDesc2 != oldConfigDesc2, concat(result.`Comment`,\"\\n New Tag description (lang2) doesn't match old config's description (lang2)\"), result.`Comment`)\n" +
             "where result.tagName = DescriptionTable.tagName;";
 
-
     //Test for the digital bits. Only for digital tags
-    private String digitalsTest = "Update " + Result.resultDatabaseName() + " result,\n" +
-            "(\n" +
-            "select t2.tagName, t2.variable_id, t1.bit_log_bit_0_to_1 as bitLog01_1, t1.bit_log_bit_1_to_0 as bitLog10_1, t1.bit_reserved bitReserved1, t1.authorisation_level as authorisationLevel1, t1.alarm_level as alarmLevel1, \n" +
-            "\tt2.bit_log_bit_0_to_1 as bitLog01_2, t2.bit_log_bit_1_to_0 as bitLog10_2, t2.bit_reserved as bitReserved2, t2.authorisation_level authorisationLevel2, t2.alarm_level as alarmLevel2 from\n" +
-            "(\n" +
-            "\tselect * from\n" +
-            "\t(\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, bit.bit_log_bit_0_to_1, bit.bit_log_bit_1_to_0,bit.bit_reserved, null as authorisation_level, null as alarm_level\n" +
-            "\t\tfrom oldvarexpdb.common as common\n" +
-            "\t\t\tright join oldvarexpdb.bit as bit on bit_variable_id\n" +
-            "\t\t    where \n" +
-            "\t\t\tbit.bit_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\tunion all\n" +
-            "\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, cmd.cmd_log_bit_0_to_1,cmd.cmd_log_bit_1_to_0,cmd.cmd_reserved, null as authorisation_level, null as alarm_level\n" +
-            "\t\tfrom oldvarexpdb.common as common\n" +
-            "\t\t\tright join oldvarexpdb.cmd as cmd on cmd_variable_id\n" +
-            "\t\t    where \n" +
-            "\t\t\tcmd.cmd_variable_id = common.variable_id\n" +
-            "\t\tunion all\n" +
-            "\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, ala.ala_log_bit_0_to_1,ala.ala_log_bit_1_to_0,ala.ala_reserved,ala.ala_alarm_level,ala_alarm \n" +
-            "\t\tfrom oldvarexpdb.common as common\n" +
-            "\t\t\tright join oldvarexpdb.ala as ala on ala_variable_id\n" +
-            "\t\t    where \n" +
-            "\t\t\tala.ala_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\tunion all\n" +
-            "\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, acm.acm_log_bit_0_to_1,acm.acm_log_bit_1_to_0,acm.acm_reserved,acm.acm_alarm_level,acm_alarm \n" +
-            "\t\tfrom oldvarexpdb.common as common\n" +
-            "\t\t\tright join oldvarexpdb.acm as acm on acm_variable_id\n" +
-            "\t\t    where \n" +
-            "\t\t\tacm.acm_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\tunion all\n" +
-            "\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, tsh.tsh_log_bit_0_to_1,tsh.tsh_log_bit_1_to_0,tsh.tsh_reserved,null as tsh_alarm_level, null as tsh_alarm \n" +
-            "\t\tfrom oldvarexpdb.common as common\n" +
-            "\t\t\tright join oldvarexpdb.tsh as tsh on tsh_variable_id\n" +
-            "\t\t    where \n" +
-            "\t\t\ttsh.tsh_variable_id = common.variable_id\n" +
-            "\t\t\n" +
-            "\t\tunion all\n" +
-            "\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, ats.ats_log_bit_0_to_1,ats.ats_log_bit_1_to_0,ats.ats_reserved,null as ats_alarm_level, null as ats_alarm \n" +
-            "\t\tfrom oldvarexpdb.common as common\n" +
-            "\t\t\tright join oldvarexpdb.ats as ats on ats_variable_id\n" +
-            "\t\t    where \n" +
-            "\t\t\tats.ats_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\t) as oldConfigTable\n" +
-            "\t) as t1\n" +
-            "\tinner join\n" +
-            "\t(\n" +
-            "\t\tselect * from\n" +
-            "\t\t(\n" +
-            "\t\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, bit.bit_log_bit_0_to_1, bit.bit_log_bit_1_to_0,bit.bit_reserved, null as authorisation_level, null as alarm_level\n" +
-            "\t\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\t\tright join newvarexpdb.bit as bit on bit_variable_id\n" +
-            "\t\t\t\twhere \n" +
-            "\t\t\t\tbit.bit_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\t\tunion all\n" +
-            "\n" +
-            "\t\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, cmd.cmd_log_bit_0_to_1,cmd.cmd_log_bit_1_to_0,cmd.cmd_reserved, null as authorisation_level, null as alarm_level\n" +
-            "\t\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\t\tright join newvarexpdb.cmd as cmd on cmd_variable_id\n" +
-            "\t\t\t\twhere \n" +
-            "\t\t\t\tcmd.cmd_variable_id = common.variable_id\n" +
-            "\t\t\tunion all\n" +
-            "\n" +
-            "\t\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, ala.ala_log_bit_0_to_1,ala.ala_log_bit_1_to_0,ala.ala_reserved,ala.ala_alarm_level,ala_alarm \n" +
-            "\t\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\t\tright join newvarexpdb.ala as ala on ala_variable_id\n" +
-            "\t\t\t\twhere \n" +
-            "\t\t\t\tala.ala_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\t\tunion all\n" +
-            "\n" +
-            "\t\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, acm.acm_log_bit_0_to_1,acm.acm_log_bit_1_to_0,acm.acm_reserved,acm.acm_alarm_level,acm_alarm \n" +
-            "\t\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\t\tright join newvarexpdb.acm as acm on acm_variable_id\n" +
-            "\t\t\t\twhere \n" +
-            "\t\t\t\tacm.acm_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\t\tunion all\n" +
-            "\n" +
-            "\t\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, tsh.tsh_log_bit_0_to_1,tsh.tsh_log_bit_1_to_0,tsh.tsh_reserved,null as tsh_alarm_level, null as tsh_alarm \n" +
-            "\t\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\t\tright join newvarexpdb.tsh as tsh on tsh_variable_id\n" +
-            "\t\t\t\twhere \n" +
-            "\t\t\t\ttsh.tsh_variable_id = common.variable_id\n" +
-            "\t\t\t\n" +
-            "\t\t\tunion all\n" +
-            "\n" +
-            "\t\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, ats.ats_log_bit_0_to_1,ats.ats_log_bit_1_to_0,ats.ats_reserved,null as ats_alarm_level, null as ats_alarm \n" +
-            "\t\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\t\tright join newvarexpdb.ats as ats on ats_variable_id\n" +
-            "\t\t\t\twhere \n" +
-            "\t\t\t\tats.ats_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\t) as newConfigTable\n" +
-            "\t) as t2 \n" +
-            "\ton t2.tagName = t1.tagName\n" +
-            ") DigitalTable\n" +
-            "set result.`Digitals Test` = if(\n" +
-            "\n" +
-            "\tDigitalTable.bitLog01_2          <=> DigitalTable.bitLog01_2  and \n" +
-            "\tDigitalTable.bitLog10_2          <=> DigitalTable.bitLog10_2  and \n" +
-            "\tDigitalTable.bitReserved2        <=> DigitalTable.bitReserved2 and \n" +
-            "\tDigitalTable.authorisationLevel2 <=> DigitalTable.authorisationLevel2 and\n" +
-            "\tDigitalTable.alarmLevel2         <=> DigitalTable.alarmLevel2 \n" +
-            "\t,'PASS','FAIL'),\n" +
-            "    result.`Comment` = if(DigitalTable.bitLog01_2          <> DigitalTable.bitLog01_2, concat(result.`Comment`,\"\\n bitlog01 does not match between old and new config\"), result.`Comment`),\n" +
-            "    result.`Comment` = if(DigitalTable.bitLog10_2          <> DigitalTable.bitLog10_2, concat(result.`Comment`,\"\\n bitlog10 does not match between old and new config\"), result.`Comment`),\n" +
-            "    result.`Comment` = if(DigitalTable.bitReserved2        <> DigitalTable.bitReserved2, concat(result.`Comment`,\"\\n bitReserved does not match between old and new config\"), result.`Comment`),\n" +
-            "    result.`Comment` = if(DigitalTable.authorisationLevel2 <> DigitalTable.authorisationLevel2, concat(result.`Comment`,\"\\n authorization level does not match between old and new config\"), result.`Comment`),\n" +
-            "    result.`Comment` = if(DigitalTable.alarmLevel2         <> DigitalTable.alarmLevel2 , concat(result.`Comment`,\"\\n alarm leveldoes not match between old and new config\"), result.`Comment`)\n" +
-            "where result.tagName = DigitalTable.tagName;";
+    private String digitalsTest =
+            "Update " + Result.resultDatabaseName() + " result,\n" +
+                    "    (SELECT \n" +
+                    "        t2.tagName AS oldTagName,\n" +
+                    "            t2.variable_id,\n" +
+                    "            t1.bit_log_bit_0_to_1 AS bitLog01_1,\n" +
+                    "            t1.bit_log_bit_1_to_0 AS bitLog10_1,\n" +
+                    "            t1.bit_reserved bitReserved1,\n" +
+                    "            t1.authorisation_level AS authorisationLevel1,\n" +
+                    "            t1.alarm_level AS alarmLevel1,\n" +
+                    "            t2.tagName AS newTagName,\n" +
+                    "            t2.bit_log_bit_0_to_1 AS bitLog01_2,\n" +
+                    "            t2.bit_log_bit_1_to_0 AS bitLog10_2,\n" +
+                    "            t2.bit_reserved AS bitReserved2,\n" +
+                    "            t2.authorisation_level authorisationLevel2,\n" +
+                    "            t2.alarm_level AS alarmLevel2\n" +
+                    "    FROM\n" +
+                    "        (SELECT \n" +
+                    "        *\n" +
+                    "    FROM\n" +
+                    "        (SELECT \n" +
+                    "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+                    "            variable_id,\n" +
+                    "            bit.bit_log_bit_0_to_1,\n" +
+                    "            bit.bit_log_bit_1_to_0,\n" +
+                    "            bit.bit_reserved,\n" +
+                    "            NULL AS authorisation_level,\n" +
+                    "            NULL AS alarm_level\n" +
+                    "    FROM\n" +
+                    "        oldvarexpdb.common AS common\n" +
+                    "    RIGHT JOIN oldvarexpdb.bit AS bit ON bit_variable_id\n" +
+                    "    WHERE\n" +
+                    "        bit.bit_variable_id = common.variable_id UNION ALL SELECT \n" +
+                    "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+                    "            variable_id,\n" +
+                    "            cmd.cmd_log_bit_0_to_1,\n" +
+                    "            cmd.cmd_log_bit_1_to_0,\n" +
+                    "            cmd.cmd_reserved,\n" +
+                    "            NULL AS authorisation_level,\n" +
+                    "            NULL AS alarm_level\n" +
+                    "    FROM\n" +
+                    "        oldvarexpdb.common AS common\n" +
+                    "    RIGHT JOIN oldvarexpdb.cmd AS cmd ON cmd_variable_id\n" +
+                    "    WHERE\n" +
+                    "        cmd.cmd_variable_id = common.variable_id UNION ALL SELECT \n" +
+                    "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+                    "            variable_id,\n" +
+                    "            ala.ala_log_bit_0_to_1,\n" +
+                    "            ala.ala_log_bit_1_to_0,\n" +
+                    "            ala.ala_reserved,\n" +
+                    "            ala.ala_alarm_level,\n" +
+                    "            ala_alarm\n" +
+                    "    FROM\n" +
+                    "        oldvarexpdb.common AS common\n" +
+                    "    RIGHT JOIN oldvarexpdb.ala AS ala ON ala_variable_id\n" +
+                    "    WHERE\n" +
+                    "        ala.ala_variable_id = common.variable_id UNION ALL SELECT \n" +
+                    "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+                    "            variable_id,\n" +
+                    "            acm.acm_log_bit_0_to_1,\n" +
+                    "            acm.acm_log_bit_1_to_0,\n" +
+                    "            acm.acm_reserved,\n" +
+                    "            acm.acm_alarm_level,\n" +
+                    "            acm_alarm\n" +
+                    "    FROM\n" +
+                    "        oldvarexpdb.common AS common\n" +
+                    "    RIGHT JOIN oldvarexpdb.acm AS acm ON acm_variable_id\n" +
+                    "    WHERE\n" +
+                    "        acm.acm_variable_id = common.variable_id UNION ALL SELECT \n" +
+                    "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+                    "            variable_id,\n" +
+                    "            tsh.tsh_log_bit_0_to_1,\n" +
+                    "            tsh.tsh_log_bit_1_to_0,\n" +
+                    "            tsh.tsh_reserved,\n" +
+                    "            NULL AS tsh_alarm_level,\n" +
+                    "            NULL AS tsh_alarm\n" +
+                    "    FROM\n" +
+                    "        oldvarexpdb.common AS common\n" +
+                    "    RIGHT JOIN oldvarexpdb.tsh AS tsh ON tsh_variable_id\n" +
+                    "    WHERE\n" +
+                    "        tsh.tsh_variable_id = common.variable_id UNION ALL SELECT \n" +
+                    "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+                    "            variable_id,\n" +
+                    "            ats.ats_log_bit_0_to_1,\n" +
+                    "            ats.ats_log_bit_1_to_0,\n" +
+                    "            ats.ats_reserved,\n" +
+                    "            NULL AS ats_alarm_level,\n" +
+                    "            NULL AS ats_alarm\n" +
+                    "    FROM\n" +
+                    "        oldvarexpdb.common AS common\n" +
+                    "    RIGHT JOIN oldvarexpdb.ats AS ats ON ats_variable_id\n" +
+                    "    WHERE\n" +
+                    "        ats.ats_variable_id = common.variable_id) AS oldConfigTable) AS t1\n" +
+                    "    RIGHT JOIN (SELECT \n" +
+                    "        *\n" +
+                    "    FROM\n" +
+                    "        (SELECT \n" +
+                    "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+                    "            variable_id,\n" +
+                    "            bit.bit_log_bit_0_to_1,\n" +
+                    "            bit.bit_log_bit_1_to_0,\n" +
+                    "            bit.bit_reserved,\n" +
+                    "            NULL AS authorisation_level,\n" +
+                    "            NULL AS alarm_level\n" +
+                    "    FROM\n" +
+                    "        newvarexpdb.common AS common\n" +
+                    "    RIGHT JOIN newvarexpdb.bit AS bit ON bit_variable_id\n" +
+                    "    WHERE\n" +
+                    "        bit.bit_variable_id = common.variable_id UNION ALL SELECT \n" +
+                    "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+                    "            variable_id,\n" +
+                    "            cmd.cmd_log_bit_0_to_1,\n" +
+                    "            cmd.cmd_log_bit_1_to_0,\n" +
+                    "            cmd.cmd_reserved,\n" +
+                    "            NULL AS authorisation_level,\n" +
+                    "            NULL AS alarm_level\n" +
+                    "    FROM\n" +
+                    "        newvarexpdb.common AS common\n" +
+                    "    RIGHT JOIN newvarexpdb.cmd AS cmd ON cmd_variable_id\n" +
+                    "    WHERE\n" +
+                    "        cmd.cmd_variable_id = common.variable_id UNION ALL SELECT \n" +
+                    "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+                    "            variable_id,\n" +
+                    "            ala.ala_log_bit_0_to_1,\n" +
+                    "            ala.ala_log_bit_1_to_0,\n" +
+                    "            ala.ala_reserved,\n" +
+                    "            ala.ala_alarm_level,\n" +
+                    "            ala_alarm\n" +
+                    "    FROM\n" +
+                    "        newvarexpdb.common AS common\n" +
+                    "    RIGHT JOIN newvarexpdb.ala AS ala ON ala_variable_id\n" +
+                    "    WHERE\n" +
+                    "        ala.ala_variable_id = common.variable_id UNION ALL SELECT \n" +
+                    "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+                    "            variable_id,\n" +
+                    "            acm.acm_log_bit_0_to_1,\n" +
+                    "            acm.acm_log_bit_1_to_0,\n" +
+                    "            acm.acm_reserved,\n" +
+                    "            acm.acm_alarm_level,\n" +
+                    "            acm_alarm\n" +
+                    "    FROM\n" +
+                    "        newvarexpdb.common AS common\n" +
+                    "    RIGHT JOIN newvarexpdb.acm AS acm ON acm_variable_id\n" +
+                    "    WHERE\n" +
+                    "        acm.acm_variable_id = common.variable_id UNION ALL SELECT \n" +
+                    "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+                    "            variable_id,\n" +
+                    "            tsh.tsh_log_bit_0_to_1,\n" +
+                    "            tsh.tsh_log_bit_1_to_0,\n" +
+                    "            tsh.tsh_reserved,\n" +
+                    "            NULL AS tsh_alarm_level,\n" +
+                    "            NULL AS tsh_alarm\n" +
+                    "    FROM\n" +
+                    "        newvarexpdb.common AS common\n" +
+                    "    RIGHT JOIN newvarexpdb.tsh AS tsh ON tsh_variable_id\n" +
+                    "    WHERE\n" +
+                    "        tsh.tsh_variable_id = common.variable_id UNION ALL SELECT \n" +
+                    "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+                    "            variable_id,\n" +
+                    "            ats.ats_log_bit_0_to_1,\n" +
+                    "            ats.ats_log_bit_1_to_0,\n" +
+                    "            ats.ats_reserved,\n" +
+                    "            NULL AS ats_alarm_level,\n" +
+                    "            NULL AS ats_alarm\n" +
+                    "    FROM\n" +
+                    "        newvarexpdb.common AS common\n" +
+                    "    RIGHT JOIN newvarexpdb.ats AS ats ON ats_variable_id\n" +
+                    "    WHERE\n" +
+                    "        ats.ats_variable_id = common.variable_id) AS newConfigTable) AS t2 ON t2.tagName = t1.tagName) DigitalTable \n" +
+                    "SET \n" +
+                    "    result.`Digitals Test` = IF(DigitalTable.bitLog01_1 <=> DigitalTable.bitLog01_2\n" +
+                    "            AND DigitalTable.bitLog10_1 <=> DigitalTable.bitLog10_2\n" +
+                    "            AND DigitalTable.bitReserved1 <=> DigitalTable.bitReserved2\n" +
+                    "            AND DigitalTable.authorisationLevel1 <=> DigitalTable.authorisationLevel2\n" +
+                    "            AND DigitalTable.alarmLevel1 <=> DigitalTable.alarmLevel2,\n" +
+                    "        'PASS',\n" +
+                    "        'FAIL'),\n" +
+                    "    result.`Comment` = CONCAT(result.`Comment`,\n" +
+                    "            IF((DigitalTable.bitLog01_1 <=> DigitalTable.bitLog01_2) = 0,\n" +
+                    "                '\n" +
+                    "                 bitlog01 does not match between old and new config',\n" +
+                    "                ''),\n" +
+                    "            IF((DigitalTable.bitLog01_1 <=> DigitalTable.bitLog01_2) = 0,\n" +
+                    "                '\n" +
+                    "                 bitlog01 does not match between old and new config',\n" +
+                    "                ''),\n" +
+                    "            IF((DigitalTable.bitLog10_1 <=> DigitalTable.bitLog10_2) = 0,\n" +
+                    "                '\n" +
+                    "                 bitlog10 does not match between old and new config',\n" +
+                    "                ''),\n" +
+                    "            IF((DigitalTable.bitReserved1 <=> DigitalTable.bitReserved2) = 0,\n" +
+                    "                '\n" +
+                    "                 bitReserved does not match between old and new config',\n" +
+                    "                ''),\n" +
+                    "            IF((DigitalTable.authorisationLevel1 <=> DigitalTable.authorisationLevel2) = 0,\n" +
+                    "                '\n" +
+                    "                 authorization level does not match between old and new config',\n" +
+                    "                ''),\n" +
+                    "            IF((DigitalTable.alarmLevel1 <=> DigitalTable.alarmLevel2) = 0,\n" +
+                    "                '\n" +
+                    "                 alarm level does not match between old and new config',\n" +
+                    "                ''))\n" +
+                    "WHERE\n" +
+                    "    result.tagName = DigitalTable.newTagName;";
 
     //Matches the units column for analog tags
-    private String unitsTest = "Update resultOutput.resultTable result,\n" +
-            "(\n" +
-            "\tselect new_table.tagName as tagName, old_table.reg_Measurement_Units as MeasurementUnits1, new_table.reg_Measurement_Units as MeasurementUnits2 from\n" +
-            "\t(\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, reg.reg_Measurement_Units\n" +
-            "\t\tfrom oldvarexpdb.common as common\n" +
-            "\t\t\tright join oldvarexpdb.reg as reg on reg_variable_id\n" +
-            "\t\t\twhere \n" +
-            "\t\t\treg.reg_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\tunion all\n" +
-            "\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, ctv.ctv_Measurement_Units\n" +
-            "\t\tfrom oldvarexpdb.common as common\n" +
-            "\t\t\tright join oldvarexpdb.ctv as ctv on ctv_variable_id\n" +
-            "\t\t\twhere \n" +
-            "\t\t\tctv.ctv_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\tunion all\n" +
-            "\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, cnt.cnt_Measurement_Units\n" +
-            "\t\tfrom oldvarexpdb.common as common\n" +
-            "\t\t\tright join oldvarexpdb.cnt as cnt on cnt_variable_id\n" +
-            "\t\t\twhere \n" +
-            "\t\t\tcnt.cnt_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\tunion all\n" +
-            "\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, chr.chr_Measurement_Units\n" +
-            "\t\tfrom oldvarexpdb.common as common\n" +
-            "\t\t\tright join oldvarexpdb.chr as chr on chr_variable_id\n" +
-            "\t\t\twhere \n" +
-            "\t\t\tchr.chr_variable_id = common.variable_id\n" +
-            "\t) as old_table\n" +
-            "\n" +
-            "\tinner join \n" +
-            "\t(\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, reg.reg_Measurement_Units\n" +
-            "\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\tright join newvarexpdb.reg as reg on reg_variable_id\n" +
-            "\t\t\twhere \n" +
-            "\t\t\treg.reg_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\tunion all\n" +
-            "\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, ctv.ctv_Measurement_Units\n" +
-            "\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\tright join newvarexpdb.ctv as ctv on ctv_variable_id\n" +
-            "\t\t\twhere \n" +
-            "\t\t\tctv.ctv_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\tunion all\n" +
-            "\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, cnt.cnt_Measurement_Units\n" +
-            "\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\tright join newvarexpdb.cnt as cnt on cnt_variable_id\n" +
-            "\t\t\twhere \n" +
-            "\t\t\tcnt.cnt_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\tunion all\n" +
-            "\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, chr.chr_Measurement_Units\n" +
-            "\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\tright join newvarexpdb.chr as chr on chr_variable_id\n" +
-            "\t\t\twhere \n" +
-            "\t\t\tchr.chr_variable_id = common.variable_id\n" +
-            "\t) as new_table\n" +
-            "\ton old_table.tagName = new_table.tagName\n" +
-            "\t\n" +
-            ") UnitsTable\n" +
-            "set result.`Units Test` = if(\n" +
-            "\n" +
-            "\tUnitsTable.MeasurementUnits1          <=> UnitsTable.MeasurementUnits2\n" +
-            "\t,'PASS','FAIL'),\n" +
-            "result.`Comment` = if(UnitsTable.MeasurementUnits1 <> UnitsTable.MeasurementUnits2, concat(result.`Comment`,\"\\n Units do not match between new and old configs\"), result.`Comment`)\n" +
-            "where result.tagName = UnitsTable.tagName;";
+    private String unitsTest = "UPDATE resultOutput.resultTable result,\n" +
+            "    (SELECT \n" +
+            "        new_table.tagName AS tagName,\n" +
+            "            old_table.reg_Measurement_Units AS MeasurementUnits1,\n" +
+            "            new_table.reg_Measurement_Units AS MeasurementUnits2\n" +
+            "    FROM\n" +
+            "        (SELECT \n" +
+            "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+            "            variable_id,\n" +
+            "            reg.reg_Measurement_Units\n" +
+            "    FROM\n" +
+            "        oldvarexpdb.common AS common\n" +
+            "    RIGHT JOIN oldvarexpdb.reg AS reg ON reg_variable_id\n" +
+            "    WHERE\n" +
+            "        reg.reg_variable_id = common.variable_id UNION ALL SELECT \n" +
+            "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+            "            variable_id,\n" +
+            "            ctv.ctv_Measurement_Units\n" +
+            "    FROM\n" +
+            "        oldvarexpdb.common AS common\n" +
+            "    RIGHT JOIN oldvarexpdb.ctv AS ctv ON ctv_variable_id\n" +
+            "    WHERE\n" +
+            "        ctv.ctv_variable_id = common.variable_id UNION ALL SELECT \n" +
+            "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+            "            variable_id,\n" +
+            "            cnt.cnt_Measurement_Units\n" +
+            "    FROM\n" +
+            "        oldvarexpdb.common AS common\n" +
+            "    RIGHT JOIN oldvarexpdb.cnt AS cnt ON cnt_variable_id\n" +
+            "    WHERE\n" +
+            "        cnt.cnt_variable_id = common.variable_id UNION ALL SELECT \n" +
+            "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+            "            variable_id,\n" +
+            "            chr.chr_Measurement_Units\n" +
+            "    FROM\n" +
+            "        oldvarexpdb.common AS common\n" +
+            "    RIGHT JOIN oldvarexpdb.chr AS chr ON chr_variable_id\n" +
+            "    WHERE\n" +
+            "        chr.chr_variable_id = common.variable_id) AS old_table\n" +
+            "    RIGHT JOIN (SELECT \n" +
+            "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+            "            variable_id,\n" +
+            "            reg.reg_Measurement_Units\n" +
+            "    FROM\n" +
+            "        newvarexpdb.common AS common\n" +
+            "    RIGHT JOIN newvarexpdb.reg AS reg ON reg_variable_id\n" +
+            "    WHERE\n" +
+            "        reg.reg_variable_id = common.variable_id UNION ALL SELECT \n" +
+            "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+            "            variable_id,\n" +
+            "            ctv.ctv_Measurement_Units\n" +
+            "    FROM\n" +
+            "        newvarexpdb.common AS common\n" +
+            "    RIGHT JOIN newvarexpdb.ctv AS ctv ON ctv_variable_id\n" +
+            "    WHERE\n" +
+            "        ctv.ctv_variable_id = common.variable_id UNION ALL SELECT \n" +
+            "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+            "            variable_id,\n" +
+            "            cnt.cnt_Measurement_Units\n" +
+            "    FROM\n" +
+            "        newvarexpdb.common AS common\n" +
+            "    RIGHT JOIN newvarexpdb.cnt AS cnt ON cnt_variable_id\n" +
+            "    WHERE\n" +
+            "        cnt.cnt_variable_id = common.variable_id UNION ALL SELECT \n" +
+            "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+            "            variable_id,\n" +
+            "            chr.chr_Measurement_Units\n" +
+            "    FROM\n" +
+            "        newvarexpdb.common AS common\n" +
+            "    RIGHT JOIN newvarexpdb.chr AS chr ON chr_variable_id\n" +
+            "    WHERE\n" +
+            "        chr.chr_variable_id = common.variable_id) AS new_table ON old_table.tagName = new_table.tagName) UnitsTable \n" +
+            "SET \n" +
+            "    result.`Units Test` = IF(UnitsTable.MeasurementUnits1 <=> UnitsTable.MeasurementUnits2,\n" +
+            "        'PASS',\n" +
+            "        'FAIL'),\n" +
+            "    result.`Comment` = CONCAT(result.`Comment`,\n" +
+            "            IF(UnitsTable.MeasurementUnits1 <> UnitsTable.MeasurementUnits2,\n" +
+            "                '\n" +
+            "                 Units do not match between new and old configs',\n" +
+            "                ''))\n" +
+            "WHERE\n" +
+            "    result.tagName = UnitsTable.tagName;";
 
     //This tests the analog max and min ratios
-    private String analogRatioTest = "Update resultOutput.resultTable result,\n" +
-            "(\n" +
-            "select matrikonTag as tagName, matrikonLowRatio,matrikonHiRatio,round(minEquipmentVal/minDisplayVal,2) as newConfigMinRatio, round(maxEquipmentVal/maxDisplayVal,2) as newConfigMaxRatio from\n" +
-            "#select matrikonTag as tagName, matrikonLowRatio,matrikonHiRatio,round(maxEquipmentVal/maxDisplayVal,2) as newConfigMaxRatio from\n" +
-            "#select * from\n" +
-            "(\n" +
-            "\tselect matrikon_id,concat(matrikon_group_name,'.',matrikon_name) as matrikonTag, matrikon_hiRaw,matrikon_lowRaw,matrikon_hiScaled,matrikon_loScaled, round(matrikon_lowRaw / matrikon_loScaled,2) as matrikonLowRatio, round(matrikon_hiRaw/matrikon_hiScaled,2) as matrikonHiRatio \n" +
-            "    from matrikondb.matrikon\n" +
-            ") as matrikonTable\n" +
+    private String analogRatioTest = "UPDATE resultOutput.resultTable result,\n" +
+            "    (SELECT \n" +
+            "        matrikonTag AS matrikonTagName,\n" +
+            "            matrikonLowRatio,\n" +
+            "            matrikonHiRatio,\n" +
+            "            ROUND(minEquipmentVal / minDisplayVal, 2) AS newConfigMinRatio,\n" +
+            "            ROUND(maxEquipmentVal / maxDisplayVal, 2) AS newConfigMaxRatio\n" +
+            "    FROM\n" +
+            "        (SELECT \n" +
+            "        matrikon_id,\n" +
+            "            CONCAT(matrikon_group_name, '.', matrikon_name) AS matrikonTag,\n" +
+            "            matrikon_hiRaw,\n" +
+            "            matrikon_lowRaw,\n" +
+            "            matrikon_hiScaled,\n" +
+            "            matrikon_loScaled,\n" +
+            "            ROUND(matrikon_lowRaw / matrikon_loScaled, 2) AS matrikonLowRatio,\n" +
+            "            ROUND(matrikon_hiRaw / matrikon_hiScaled, 2) AS matrikonHiRatio\n" +
+            "    FROM\n" +
+            "        matrikondb.matrikon) AS matrikonTable\n" +
+            "    RIGHT JOIN (SELECT \n" +
+            "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+            "            variable_id,\n" +
+            "            reg_Minimium_display_value AS minDisplayVal,\n" +
+            "            reg_Minimum_equipment_value AS minEquipmentVal,\n" +
+            "            reg_Maximum_display_value AS maxDisplayVal,\n" +
+            "            reg_Maximum_equipment_value AS maxEquipmentVal\n" +
+            "    FROM\n" +
+            "        newvarexpdb.common AS common\n" +
+            "    RIGHT JOIN newvarexpdb.reg AS reg ON reg_variable_id\n" +
+            "    WHERE\n" +
+            "        reg.reg_variable_id = common.variable_id UNION ALL SELECT \n" +
+            "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+            "            variable_id,\n" +
+            "            ctv_Minimium_display_value AS minDisplayVal,\n" +
+            "            ctv_Minimum_equipment_value AS minEquipmentVal,\n" +
+            "            ctv_Maximum_display_value AS maxDisplayVal,\n" +
+            "            ctv_Maximum_equipment_value AS maxEquipmentVal\n" +
+            "    FROM\n" +
+            "        newvarexpdb.common AS common\n" +
+            "    RIGHT JOIN newvarexpdb.ctv AS ctv ON ctv_variable_id\n" +
+            "    WHERE\n" +
+            "        ctv.ctv_variable_id = common.variable_id UNION ALL SELECT \n" +
+            "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+            "            variable_id,\n" +
+            "            cnt_Minimium_display_value AS minDisplayVal,\n" +
+            "            cnt_Minimum_equipment_value AS minEquipmentVal,\n" +
+            "            cnt_Maximum_display_value AS maxDisplayVal,\n" +
+            "            cnt_Maximum_equipment_value AS maxEquipmentVal\n" +
+            "    FROM\n" +
+            "        newvarexpdb.common AS common\n" +
+            "    RIGHT JOIN newvarexpdb.cnt AS cnt ON cnt_variable_id\n" +
+            "    WHERE\n" +
+            "        cnt.cnt_variable_id = common.variable_id UNION ALL SELECT \n" +
+            "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+            "            variable_id,\n" +
+            "            chr_Minimium_display_value AS minDisplayVal,\n" +
+            "            chr_Minimum_equipment_value AS minEquipmentVal,\n" +
+            "            chr_Maximum_display_value AS maxDisplayVal,\n" +
+            "            chr_Maximum_equipment_value AS maxEquipmentVal\n" +
+            "    FROM\n" +
+            "        newvarexpdb.common AS common\n" +
+            "    RIGHT JOIN newvarexpdb.chr AS chr ON chr_variable_id\n" +
+            "    WHERE\n" +
+            "        chr.chr_variable_id = common.variable_id) AS new_config ON matrikonTable.matrikonTag = new_config.tagName) AnalogsRatioTable \n" +
+            "SET \n" +
             "\n" +
-            "inner join\n" +
-            "(\n" +
-            "\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, reg_Minimium_display_value as minDisplayVal,reg_Minimum_equipment_value as minEquipmentVal, reg_Maximum_display_value as maxDisplayVal,reg_Maximum_equipment_value as maxEquipmentVal\n" +
-            "\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\tright join newvarexpdb.reg as reg on reg_variable_id\n" +
-            "\t\t\twhere \n" +
-            "\t\t\treg.reg_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\tunion all\n" +
-            "\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, ctv_Minimium_display_value as minDisplayVal,ctv_Minimum_equipment_value as minEquipmentVal, ctv_Maximum_display_value as maxDisplayVal,ctv_Maximum_equipment_value as maxEquipmentVal\n" +
-            "\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\tright join newvarexpdb.ctv as ctv on ctv_variable_id\n" +
-            "\t\t\twhere \n" +
-            "\t\t\tctv.ctv_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\tunion all\n" +
-            "\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, cnt_Minimium_display_value as minDisplayVal,cnt_Minimum_equipment_value as minEquipmentVal, cnt_Maximum_display_value as maxDisplayVal,cnt_Maximum_equipment_value as maxEquipmentVal\n" +
-            "\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\tright join newvarexpdb.cnt as cnt on cnt_variable_id\n" +
-            "\t\t\twhere \n" +
-            "\t\t\tcnt.cnt_variable_id = common.variable_id\n" +
-            "\n" +
-            "\t\tunion all\n" +
-            "\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName,variable_id, chr_Minimium_display_value as minDisplayVal,chr_Minimum_equipment_value as minEquipmentVal, chr_Maximum_display_value as maxDisplayVal,chr_Maximum_equipment_value as maxEquipmentVal\n" +
-            "\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\tright join newvarexpdb.chr as chr on chr_variable_id\n" +
-            "\t\t\twhere \n" +
-            "\t\t\tchr.chr_variable_id = common.variable_id\n" +
-            "\t) as new_config\n" +
-            "\ton matrikonTable.matrikonTag = new_config.tagName\n" +
-            "\n" +
-            "\t\n" +
-            ") AnalogsRatioTable\n" +
-            "set result.`Analogs Minimum Ratio Test` = \n" +
-            "\tif(\n" +
-            "\t\tif(newConfigMinRatio is null or newConfigMinRatio =0,true,\n" +
-            "\t\t\t\tmatrikonLowRatio <=> newConfigMinRatio\n" +
-            "        ),'PASS','FAIL'\n" +
-            "    ),\n" +
-            "result.`Analogs Maximum Ratio Test` =\n" +
-            "    if(\n" +
-            "\t\t(AnalogsRatioTable.matrikonHiRatio <=> AnalogsRatioTable.newConfigMaxRatio),'PASS','FAIL'\n" +
-            "    ),\n" +
-            "\n" +
-            "    result.`Comment` = if(AnalogsRatioTable.newConfigMinRatio is null, concat(result.`Comment`,\"\\n min display value (62) is zero\"), result.`Comment`),\n" +
-            "    result.`Comment` = if(AnalogsRatioTable.newConfigMinRatio = 0, concat(result.`Comment`,\"\\n min equipment value (65) is zero\"), result.`Comment`),\n" +
-            "    result.`Comment` = if(AnalogsRatioTable.newConfigMinRatio <> AnalogsRatioTable.matrikonLowRatio, concat(result.`Comment`,\"\\n min equipment val and min display val does not match between new nad matrikon config\"), result.`Comment`),\n" +
-            "    result.`Comment` = if(AnalogsRatioTable.matrikonHiRatio <> AnalogsRatioTable.newConfigMaxRatio, concat(result.`Comment`,\"\\n max equipment val and max display val does not match between new and matrikon config\"), result.`Comment`)\n" +
-            "where result.tagName = AnalogsRatioTable.tagName;";
+            "    result.`Analogs Minimum Ratio Test` = IF(IF(newConfigMinRatio IS NULL\n" +
+            "                OR newConfigMinRatio = 0,\n" +
+            "            TRUE,\n" +
+            "            (matrikonLowRatio <=> newConfigMinRatio) and (AnalogsRatioTable.matrikonTagName is not null)),\n" +
+            "        'PASS',\n" +
+            "        'FAIL'),\n" +
+            "    result.`Analogs Maximum Ratio Test` = IF((AnalogsRatioTable.matrikonHiRatio <=> AnalogsRatioTable.newConfigMaxRatio) and (AnalogsRatioTable.matrikonTagName IS NOT NULL),\n" +
+            "        'PASS',\n" +
+            "        'FAIL'),\n" +
+            "\tresult.`Comment` = concat(result.`Comment`,\n" +
+            "\t\t\tIF(AnalogsRatioTable.newConfigMinRatio IS NULL,\"\\n min display value (62) is zero\",''),\n" +
+            "            IF(AnalogsRatioTable.newConfigMinRatio = 0, \"\\n min equipment value (65) is zero\",''),\n" +
+            "            IF(AnalogsRatioTable.newConfigMinRatio <> AnalogsRatioTable.matrikonLowRatio,\"\\n min equipment val and min display val does not match between new nad matrikon config\",''),\n" +
+            "            IF(AnalogsRatioTable.matrikonHiRatio <> AnalogsRatioTable.newConfigMaxRatio, \"\\n max equipment val and max display val does not match between new and matrikon config\",''),\n" +
+            "            IF(AnalogsRatioTable.matrikonTagName is null, \"\\n tag name doesn't exist in matrikon config\",'')\n" +
+            "\t)\n" +
+            "WHERE\n" +
+            "    result.tagName = AnalogsRatioTable.matrikonTagName;";
 
     //This test is to update DNP3 Type. It checks to see if the oldSource is 'O' and for the same tags, check if the new source in the new config is '3'
-    private String dnp3TypeTest = "Update resultOutput.resultTable result,\n" +
-            "(\n" +
-            "\tselect newConfigTable.variable_id, newTagName as tagName, newConfigTable.source as newSource, oldConfigTable.source as oldSource\n" +
-            "\tfrom\n" +
-            "\t\t(\n" +
-            "\t\t\tselect *,trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as newTagName\n" +
-            "\t\tfrom newvarexpdb.common as common\n" +
-            "\t\twhere source = \"3\"\n" +
-            "\t    \n" +
-            "\t    ) as newConfigTable\n" +
-            "\n" +
-            "\tinner join\n" +
-            "\n" +
-            "\t(\n" +
-            "\t\t\tselect *,trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as oldTagName\n" +
-            "\t\tfrom oldvarexpdb.common as common\n" +
-            "\t\twhere source = \"O\"\n" +
-            "\t) as oldConfigTable\n" +
-            "\ton newTagName = oldTagName\n" +
-            ") Dnp3TypeTable\n" +
-            "set result.`Type Test` = if(\n" +
-            "\toldSource = 'O' and\n" +
-            "    newSource = '3'\n" +
-            "\t,'PASS','FAIL'),\n" +
-            "result.`Comment` = if(oldSource ='O' and newSource <> '3', concat(result.`Comment`,\"\\n Source hasn't been updated to '3' in new config\"), result.`Comment`)\n" +
-            "where result.tagName = Dnp3TypeTable.tagName;";
+    private String dnp3TypeTest = "UPDATE resultOutput.resultTable result,\n" +
+            "    (SELECT \n" +
+            "        newConfigTable.variable_id,\n" +
+            "            newTagName AS tagName,\n" +
+            "            newConfigTable.source AS newSource,\n" +
+            "            oldConfigTable.source AS oldSource\n" +
+            "    FROM\n" +
+            "        (SELECT \n" +
+            "        *,\n" +
+            "            TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS newTagName\n" +
+            "    FROM\n" +
+            "        newvarexpdb.common AS common\n" +
+            "    WHERE\n" +
+            "        source = '3') AS newConfigTable\n" +
+            "    LEFT JOIN (SELECT \n" +
+            "        *,\n" +
+            "            TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS oldTagName\n" +
+            "    FROM\n" +
+            "        oldvarexpdb.common AS common\n" +
+            "    WHERE\n" +
+            "        source = 'O') AS oldConfigTable ON newTagName = oldTagName) Dnp3TypeTable \n" +
+            "SET \n" +
+            "    result.`Type Test` = IF(oldSource = 'O' AND newSource = '3',\n" +
+            "        'PASS',\n" +
+            "        'FAIL'),\n" +
+            "    result.`Comment` = CONCAT(result.`Comment`,\n" +
+            "            IF(oldSource = 'O' AND newSource <> '3',\n" +
+            "                '\n" +
+            "                 Source hasn\\'t been updated to \\'3\\' in new config',\n" +
+            "                ''))\n" +
+            "WHERE\n" +
+            "    result.tagName = Dnp3TypeTable.tagName;";
 
     //This tests to see if  the item paths for DNP3 is the same (This is the SEL path)
-    private String sourceTest = "Update resultOutput.resultTable result,\n" +
-            "(\n" +
-            "\tselect * from\n" +
-            "\t(\n" +
-            "\t\tselect commonTable.variable_id, commonTable.source, commonTable.tagName, concat(dnp3_master_device_name,'.',lpad(dnp3_master_type,3,'0'), '.',dnp3_master_AOB_PointVariation,\".\",dnp3_master_point_address) as newConfigItemPath from\n" +
-            "\t\t(\n" +
-            "\t\t\tselect source,variable_id,trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName \n" +
-            "\t\t\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\t\twhere \n" +
-            "\t\t\t\t\tsource = \"3\" or source=\"O\"\n" +
-            "\t\t) as commonTable\n" +
-            "\t\tinner join\n" +
-            "\t\t(\n" +
-            "\t\t\tselect *\n" +
-            "\t\t\t\tfrom newvarexpdb.dnp3_master\n" +
-            "\t\t) as dnp3Table\n" +
-            "\t\ton commonTable.variable_id = dnp3Table.dnp3_master_variable_id\n" +
-            "\t) as newConfigTable\n" +
-            "\n" +
-            "\tinner join\n" +
-            "\t(\n" +
-            "\t\tselect concat(matrikon_group_name,'.',matrikon_name) as matrikonTag, matrikon_item_path as itemPath from matrikondb.matrikon\n" +
-            "\t) as matrikonTable\n" +
-            "\ton newConfigTable.tagName = matrikonTable.matrikonTag\n" +
-            "\t\n" +
-            ") SourceTable\n" +
-            "set result.`OPC DNP3 Source Test` = if(\n" +
-            "\tnewConfigItemPath = itemPath\n" +
-            "\t,'PASS','FAIL'),\n" +
-            "result.`Comment` = if(newConfigItemPath <> itemPath, concat(result.`Comment`,\"\\n SEL item path does not match for tag\"), result.`Comment`)\n" +
-            "where result.tagName = SourceTable.tagName;";
+    private String sourceTest = "UPDATE resultOutput.resultTable result,\n" +
+            "    (SELECT \n" +
+            "        *\n" +
+            "    FROM\n" +
+            "        (SELECT \n" +
+            "        commonTable.variable_id,\n" +
+            "            commonTable.source,\n" +
+            "            commonTable.tagName,\n" +
+            "            CONCAT(dnp3_master_device_name, '.', LPAD(dnp3_master_type, 3, '0'), '.', dnp3_master_AOB_PointVariation, '.', dnp3_master_point_address) AS newConfigItemPath\n" +
+            "    FROM\n" +
+            "        (SELECT \n" +
+            "        source,\n" +
+            "            variable_id,\n" +
+            "            TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName\n" +
+            "    FROM\n" +
+            "        newvarexpdb.common AS common\n" +
+            "    WHERE\n" +
+            "        source = '3' OR source = 'O') AS commonTable\n" +
+            "    INNER JOIN (SELECT \n" +
+            "        *\n" +
+            "    FROM\n" +
+            "        newvarexpdb.dnp3_master) AS dnp3Table ON commonTable.variable_id = dnp3Table.dnp3_master_variable_id) AS newConfigTable\n" +
+            "    INNER JOIN (SELECT \n" +
+            "        CONCAT(matrikon_group_name, '.', matrikon_name) AS matrikonTag,\n" +
+            "            matrikon_item_path AS itemPath\n" +
+            "    FROM\n" +
+            "        matrikondb.matrikon) AS matrikonTable ON newConfigTable.tagName = matrikonTable.matrikonTag) SourceTable \n" +
+            "SET \n" +
+            "    result.`OPC DNP3 Source Test` = IF(newConfigItemPath = itemPath,\n" +
+            "        'PASS',\n" +
+            "        'FAIL'),\n" +
+            "    result.`Comment` = IF(newConfigItemPath <> itemPath,\n" +
+            "        CONCAT(result.`Comment`,\n" +
+            "                '\n" +
+            "                 SEL item path does not match for tag'),\n" +
+            "        result.`Comment`)";
 
 
     //This tests for the commandable range. This should only work for CTV tags
-    private String ctvRangeTest = "Update resultOutput.resultTable result,\n" +
-            "(\n" +
-            "\tSelect commonTable.tagName,commonTable.variable_id, ctvTable.ctv_Minimium_display_value as minDisplayValue, ctvTable.ctv_Maximum_display_value as maxDisplayValue, \n" +
-            "\t\tctvTable.ctv_Minimum_control_value as minControlValue, ctvTable.ctv_maximum_control_value as maxControlValue\n" +
-            "    from\n" +
-            "\t(\n" +
-            "\t\tselect trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as tagName, common.* \n" +
-            "\t\t\tfrom newvarexpdb.common as common\n" +
-            "\t\t\twhere source = \"CTV\"\n" +
-            "\t) as commonTable\n" +
-            "\tinner join\n" +
-            "\t(\n" +
-            "\t\tselect *\n" +
-            "\t\t\tfrom newvarexpdb.ctv\n" +
-            "\t) as ctvTable\n" +
-            "\ton ctvTable.ctv_variable_id = commonTable.variable_id\n" +
-            "\t\n" +
-            ") RangeTable\n" +
-            "set result.`Commandable Range Test` = if(\n" +
-            "\t\tminControlValue = minDisplayValue and \n" +
-            "        maxDisplayValue = maxControlValue\n" +
-            "\t,'PASS','FAIL'),\n" +
-            "    result.`Comment` = if( minControlValue <> minDisplayValue , concat(result.`Comment`,\"\\n min commandable ranges does not match\"), result.`Comment`),\n" +
-            "    result.`Comment` = if( maxDisplayValue <> maxControlValue , concat(result.`Comment`,\"\\n max commandable ranges does not match\"), result.`Comment`)\n" +
-            "where result.tagName = RangeTable.tagName;";
+    private String ctvRangeTest = "UPDATE resultOutput.resultTable result,\n" +
+            "    (SELECT \n" +
+            "        commonTable.tagName,\n" +
+            "            commonTable.variable_id,\n" +
+            "            ctvTable.ctv_Minimium_display_value AS minDisplayValue,\n" +
+            "            ctvTable.ctv_Maximum_display_value AS maxDisplayValue,\n" +
+            "            ctvTable.ctv_Minimum_control_value AS minControlValue,\n" +
+            "            ctvTable.ctv_maximum_control_value AS maxControlValue\n" +
+            "    FROM\n" +
+            "        (SELECT \n" +
+            "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+            "            common.*\n" +
+            "    FROM\n" +
+            "        newvarexpdb.common AS common\n" +
+            "    WHERE\n" +
+            "        source = 'CTV') AS commonTable\n" +
+            "    INNER JOIN (SELECT \n" +
+            "        *\n" +
+            "    FROM\n" +
+            "        newvarexpdb.ctv) AS ctvTable ON ctvTable.ctv_variable_id = commonTable.variable_id) RangeTable \n" +
+            "SET \n" +
+            "    result.`Commandable Range Test` = IF(minControlValue = minDisplayValue\n" +
+            "            AND maxDisplayValue = maxControlValue,\n" +
+            "        'PASS',\n" +
+            "        'FAIL'),\n" +
+            "    result.`Comment` = CONCAT(result.`Comment`,\n" +
+            "            IF(minControlValue <> minDisplayValue,\n" +
+            "                '\n" +
+            "                 min commandable ranges does not match',\n" +
+            "                ''),\n" +
+            "            IF(maxDisplayValue <> maxControlValue,\n" +
+            "                '\n" +
+            "                 max commandable ranges does not match',\n" +
+            "                ''))\n" +
+            "WHERE\n" +
+            "    result.tagName = RangeTable.tagName;";
 
     private String internalTest = "Update resultOutput.resultTable result,\n" +
             "(\n" +
@@ -490,43 +623,57 @@ public class ComparisonTest {
             "\t\n" +
             ") InternalTable\n" +
             "set result.`Internal Type Check Test` = 'PASS'\n" +
-            "where result.tagName = InternalTable.newTagName;\n";
+            "set result.`Comment`= concat(result.`Comment`\n" +
+            "where result.tagName = InternalTable.newTagName;";
 
-    private String producerTest = "Update resultOutput.resultTable result,\n" +
-            "(\n" +
-            "\tselect newTable.tagName as TagName, \n" +
-            "\tnewTable.topology_server as newProducer, newTable.source as newSource, newTable.topology_client as newClient,\n" +
-            "\toldTable.topology_server as oldProducer, oldTable.source as oldSource, oldTable.topology_client as oldClient\n" +
-            "\tfrom  \n" +
-            "\t(\n" +
-            "\t\tselect\n" +
-            "\t\t\tregexp_substr(common.topology_server, '[[:digit:]]+') as temp,\n" +
+    private String producerTest = "UPDATE resultOutput.resultTable result,\n" +
+            "    (SELECT \n" +
+            "        newTable.tagName AS TagName,\n" +
+            "            newTable.topology_server AS newProducer,\n" +
+            "            newTable.source AS newSource,\n" +
+            "            newTable.topology_client AS newClient,\n" +
+            "            oldTable.topology_server AS oldProducer,\n" +
+            "            oldTable.source AS oldSource,\n" +
+            "            oldTable.topology_client AS oldClient\n" +
+            "    FROM\n" +
+            "        (SELECT \n" +
+            "        REGEXP_SUBSTR(common.topology_server, '[[:digit:]]+') AS temp,\n" +
             "            common.topology_client,\n" +
-            "\t\t\tcommon.topology_server, \n" +
-            "\t\t\tcommon.variable_id, \n" +
-            "\t\t\tcommon.source, trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) \n" +
-            "\t\t\t\t\tas tagName\n" +
-            "\t\t\t\tfrom newvarexpdb.common as common\n" +
-            "\t) as newTable\n" +
-            "\tinner join\n" +
-            "\t(\n" +
-            "\t\tselect common.topology_server, \n" +
-            "\t\t\tcommon.topology_client,\n" +
-            "\t\t\tcommon.variable_id, \n" +
-            "\t\t\tcommon.source, trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) \n" +
-            "\t\t\t\t\tas tagName \n" +
-            "\t\t\t\tfrom oldvarexpdb.common as common\n" +
-            "\t) as oldTable\n" +
-            "\n" +
-            "\ton newTable.tagName = oldTable.tagName\n" +
-            ") ProducerTable\n" +
-            "set result.`Producer Test` = if(newSource=\"I\",\n" +
-            "\tif(newSource = oldSource,'PASS','FAIL'),\n" +
-            "    if(regexp_substr(newProducer, '[:alpha:]+') = 'ST' and regexp_substr(newClient,'[:digit:]+')=regexp_substr(oldClient,'[:digit:]+'),'PASS','FAIL')\n" +
-            "\t),\n" +
-            "\tresult.`Comment` = if(regexp_substr(newClient,'[:digit:]+') <> regexp_substr(oldClient,'[:digit:]+'), concat(result.`Comment`,\"\\n Check Producer. Stations does not match \"), result.`Comment`),\n" +
-            "    result.`Comment` = if( newSource = \"I\" and newSource <> oldSource , concat(result.`Comment`,\"\\n Source types does not match\"), result.`Comment`)\n" +
-            "where result.tagName = ProducerTable.tagName;";
+            "            common.topology_server,\n" +
+            "            common.variable_id,\n" +
+            "            common.source,\n" +
+            "            TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName\n" +
+            "    FROM\n" +
+            "        newvarexpdb.common AS common) AS newTable\n" +
+            "    LEFT JOIN (SELECT \n" +
+            "        common.topology_server,\n" +
+            "            common.topology_client,\n" +
+            "            common.variable_id,\n" +
+            "            common.source,\n" +
+            "            TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName\n" +
+            "    FROM\n" +
+            "        oldvarexpdb.common AS common) AS oldTable ON newTable.tagName = oldTable.tagName) ProducerTable \n" +
+            "SET \n" +
+            "    result.`Producer Test` = IF(newSource = 'I',\n" +
+            "        IF(newSource = oldSource,\n" +
+            "            'PASS',\n" +
+            "            'FAIL'),\n" +
+            "        IF(REGEXP_SUBSTR(newProducer, '[:alpha:]+') = 'ST'\n" +
+            "                AND REGEXP_SUBSTR(newClient, '[:digit:]+') = REGEXP_SUBSTR(oldClient, '[:digit:]+'),\n" +
+            "            'PASS',\n" +
+            "            'FAIL')),\n" +
+            "    result.`Comment` = CONCAT(result.`Comment`,\n" +
+            "            IF(REGEXP_SUBSTR(newClient, '[:digit:]+') <> REGEXP_SUBSTR(oldClient, '[:digit:]+'),\n" +
+            "                '\n" +
+            "                 Check Producer. Stations does not match ',\n" +
+            "                ''),\n" +
+            "            IF(newSource = 'I'\n" +
+            "                    AND newSource <> oldSource,\n" +
+            "                '\n" +
+            "                 Source types does not match',\n" +
+            "                ''))\n" +
+            "WHERE\n" +
+            "    result.tagName = ProducerTable.tagName;";
 
 
     public ComparisonTest(String matrikonDB, String newConfigDB, String oldConfigDB, String resultDB) {
@@ -542,6 +689,8 @@ public class ComparisonTest {
         databaseList.add(newConfigDB);
         databaseList.add(oldConfigDB);
         databaseList.add(resultDB);
+
+        String databaseName = Result.resultDatabaseName();
 
         testList.add(initialInsert);
         testList.add(tagMatchTest);
