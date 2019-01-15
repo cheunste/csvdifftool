@@ -108,6 +108,11 @@ public class MainCmd {
         String matrikonDB = "matrikonDB";
 
         String resultDB = "resultoutput";
+
+        //Fetch fields from the config file
+        PropertyManager pm = new PropertyManager();
+        pm.getPropertyValues();
+
         //Import the Old Varexp and New Varexp into a newVarexpDB and oldVarexpDB and create a finalVarexpDB
         deleteDB(oldDB);
         deleteDB(newDB);
@@ -116,15 +121,20 @@ public class MainCmd {
 
         createVarexpDB(oldDB);
         createVarexpDB(newDB);
-        createVarexpDB(resultDB);
+
+        Result result = new Result();
+
         createMatrikonDB(matrikonDB);
         System.out.println("DBs created");
 
         //Read three files in the current directory
         //TODO: Remove the hardcoded file names when you impelment the GUI. Throw this in a config file somewhere
-        String fileDirectory = "C:\\Users\\Stephen\\Documents\\ComparisonTool\\";
+
+        //String fileDirectory = "C:\\Users\\Stephen\\Documents\\ComparisonTool\\";
+        String fileDirectory = PropertyManager.getDefaultFilePath();
 
 
+        //Import the varexps
         importFile(fileDirectory + "Varexp_FE03_SHILO_OLD.csv", oldDB);
         importFile(fileDirectory + "Varexp_FE03_SHILO_NEW.csv", newDB);
 
@@ -134,23 +144,25 @@ public class MainCmd {
         //Get the number of items from the DB. If they do not match, then throw a warning and end the program.
         boolean equalLines = Merge.compareLines(oldDB, newDB, matrikonDB);
         if (!equalLines) {
+            System.out.println("Line not equal");
             //End the program
         } else {
 
         }
 
         //Create a result Database and a  Result Table.
-        Result result = new Result();
-
         try {
             Thread.sleep(5000);
-            Result.executeTests(matrikonDB, newDB, oldDB);
+            //Result.executeTests(matrikonDB, newDB, oldDB);
         } catch (InterruptedException e) {
         }
-        //result.executeTests(matrikonDB,newDB,oldDB);
+        Result.executeTests(matrikonDB, newDB, oldDB);
 
         //Drop the databases (becaues at this point, you're done)
         System.out.println("DBs deleted");
+
+        //Export the database
+        Result.exportResult();
     }
 
 

@@ -20,6 +20,7 @@ public class PropertyManager {
     private static String databaseIP;
     private static String defaultFileName;
     private static String defaultFilePath;
+    private static String currentMachine;
 
     InputStream inputStream;
 
@@ -29,19 +30,19 @@ public class PropertyManager {
     }
 
     public static String getPassword() {
-        return getPassword();
+        return password;
     }
 
     public static String getDatabaseIP() {
-        return getDatabaseIP();
+        return databaseIP;
     }
 
     public static String getDefaultFileName() {
-        return getDefaultFileName();
+        return defaultFileName;
     }
 
     public static String getDefaultFilePath() {
-        return getDefaultFilePath();
+        return defaultFilePath;
     }
 
     public void getPropertyValues() throws IOException {
@@ -62,7 +63,16 @@ public class PropertyManager {
             databaseIP = prop.getProperty("databaseIP");
             password = prop.getProperty("password");
             defaultFileName = prop.getProperty("defaultFileName");
+            //defaultFilePath = prop.getProperty("defaultFilePath");
+
+            //Get the path on where the java app was executed
+            //defaultFilePath = System.getProperty("user.dir");
             defaultFilePath = prop.getProperty("defaultFilePath");
+
+            //Get the Current Hostname. This is needed as you might not be querying data from localhost
+            java.net.InetAddress localMachine = java.net.InetAddress.getLocalHost();
+            currentMachine = localMachine.toString();
+
         } catch (Exception e) {
             System.out.println("Exception: " + e);
         } finally {
