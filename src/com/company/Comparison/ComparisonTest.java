@@ -299,10 +299,6 @@ public class ComparisonTest {
                     "                '\n" +
                     "                 bitlog01 does not match between old and new config',\n" +
                     "                ''),\n" +
-                    "            IF((DigitalTable.bitLog01_1 <=> DigitalTable.bitLog01_2) = 0,\n" +
-                    "                '\n" +
-                    "                 bitlog01 does not match between old and new config',\n" +
-                    "                ''),\n" +
                     "            IF((DigitalTable.bitLog10_1 <=> DigitalTable.bitLog10_2) = 0,\n" +
                     "                '\n" +
                     "                 bitlog10 does not match between old and new config',\n" +
@@ -613,7 +609,7 @@ public class ComparisonTest {
             "\t\t\tfrom newvarexpdb.common as common\n" +
             "\t\t\twhere source=\"I\"\n" +
             "\t) as newCommon\n" +
-            "\tinner join\n" +
+            "\tleft join\n" +
             "\t(\n" +
             "\t\tselect common.variable_id, common.source, trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as oldTagName \n" +
             "\t\t\tfrom oldvarexpdb.common as common\n" +
@@ -622,9 +618,11 @@ public class ComparisonTest {
             "\ton oldTagName = newTagName\n" +
             "\t\n" +
             ") InternalTable\n" +
-            "set result.`Internal Type Check Test` = 'PASS'\n" +
-            "set result.`Comment`= concat(result.`Comment`\n" +
-            "where result.tagName = InternalTable.newTagName;";
+            "set result.`Internal Type Check Test` = if((newTagName is not null) and (oldTagName is not null),'PASS','FAIL'),\n" +
+            "\tresult.`Comment`= concat(result.`Comment`,\n" +
+            "\t\tif( (newTagName is null) or (oldTagName is null), \"\\n The internal tags don't match\",'')\n" +
+            ")\n" +
+            "where result.tagName = InternalTable.newTagName;\n";
 
     private String producerTest = "UPDATE resultOutput.resultTable result,\n" +
             "    (SELECT \n" +
