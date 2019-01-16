@@ -10,6 +10,7 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 public class MainCmd {
+    private static int FIVE_SECONDS = 5000;
 
     //Function to import the varexp file. Ask a user if they want to overwrite a DB first and then actually import it
     private static void importFile(String fileLocation, String databaseName) throws IOException, SQLException {
@@ -113,19 +114,22 @@ public class MainCmd {
         PropertyManager pm = new PropertyManager();
         pm.getPropertyValues();
 
-        //Import the Old Varexp and New Varexp into a newVarexpDB and oldVarexpDB and create a finalVarexpDB
-        deleteDB(oldDB);
-        deleteDB(newDB);
-        deleteDB(resultDB);
-        deleteDB(matrikonDB);
+        //Debug Mode. In this mode, everything important should be logged but more importantly, the DB should not be deleted.
+        //TODO: When a GUI is created, create a checkbox that allows user to select Debug mode
+        boolean debugMode = true;
 
+        //Create a reference to Result class. Result class is used for output. Instaniating it will create
+        // the DB used to store results
+        Result.createResultDB();
+
+        //Import the Old Varexp and New Varexp into a newVarexpDB and oldVarexpDB and create a finalVarexpDB
         createVarexpDB(oldDB);
         createVarexpDB(newDB);
 
-        Result result = new Result();
 
         createMatrikonDB(matrikonDB);
         System.out.println("DBs created");
+
 
         //Read three files in the current directory
         //TODO: Remove the hardcoded file names when you impelment the GUI. Throw this in a config file somewhere
@@ -135,10 +139,12 @@ public class MainCmd {
 
 
         //Import the varexps
+        //TODO: Remove the hardcoded file names when you impelment the GUI. Throw this in a config file somewhere
         importFile(fileDirectory + "Varexp_FE03_SHILO_OLD.csv", oldDB);
         importFile(fileDirectory + "Varexp_FE03_SHILO_NEW.csv", newDB);
 
         //Import the MatrikonFactory file
+        //TODO: Remove the hardcoded file names when you impelment the GUI. Throw this in a config file somewhere
         importMatrikon(fileDirectory + "Matrikon_FE03_SHILO.csv", matrikonDB);
 
         //Get the number of items from the DB. If they do not match, then throw a warning and end the program.
@@ -151,18 +157,34 @@ public class MainCmd {
         }
 
         //Create a result Database and a  Result Table.
+
+        //Wait some time in order to let mysql set up all the DB
+        dbWait(FIVE_SECONDS);
+        Result.executeTests(matrikonDB, newDB, oldDB);
+
+        //Export the database
+        Result.exportResult();
+        System.out.println(PropertyManager.getDefaultFileName() + " created");
+
+        //Drop the databases (becaues at this point, you're done)
+        System.out.println("DBs deleted");
+
+        //Delete the DB
+        if (!debugMode) {
+            deleteDB(oldDB);
+            deleteDB(newDB);
+            //deleteDB(resultDB);
+            deleteDB(matrikonDB);
+        }
+    }
+
+    private static void dbWait(int milliseconds) {
         try {
             Thread.sleep(5000);
             //Result.executeTests(matrikonDB, newDB, oldDB);
         } catch (InterruptedException e) {
         }
-        Result.executeTests(matrikonDB, newDB, oldDB);
 
-        //Drop the databases (becaues at this point, you're done)
-        System.out.println("DBs deleted");
-
-        //Export the database
-        Result.exportResult();
     }
 
 
