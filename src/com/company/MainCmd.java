@@ -148,7 +148,7 @@ public class MainCmd {
         importMatrikon(fileDirectory + "Matrikon_FE03_SHILO.csv", matrikonDB);
 
         //Get the number of items from the DB. If they do not match, then throw a warning and end the program.
-        boolean equalLines = Merge.compareLines(oldDB, newDB, matrikonDB);
+        boolean equalLines = Result.compareLines(oldDB, newDB, matrikonDB);
         if (!equalLines) {
             System.out.println("Line not equal");
             //End the program
