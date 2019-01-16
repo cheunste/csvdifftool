@@ -1,5 +1,6 @@
 package com.company.Database;
 
+import com.company.PropertyManager;
 import com.company.matrikon.MatrikonVariable;
 import com.company.pcvue.fields.VarexpFactory;
 import com.company.pcvue.fields.VarexpVariable;
@@ -36,7 +37,6 @@ public class dbConnector {
             resultSet = statement.executeQuery(sqlCmd);
 
             resultSetArray = new ArrayList<>();
-            System.out.println(temp);
             System.out.println(temp);
             ResultSetMetaData rsmd = resultSet.getMetaData();
             int colNum = rsmd.getColumnCount();
@@ -83,11 +83,8 @@ public class dbConnector {
         String resultString = "";
         while (resultSet.next()) {
             for (int i = 1; i <= columnNum; i++) {
-                //System.out.println(" "+rsmd.getColumnName(i));
                 resultString += resultSet.getString(i) + ",";
-                //System.out.println(" "+rsmd.getString(i));
             }
-            System.out.println(resultString);
         }
 
         return resultString;
@@ -101,7 +98,7 @@ public class dbConnector {
             Class.forName("com.mysql.jdbc.Driver");
             this.connect = DriverManager
                     //.getConnection("jdbc:mysql://localhost/" + databaseName + "?" + "user=production&password=ZAQ!xsw2CDE#&useSSL=false");
-                    .getConnection("jdbc:mysql://localhost/" + databaseName, "production", "ZAQ!xsw2CDE#");
+                    .getConnection("jdbc:mysql://localhost/" + databaseName, PropertyManager.getUser(), PropertyManager.getPassword());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -116,7 +113,7 @@ public class dbConnector {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             this.connect = DriverManager
-                    .getConnection("jdbc:mysql://localhost/", "production", "ZAQ!xsw2CDE#");
+                    .getConnection("jdbc:mysql://localhost/", PropertyManager.getUser(), PropertyManager.getPassword());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -226,7 +223,6 @@ public class dbConnector {
         String sqlCmd = "SELECT COUNT(common.variable_id) FROM common;";
         try {
             ResultSet rs = statement.executeQuery(sqlCmd);
-            System.out.println(rs);
             rs.next();
             String numVarexpVariable = rs.getString(1);
             return numVarexpVariable;
