@@ -23,7 +23,9 @@ public class ComparisonSceneController implements Initializable {
 
     private static final int DOUBLE_CLICK = 2;
     private static int FIVE_SECONDS = 5000;
+
     Stage currentWindow;
+    //Main Buttons on GUI
     @FXML
     private JFXButton oldConfigImportBtn;
     @FXML
@@ -32,14 +34,16 @@ public class ComparisonSceneController implements Initializable {
     private JFXButton matrikonConfigImportBtn;
     @FXML
     private JFXButton compareBtn;
+
+    //Debug Mode
     @FXML
     private JFXCheckBox debugModeBtn;
+
+    //TextFields. These exists so I can display a file path to the user
     @FXML
     private JFXTextField oldConfigFilePath;
     @FXML
     private JFXTextField newConfigFilePath;
-
-    //Initialize the window by adding listeners and other binding calls
     @FXML
     private JFXTextField matrikonFilePath;
 
@@ -133,7 +137,21 @@ public class ComparisonSceneController implements Initializable {
 
     }
 
-    public static void main(String[] args) throws IOException, ArrayIndexOutOfBoundsException, SQLException {
+    private static void dbWait(int milliseconds) {
+        try {
+            Thread.sleep(milliseconds);
+            //Result.executeTests(matrikonDB, newDB, oldDB);
+        } catch (InterruptedException e) {
+        }
+
+    }
+
+    public void compare() throws IOException, SQLException {
+
+
+        //If checked, then it should be in debug mode
+        boolean checked = this.getDebugMode();
+
         String oldDB = "oldVarexpDB";
         String newDB = "newVarexpDB";
         String matrikonDB = "matrikonDB";
@@ -172,10 +190,13 @@ public class ComparisonSceneController implements Initializable {
         //TODO: Remove the hardcoded file names when you impelment the GUI. Throw this in a config file somewhere
         importFile(fileDirectory + "Varexp_FE03_SHILO_OLD.csv", oldDB);
         importFile(fileDirectory + "Varexp_FE03_SHILO_NEW.csv", newDB);
+        //importFile(fileDirectory + oldConfigFilePath.getSelectedText(),oldDB);
+        //importFile(fileDirectory + newConfigFilePath.getSelectedText(),newDB);
 
         //Import the MatrikonFactory file
         //TODO: Remove the hardcoded file names when you impelment the GUI. Throw this in a config file somewhere
         importMatrikon(fileDirectory + "Matrikon_FE03_SHILO.csv", matrikonDB);
+        //importMatrikon(fileDirectory + matrikonFilePath,matrikonDB);
 
         //Get the number of items from the DB. If they do not match, then throw a warning and end the program.
         boolean equalLines = Result.compareLines(oldDB, newDB, matrikonDB);
@@ -192,7 +213,7 @@ public class ComparisonSceneController implements Initializable {
         dbWait(FIVE_SECONDS);
         Result.executeTests(matrikonDB, newDB, oldDB);
 
-        //Export the database
+        //Export the database.
         Result.exportResult();
         System.out.println(PropertyManager.getDefaultFileName() + " created");
 
@@ -203,25 +224,8 @@ public class ComparisonSceneController implements Initializable {
         if (!debugMode) {
             deleteDB(oldDB);
             deleteDB(newDB);
-            //deleteDB(resultDB);
             deleteDB(matrikonDB);
         }
-    }
-
-    private static void dbWait(int milliseconds) {
-        try {
-            Thread.sleep(5000);
-            //Result.executeTests(matrikonDB, newDB, oldDB);
-        } catch (InterruptedException e) {
-        }
-
-    }
-
-    public static void exportFile(String databaseName, String outputFilePath) {
-        //Shtudown
-        Buffer buffer = new Buffer();
-        Export exp = new Export(databaseName, buffer, outputFilePath);
-        exp.exportDB();
     }
 
     @FXML
@@ -254,11 +258,8 @@ public class ComparisonSceneController implements Initializable {
         });
     }
 
-    private void compare() {
-
-        //If checked, then it should be in debug mode
-        boolean checked = debugModeBtn.isSelected();
-
+    private boolean getDebugMode() {
+        return debugModeBtn.isSelected();
     }
 
     //This is used to keep track of prvevious stages so I can close them later
