@@ -2,7 +2,7 @@
  * Created by Stephen on 7/28/2018.
  */
 
-import Controller.DBSelectorController;
+import Controller.ComparisonSceneController;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -39,10 +39,10 @@ public class Main extends Application {
         //Load the document
         //Parent root = FXMLLoader.load(getClass().getResource("View/DBSelector.fxml"));
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("View/DBSelector.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("View/ComparisonGUI.fxml"));
         Parent root = loader.load();
-        DBSelectorController dbSelectorController = loader.getController();
-        dbSelectorController.setCurrentWindow(window);
+        ComparisonSceneController comparisonSceneController = loader.getController();
+        comparisonSceneController.setCurrentWindow(window);
 
         window.setScene(new Scene(root, 600, 400));
         window.show();
