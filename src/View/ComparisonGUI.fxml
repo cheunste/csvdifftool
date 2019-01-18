@@ -5,10 +5,8 @@
 <?import javafx.scene.text.Text?>
 <?import java.net.URL?>
 <AnchorPane xmlns:fx="http://javafx.com/fxml/1" fx:id="configSelector" maxHeight="-Infinity" maxWidth="-Infinity"
-            minHeight="-Infinity" minWidth="-Infinity"
-            prefHeight="400.0" prefWidth="600.0"
-            xmlns="http://javafx.com/javafx/8.0.171"
-            fx:controller="Controller.ComparisonSceneController">
+            minHeight="-Infinity" minWidth="-Infinity" prefHeight="400.0" prefWidth="600.0"
+            xmlns="http://javafx.com/javafx/8.0.171" fx:controller="Controller.ComparisonSceneController">
     <stylesheets>
         <URL value="@CSS/defaultTheme.css"/>
     </stylesheets>
@@ -21,7 +19,7 @@
         <JFXTextField fx:id="newConfigFilePath" layoutX="281.0" layoutY="177.0" prefHeight="25.0" prefWidth="226.0"/>
         <JFXTextField fx:id="matrikonFilePath" layoutX="281.0" layoutY="230.0" prefHeight="25.0" prefWidth="226.0"/>
         <JFXCheckBox fx:id="debugModeBtn" layoutX="87.0" layoutY="282.0" text="Debug Mode"/>
-        <JFXButton fx:id="compareBtn" layoutX="319.0" layoutY="291.0" text="Compare!"/>
+        <JFXButton fx:id="compareBtn" disable="true" layoutX="319.0" layoutY="291.0" text="Compare!"/>
         <Text layoutX="54.0" layoutY="80.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Varexp Comparison Tool"
               wrappingWidth="453.13671875"/>
     </children>

@@ -180,7 +180,7 @@ public class MainCmd {
 
     private static void dbWait(int milliseconds) {
         try {
-            Thread.sleep(5000);
+            Thread.sleep(FIVE_SECONDS);
             //Result.executeTests(matrikonDB, newDB, oldDB);
         } catch (InterruptedException e) {
         }
