@@ -91,6 +91,7 @@ public class dbConnector {
 
     }
 
+    //Open connection to DB. Warning: Requires property manager rto be used
     public Connection openConnection(String databaseName) {
         try {
 
@@ -207,7 +208,7 @@ public class dbConnector {
             openConnection(databaseName);
             setStatement(connect);
             boolean rs = statement.execute(sqlCmd);
-            System.out.println(rs);
+            //System.out.println(rs);
 
 
         } catch (Exception e) {
