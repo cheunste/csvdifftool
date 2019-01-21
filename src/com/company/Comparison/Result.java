@@ -147,16 +147,20 @@ public class Result {
         String fileLocation = PropertyManager.getDefaultFilePath();
 
         //Create a file
-        File csvOutput = new File(fileLocation + fileName);
+        //File csvOutput = new File(fileLocation + fileName);
+        File csvOutput = getFile(fileLocation, fileName);
 
         //Query to output content from the DB
+        //TODO: Change the otufile in sql to the config file
+        String fullPath = fileLocation + fileName.replace("/", "////");
+        //"into outfile 'C:\\\\Users\\\\Stephen\\\\Documents\\\\ComparisonTool\\\\" + fileName + "'\n" +
         String saveToFile = "select \"Tag Name\",\"Tag Name Test\", \"Description Test\", \"Digitals Test\", \"Units Test\",\"Analogs Minimum Ratio Test\",\"Analogs Maximum Ratio Test\",\"Type Test\" ,\"OPC DNP3 Source Test\",\"Commandable Range Test\",\n" +
                 "\t\"Internal Type Check Test\",\"Producer Test\",\"Comment\"\n" +
                 "union all\n" +
                 "(\n" +
                 "Select `TagName`,`Tag Name Test`, `Description Test`, `Digitals Test`, `Units Test`,`Analogs Minimum Ratio Test`,`Analogs Maximum Ratio Test`,`Type Test` ,`OPC DNP3 Source Test`,`Commandable Range Test`,\n" +
                 "\t`Internal Type Check Test`,`Producer Test`,`Comment`\n" +
-                "into outfile 'C:\\\\Users\\\\Stephen\\\\Documents\\\\ComparisonTool\\\\" + fileName + "'\n" +
+                "into outfile '" + fullPath + "'\n" +
                 "fields terminated by ','\n" +
                 "enclosed by '\"'\n" +
                 "escaped by '\\\\'\n" +
@@ -165,22 +169,40 @@ public class Result {
                 ");";
 
         dbConnector dbConnector = new dbConnector();
-        if (csvOutput.delete()) {
-            dbConnector.sqlExecute("", saveToFile);
-        }
-        //delete the file if it exists;
-        if (csvOutput.exists()) {
 
-            boolean deleted = csvOutput.delete();
-            if (deleted) {
-                dbConnector.sqlExecute("", saveToFile);
-            } else {
-                //Todo: Replace this with logging
-                System.out.println("File still in use. Will not export");
-            }
-        } else {
-            //call query
-            dbConnector.sqlExecute("", saveToFile);
-        }
+        //call query to save to file. Note that there isn't any file checks here
+        //Because that's already handled in the ComparionsScneeController's fileCheck()
+        dbConnector.sqlExecute("", saveToFile);
+
     }
+
+    public static boolean resultFileExists(String filePath, String fileName) {
+        File file = getFile(filePath, fileName);
+        return file.exists();
+    }
+
+    public static boolean deleteResultFile(String filePath, String fileName) {
+        File file = getFile(filePath, fileName);
+        boolean fileDeleted = file.delete();
+        //TODO: log this instead
+        System.out.println(fileDeleted ? "File has been deleted" : "File couldn't be dleeted");
+        return fileDeleted;
+    }
+
+    //Tests to see if a file is opened
+    public static boolean resultFileOpen(String filePath, String fileName) {
+        File file = getFile(filePath, fileName);
+        boolean fileIsLocked = !file.renameTo(file);
+        //TODO: log this instead
+        System.out.println(fileIsLocked ? "File is Locked and not usable" : "File usable");
+        //Remember to log
+        return fileIsLocked;
+    }
+
+
+    //Returns a file object needed for resultFile
+    private static File getFile(String filePath, String fileName) {
+        return new File(filePath + fileName);
+    }
+
 }

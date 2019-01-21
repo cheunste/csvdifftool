@@ -23,7 +23,6 @@ import java.util.concurrent.Future;
 
 public class ComparisonSceneController implements Initializable {
 
-    private static final int DOUBLE_CLICK = 2;
     private static int FIVE_SECONDS = 5000;
 
     Stage currentWindow;
@@ -48,12 +47,6 @@ public class ComparisonSceneController implements Initializable {
     private JFXTextField newConfigFilePath;
     @FXML
     private JFXTextField matrikonFilePath;
-
-    //Boolean member variables. THey are used for seeing if certain conditions are fulfilled in the GUI
-    private boolean oldConfigSelected;
-    private boolean newConfigSelected;
-    private boolean matrikonSelected;
-    private boolean debugModeEnabled;
 
     //Function to import the varexp file. Ask a user if they want to overwrite a DB first and then actually import it
     private static void importFile(String fileLocation, String databaseName) throws IOException, SQLException {
@@ -154,6 +147,32 @@ public class ComparisonSceneController implements Initializable {
 
     }
 
+    //Function to perform a file check before running the actual execute code
+    /*
+    return: true: if file is not opened and file is deleted
+            false: if file is opened
+     */
+    public boolean fileCheck() {
+
+        String fileName = PropertyManager.getDefaultFileName();
+        String filePath = PropertyManager.getDefaultFilePath();
+
+        boolean fileExists = Result.resultFileExists(filePath, fileName);
+
+        //If the file exists, check if it is open. If it is  open, then
+        // inform user to close it. Program will not continue
+        if (fileExists) {
+            boolean fileOpen = Result.resultFileOpen(filePath, fileName);
+            if (fileOpen) {
+                System.out.println("File is open. Please close to continue");
+                return false;
+            }
+            //If file isn't open, then delete it
+            Result.deleteResultFile(filePath, fileName);
+        }
+        return true;
+    }
+
     private void compareBtnVisibilityEnable() {
 
         System.out.println(oldConfigFilePath.getText() + " null");
@@ -183,9 +202,22 @@ public class ComparisonSceneController implements Initializable {
         String newDB = "newVarexpDB";
         String matrikonDB = "matrikonDB";
 
-        //Fetch fields from the config file
-        PropertyManager pm = new PropertyManager();
-        pm.getPropertyValues();
+        if (!fileCheck()) {
+            //TODO: Replace this with a popup for the user
+            System.out.println("Program will not run as the " +
+                    PropertyManager.getDefaultFilePath() + PropertyManager.getDefaultFileName() +
+                    " is still open");
+            return;
+        }
+
+
+        //Result.exportResult();
+
+        //Delete the DBs beforehand just in case. They should be deleted after everything is done, but might not
+        //due to debug mode
+        deleteDB(oldDB);
+        deleteDB(newDB);
+        deleteDB(matrikonDB);
 
         //Create a reference to Result class. Result class is used for output. Instaniating it will create
         // the DB used to store results
@@ -199,25 +231,19 @@ public class ComparisonSceneController implements Initializable {
         createMatrikonDB(matrikonDB);
         System.out.println("DBs created");
 
-
-        //Read three files in the current directory
-        //TODO: Remove the hardcoded file names when you impelment the GUI. Throw this in a config file somewhere
-
-        //String fileDirectory = "C:\\Users\\Stephen\\Documents\\ComparisonTool\\";
-        String fileDirectory = PropertyManager.getDefaultFilePath();
-
-
-        //Import the varexps
-        //TODO: Remove the hardcoded file names when you impelment the GUI. Throw this in a config file somewhere
+        //Import the varexps.
+        //TODO: The following are the thread version of importFile...still a WIP
+        //new Thread(new ImportThreadExecutor(oldConfigFilePath.getText(),oldDB)).start();
+        //new Thread(new ImportThreadExecutor(newConfigFilePath.getText(),newDB)).start();
 
         importFile(oldConfigFilePath.getText(), oldDB);
         importFile(newConfigFilePath.getText(), newDB);
 
         //Import the MatrikonFactory file
-        //TODO: Remove the hardcoded file names when you impelment the GUI. Throw this in a config file somewhere
         importMatrikon(matrikonFilePath.getText(), matrikonDB);
 
         //Get the number of items from the DB. If they do not match, then throw a warning and end the program.
+        //TODO: Do something about matrikon.common as that doesn't exist, but the function stil uses it
         boolean equalLines = Result.compareLines(oldDB, newDB, matrikonDB);
         if (!equalLines) {
             System.out.println("Line not equal");
@@ -229,6 +255,7 @@ public class ComparisonSceneController implements Initializable {
         //Create a result Database and a  Result Table.
 
         //Wait some time in order to let mysql set up all the DB
+        //TODO: Replace this with a Future/Promise so you don't have to wait. Because that's bullshit.
         dbWait(FIVE_SECONDS);
         Result.executeTests(matrikonDB, newDB, oldDB);
 
@@ -238,13 +265,27 @@ public class ComparisonSceneController implements Initializable {
 
         //Drop the databases (becaues at this point, you're done)
         System.out.println("DBs deleted");
+    }
 
-        //Delete the DB
-        if (debugMode) {
-            deleteDB(oldDB);
-            deleteDB(newDB);
-            deleteDB(matrikonDB);
+    private static class ImportThreadExecutor implements Runnable {
+
+        String dbName;
+        String configFilePath;
+
+        public ImportThreadExecutor(String configfilePath, String dbName) {
+            this.dbName = dbName;
+            this.configFilePath = configfilePath;
         }
+
+        @Override
+        public void run() {
+            try {
+                importFile(configFilePath, dbName);
+            } catch (IOException e) {
+            } catch (SQLException e) {
+            }
+        }
+
     }
 
     @FXML

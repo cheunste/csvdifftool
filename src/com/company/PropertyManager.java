@@ -54,16 +54,6 @@ public class PropertyManager {
             Properties prop = new Properties();
             prop.loadFromXML(new FileInputStream(propertiesConfigPath));
 
-
-            String propFileName = "comparisonToolConfig.properties";
-            //inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
-
-            //if (inputStream != null) {
-            //    prop.load(inputStream);
-            //} else {
-            //    throw new FileNotFoundException("property file '" + propFileName + "' not found");
-            //}
-
             //Set to member variables
             user = prop.getProperty("user");
             databaseIP = prop.getProperty("databaseIP");
@@ -72,7 +62,6 @@ public class PropertyManager {
             //defaultFilePath = prop.getProperty("defaultFilePath");
 
             //Get the path on where the java app was executed
-            //defaultFilePath = System.getProperty("user.dir");
             defaultFilePath = prop.getProperty("defaultFilePath");
 
             //Get the Current Hostname. This is needed as you might not be querying data from localhost
