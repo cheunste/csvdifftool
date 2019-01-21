@@ -1,8 +1,6 @@
 package com.company;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.util.Properties;
 
 /*
@@ -21,6 +19,7 @@ public class PropertyManager {
     private static String defaultFileName;
     private static String defaultFilePath;
     private static String currentMachine;
+    private static String propertiesFileName = "properties.xml";
 
     InputStream inputStream;
 
@@ -46,17 +45,24 @@ public class PropertyManager {
     }
 
     public void getPropertyValues() throws IOException {
+        String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+        System.out.println(rootPath);
+        String propertiesConfigPath = rootPath + propertiesFileName;
         try {
 
+            //Load from XML. If it isn't available, create it I guess"
             Properties prop = new Properties();
-            String propFileName = "comparisonToolConfig.properties";
-            inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
+            prop.loadFromXML(new FileInputStream(propertiesConfigPath));
 
-            if (inputStream != null) {
-                prop.load(inputStream);
-            } else {
-                throw new FileNotFoundException("property file '" + propFileName + "' not found");
-            }
+
+            String propFileName = "comparisonToolConfig.properties";
+            //inputStream = getClass().getClassLoader().getResourceAsStream(propFileName);
+
+            //if (inputStream != null) {
+            //    prop.load(inputStream);
+            //} else {
+            //    throw new FileNotFoundException("property file '" + propFileName + "' not found");
+            //}
 
             //Set to member variables
             user = prop.getProperty("user");
@@ -73,10 +79,42 @@ public class PropertyManager {
             java.net.InetAddress localMachine = java.net.InetAddress.getLocalHost();
             currentMachine = localMachine.toString();
 
-        } catch (Exception e) {
+        }
+        //If the properties file doesn't exist, then create it
+        catch (Exception e) {
             System.out.println("Exception: " + e);
-        } finally {
-            inputStream.close();
+            createPropertiesXML(rootPath);
+
         }
     }
+
+    //Create a XML. SHould only be used if XML doesn't exist.
+    // While you're at it, set the variables
+    private void createPropertiesXML(String rootPath) {
+        try {
+            Properties props = new Properties();
+
+            props.setProperty("user", "production");
+            props.setProperty("databaseIP", "localhost");
+            props.setProperty("password", "ZAQ!xsw2CDE#");
+            props.setProperty("defaultFileName", "output.csv");
+            // save the CSV file to the same place where the JAR is executed
+            props.setProperty("defaultFilePath", rootPath);
+
+            //Where to store
+            OutputStream os = new FileOutputStream(rootPath + propertiesFileName);
+
+            //Store the properties detail into a pre-defiend XML file
+            props.storeToXML(os, "Varexp Comparison Properties", "UTF-8");
+            System.out.println("Done");
+
+        } catch (Exception e) {
+            System.out.println(e);
+
+        }
+
+
+    }
+
+
 }
