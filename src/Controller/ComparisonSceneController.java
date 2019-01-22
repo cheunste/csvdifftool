@@ -193,6 +193,10 @@ public class ComparisonSceneController implements Initializable {
 
     public void compare() throws IOException, SQLException {
 
+        //Fetch fields from the config file
+        PropertyManager pm = new PropertyManager();
+        pm.getPropertyValues();
+
 
         //Debug Mode. In this mode, everything important should be logged but more importantly, the DB should not be deleted.
         //TODO: When a GUI is created, create a checkbox that allows user to select Debug mode
@@ -212,6 +216,7 @@ public class ComparisonSceneController implements Initializable {
 
 
         //Result.exportResult();
+        //System.out.println("derp");
 
         //Delete the DBs beforehand just in case. They should be deleted after everything is done, but might not
         //due to debug mode
@@ -330,9 +335,9 @@ public class ComparisonSceneController implements Initializable {
             try {
                 compare();
             } catch (IOException e1) {
-                e1.printStackTrace();
+                //e1.printStackTrace();
             } catch (SQLException e1) {
-                e1.printStackTrace();
+                //e1.printStackTrace();
             }
 
         });

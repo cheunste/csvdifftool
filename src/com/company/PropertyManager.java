@@ -45,7 +45,8 @@ public class PropertyManager {
     }
 
     public void getPropertyValues() throws IOException {
-        String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+        //String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
+        String rootPath = new File(".").getCanonicalPath() + "\\";
         System.out.println(rootPath);
         String propertiesConfigPath = rootPath + propertiesFileName;
         try {
@@ -90,7 +91,7 @@ public class PropertyManager {
             // save the CSV file to the same place where the JAR is executed
             props.setProperty("defaultFilePath", rootPath);
 
-            //Where to store
+            //Where to store the properties file
             OutputStream os = new FileOutputStream(rootPath + propertiesFileName);
 
             //Store the properties detail into a pre-defiend XML file

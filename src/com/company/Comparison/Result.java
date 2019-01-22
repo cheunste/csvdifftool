@@ -152,7 +152,7 @@ public class Result {
 
         //Query to output content from the DB
         //TODO: Change the otufile in sql to the config file
-        String fullPath = fileLocation + fileName.replace("/", "////");
+        String fullPath = (fileLocation + fileName).replace("\\", "\\\\");
         //"into outfile 'C:\\\\Users\\\\Stephen\\\\Documents\\\\ComparisonTool\\\\" + fileName + "'\n" +
         String saveToFile = "select \"Tag Name\",\"Tag Name Test\", \"Description Test\", \"Digitals Test\", \"Units Test\",\"Analogs Minimum Ratio Test\",\"Analogs Maximum Ratio Test\",\"Type Test\" ,\"OPC DNP3 Source Test\",\"Commandable Range Test\",\n" +
                 "\t\"Internal Type Check Test\",\"Producer Test\",\"Comment\"\n" +
