@@ -4,11 +4,12 @@ import com.company.PropertyManager;
 import com.company.matrikon.MatrikonVariable;
 import com.company.pcvue.fields.VarexpFactory;
 import com.company.pcvue.fields.VarexpVariable;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
-
 
 /**
  * Created by Stephen on 4/20/2018.
@@ -16,6 +17,10 @@ import java.util.List;
  * This class is responsible for connecting to mySQL
  */
 public class dbConnector {
+
+    //Log
+    static final Logger dbConnectionLogger = LogManager.getLogger(dbConnector.class.getName());
+
     private Connection connect = null;
     private Statement statement = null;
     private PreparedStatement preparedStatement = null;
@@ -57,6 +62,7 @@ public class dbConnector {
             return resultSetArray;
 
         } catch (Exception e) {
+
             e.printStackTrace();
             return null;
         } finally {
@@ -103,6 +109,7 @@ public class dbConnector {
 
         } catch (Exception e) {
             e.printStackTrace();
+            dbConnectionLogger.error("Error making connection to database " + databaseName);
             //In the case where you get an error opening, this might mean the database does not exist, In this case
             //it will build you a new DATABAES instead
 
@@ -117,6 +124,7 @@ public class dbConnector {
                     .getConnection("jdbc:mysql://localhost/", PropertyManager.getUser(), PropertyManager.getPassword());
 
         } catch (Exception e) {
+            dbConnectionLogger.error("Error in making a new Connection. Error: " + e);
             e.printStackTrace();
         }
         return this.connect;
@@ -126,7 +134,6 @@ public class dbConnector {
         try {
             this.statement = connection.createStatement();
         } catch (Exception e) {
-
         }
     }
 
@@ -134,6 +141,7 @@ public class dbConnector {
         try {
             this.statement = connection.createStatement();
         } catch (SQLException e) {
+            dbConnectionLogger.error("Error in getting statement from DB. Error: " + e);
             e.printStackTrace();
         }
         return this.statement;
@@ -195,6 +203,7 @@ public class dbConnector {
             String resultString = writeResultSet(rs);
             return resultString;
         } catch (Exception e) {
+            dbConnectionLogger.error("Exception with sqlQuery. Error" + e);
             e.printStackTrace();
             return "";
         } finally {
@@ -212,6 +221,7 @@ public class dbConnector {
 
 
         } catch (Exception e) {
+            dbConnectionLogger.error("Exception with sqlQuery. Error" + e);
             e.printStackTrace();
         } finally {
             close(connect);
@@ -228,6 +238,7 @@ public class dbConnector {
             String numVarexpVariable = rs.getString(1);
             return numVarexpVariable;
         } catch (Exception e) {
+            dbConnectionLogger.error("Exception with fetching Table Size. Error" + e);
             e.printStackTrace();
 
         } finally {
@@ -249,6 +260,7 @@ public class dbConnector {
                 }
             }
         } catch (SQLException e1) {
+            dbConnectionLogger.error("Exception with verifying DB's existance. Please panic");
         } finally {
             close();
         }
@@ -274,6 +286,8 @@ public class dbConnector {
             return listOfDatabase;
 
         } catch (Exception e) {
+
+            dbConnectionLogger.error("Exception with showing Database. Error: " + e);
             e.printStackTrace();
             return null;
         } finally {
@@ -298,9 +312,12 @@ public class dbConnector {
 
         } catch (SQLException se) {
             //Handle errors for JDBC
+            dbConnectionLogger.error("SQL Exception when attempting to create Matrikon DB." +
+                    " Error: " + se);
             se.printStackTrace();
         } catch (Exception e) {
             //Handle errors for Class.forName
+            dbConnectionLogger.error("Exception with creating MatrikonDB. Error: " + e);
             e.printStackTrace();
         } finally {
             //finally block used to close resources
@@ -340,9 +357,11 @@ public class dbConnector {
             }
         } catch (SQLException se) {
             //Handle errors for JDBC
+            dbConnectionLogger.error("SQL Exception with creating VarexpDB. Error: " + se);
             se.printStackTrace();
         } catch (Exception e) {
             //Handle errors for Class.forName
+            dbConnectionLogger.error("Error with creating VarexpDB. Error: " + e);
             e.printStackTrace();
         } finally {
             //finally block used to close resources
@@ -375,9 +394,12 @@ public class dbConnector {
 
         } catch (SQLException se) {
             //Handle errors for JDBC
+            dbConnectionLogger.error("SQL Error with creating DB " + databaseName +
+                    ". Error: " + se);
             se.printStackTrace();
         } catch (Exception e) {
             //Handle errors for Class.forName
+            dbConnectionLogger.error("Error with creating DB " + databaseName + ". Error: " + e);
             e.printStackTrace();
         } finally {
             //finally block used to close resources
@@ -405,9 +427,11 @@ public class dbConnector {
             statement.executeUpdate(deleteStatement);
         } catch (SQLException se) {
             //Handle errors for JDBC
+            dbConnectionLogger.error("SQL Error with deleting DB " + DBName + ". Error: " + se);
             se.printStackTrace();
         } catch (Exception e) {
             //Handle errors for Class.forName
+            dbConnectionLogger.error("Error with deleting DB " + DBName + ". Error: " + e);
             e.printStackTrace();
         } finally {
             //finally block used to close resources

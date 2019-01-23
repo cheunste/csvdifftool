@@ -11,6 +11,8 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 import java.io.IOException;
@@ -23,8 +25,9 @@ import java.util.concurrent.Future;
 
 public class ComparisonSceneController implements Initializable {
 
-    private static int FIVE_SECONDS = 5000;
+    static final Logger logger = LogManager.getLogger(ComparisonSceneController.class.getName());
 
+    private static int FIVE_SECONDS = 5000;
     Stage currentWindow;
     //Main Buttons on GUI
     @FXML
@@ -113,6 +116,7 @@ public class ComparisonSceneController implements Initializable {
     }
 
     private static void deleteDB(String databaseName) {
+        logger.info("Attempting to delete DB " + databaseName);
         dbConnector db = new dbConnector();
         db.deleteDB(databaseName);
         db.close();
@@ -162,9 +166,11 @@ public class ComparisonSceneController implements Initializable {
         //If the file exists, check if it is open. If it is  open, then
         // inform user to close it. Program will not continue
         if (fileExists) {
+            logger.info("File " + fileName + " Exists");
             boolean fileOpen = Result.resultFileOpen(filePath, fileName);
             if (fileOpen) {
-                System.out.println("File is open. Please close to continue");
+                //TODO: Add a screen to tell user to close the file
+                logger.info("File is open. Please close to continue. Program will now shut exit");
                 return false;
             }
             //If file isn't open, then delete it
@@ -175,18 +181,19 @@ public class ComparisonSceneController implements Initializable {
 
     private void compareBtnVisibilityEnable() {
 
-        System.out.println(oldConfigFilePath.getText() + " null");
-        System.out.println(newConfigFilePath.getText() + " null");
-        System.out.println(matrikonFilePath.getText());
+        logger.info("Old config File Path" + oldConfigFilePath.getText());
+        logger.info("Old config File Path" + newConfigFilePath.getText());
+        logger.info("Old config File Path" + matrikonFilePath.getText());
+
 
         if ((oldConfigFilePath.getText() != null &&
                 newConfigFilePath.getText() != null &&
                 matrikonFilePath.getText() != null)
         ) {
-            System.out.println("Compare Btn: " + compareBtn.isDisable());
+            logger.info("Compare Btn: " + compareBtn.isDisable());
             compareBtn.setDisable(false);
         } else {
-            System.out.println("Compare Btn: " + compareBtn.isDisable());
+            logger.info("Compare Btn: " + compareBtn.isDisable());
             compareBtn.setDisable(true);
         }
     }
@@ -199,16 +206,21 @@ public class ComparisonSceneController implements Initializable {
 
 
         //Debug Mode. In this mode, everything important should be logged but more importantly, the DB should not be deleted.
-        //TODO: When a GUI is created, create a checkbox that allows user to select Debug mode
         boolean debugMode = debugModeBtn.isSelected();
+        if (debugMode) {
+            logger.debug("Debug Mode seelcted");
+        }
 
+        //These are names of the databases that will be created. Since these are going to be dleted
+        //I really do not care if I hardcode them
         String oldDB = "oldVarexpDB";
         String newDB = "newVarexpDB";
         String matrikonDB = "matrikonDB";
 
+        //Check to see if file is open. If it is, exit the program immediately
         if (!fileCheck()) {
             //TODO: Replace this with a popup for the user
-            System.out.println("Program will not run as the " +
+            logger.info("Program will not run as the " +
                     PropertyManager.getDefaultFilePath() + PropertyManager.getDefaultFileName() +
                     " is still open");
             return;
@@ -220,6 +232,7 @@ public class ComparisonSceneController implements Initializable {
 
         //Delete the DBs beforehand just in case. They should be deleted after everything is done, but might not
         //due to debug mode
+        logger.info("Attempting to delete the three databases");
         deleteDB(oldDB);
         deleteDB(newDB);
         deleteDB(matrikonDB);
@@ -229,29 +242,37 @@ public class ComparisonSceneController implements Initializable {
         Result.createResultDB();
 
         //Import the Old Varexp and New Varexp into a newVarexpDB and oldVarexpDB and create a finalVarexpDB
+        logger.info("Creating the DB for the new and old config");
         createVarexpDB(oldDB);
         createVarexpDB(newDB);
 
 
+        logger.info("Creating the DB for the matrikon config");
         createMatrikonDB(matrikonDB);
-        System.out.println("DBs created");
+
+        logger.info("DBs created");
 
         //Import the varexps.
         //TODO: The following are the thread version of importFile...still a WIP
         //new Thread(new ImportThreadExecutor(oldConfigFilePath.getText(),oldDB)).start();
         //new Thread(new ImportThreadExecutor(newConfigFilePath.getText(),newDB)).start();
 
+        logger.info("Importing the old config file to its DB ");
         importFile(oldConfigFilePath.getText(), oldDB);
+
+        logger.info("Importing the new config file to its DB");
         importFile(newConfigFilePath.getText(), newDB);
 
         //Import the MatrikonFactory file
+        logger.info("Importing the matrikon file to the DB");
         importMatrikon(matrikonFilePath.getText(), matrikonDB);
 
         //Get the number of items from the DB. If they do not match, then throw a warning and end the program.
         //TODO: Do something about matrikon.common as that doesn't exist, but the function stil uses it
+        //TODO: You need to have a pop up to verify user if they want to continue or not
         boolean equalLines = Result.compareLines(oldDB, newDB, matrikonDB);
         if (!equalLines) {
-            System.out.println("Line not equal");
+            logger.info("Lines between the three files are not equal");
             //End the program
         } else {
 
@@ -266,10 +287,88 @@ public class ComparisonSceneController implements Initializable {
 
         //Export the database.
         Result.exportResult();
-        System.out.println(PropertyManager.getDefaultFileName() + " created");
+        logger.info(PropertyManager.getDefaultFileName() + " created");
 
         //Drop the databases (becaues at this point, you're done)
-        System.out.println("DBs deleted");
+        logger.info("DBs deleted");
+        if (!debugMode) {
+            logger.debug("Debug Mode is not selected. DBs will be deleted");
+            deleteDB(oldDB);
+            deleteDB(newDB);
+            deleteDB(matrikonDB);
+        } else {
+            logger.debug("Debug Mode is enabled. DBs will not be deleted");
+        }
+    }
+
+    @FXML
+    public void initialize(URL location, ResourceBundle resources) {
+
+        //Button mapping
+
+        //The following three buttons allow user to select the old,new and matrikon config respectively
+        oldConfigImportBtn.setOnAction((ActionEvent e) -> {
+            try {
+
+                logger.info("oldConfig Btn clicked");
+                oldConfigFilePath.setText(getFilePath(currentWindow));
+            } catch (Exception x) {
+
+            }
+            compareBtnVisibilityEnable();
+        });
+        newConfigImportBtn.setOnAction((ActionEvent e) -> {
+            try {
+
+                logger.info("newConfig Btn clicked");
+                newConfigFilePath.setText(getFilePath(currentWindow));
+            } catch (Exception x) {
+
+            }
+            compareBtnVisibilityEnable();
+        });
+        matrikonConfigImportBtn.setOnAction((ActionEvent e) -> {
+            try {
+
+                logger.info("MatrikonConfig Btn clicked");
+                matrikonFilePath.setText(getFilePath(currentWindow));
+
+            } catch (Exception x) {
+
+            }
+            compareBtnVisibilityEnable();
+        });
+
+        //This  button fires the main function
+        compareBtn.setOnAction((ActionEvent e) -> {
+            try {
+                logger.info("Compare Btn clicked");
+                compare();
+            } catch (IOException ioe) {
+                logger.info("Error occured when comparing. Error: " + ioe);
+                ioe.printStackTrace();
+            } catch (SQLException sqe) {
+                logger.info("SQL Error occured when comparing. Error: " + sqe);
+                sqe.printStackTrace();
+            }
+
+        });
+    }
+
+    private boolean getDebugMode() {
+        return debugModeBtn.isSelected();
+    }
+
+    //This is used to keep track of prvevious stages so I can close them later
+    public void setCurrentWindow(Stage window) {
+        this.currentWindow = window;
+    }
+
+    public String getFilePath(Stage stage) {
+        FileChooser fileChooser = new FileChooser();
+        fileChooser.setTitle("Open Config");
+        File configFile = fileChooser.showOpenDialog(stage);
+        return configFile.getAbsolutePath();
     }
 
     private static class ImportThreadExecutor implements Runnable {
@@ -291,72 +390,6 @@ public class ComparisonSceneController implements Initializable {
             }
         }
 
-    }
-
-    @FXML
-    public void initialize(URL location, ResourceBundle resources) {
-
-        //Button mapping
-
-        //The following three buttons allow user to select the old,new and matrikon config respectively
-        oldConfigImportBtn.setOnAction((ActionEvent e) -> {
-            try {
-
-                System.out.println("oldConfig Btn clicked");
-                oldConfigFilePath.setText(getFilePath(currentWindow));
-            } catch (Exception x) {
-
-            }
-            compareBtnVisibilityEnable();
-        });
-        newConfigImportBtn.setOnAction((ActionEvent e) -> {
-            try {
-
-                System.out.println("newConfig Btn clicked");
-                newConfigFilePath.setText(getFilePath(currentWindow));
-            } catch (Exception x) {
-
-            }
-            compareBtnVisibilityEnable();
-        });
-        matrikonConfigImportBtn.setOnAction((ActionEvent e) -> {
-            try {
-                System.out.println("MatrikonConfig Btn clicked");
-                matrikonFilePath.setText(getFilePath(currentWindow));
-
-            } catch (Exception x) {
-
-            }
-            compareBtnVisibilityEnable();
-        });
-
-        //This  button fires the main function
-        compareBtn.setOnAction((ActionEvent e) -> {
-            try {
-                compare();
-            } catch (IOException e1) {
-                //e1.printStackTrace();
-            } catch (SQLException e1) {
-                //e1.printStackTrace();
-            }
-
-        });
-    }
-
-    private boolean getDebugMode() {
-        return debugModeBtn.isSelected();
-    }
-
-    //This is used to keep track of prvevious stages so I can close them later
-    public void setCurrentWindow(Stage window) {
-        this.currentWindow = window;
-    }
-
-    public String getFilePath(Stage stage) {
-        FileChooser fileChooser = new FileChooser();
-        fileChooser.setTitle("Open Config");
-        File configFile = fileChooser.showOpenDialog(stage);
-        return configFile.getAbsolutePath();
     }
 
 
