@@ -2,6 +2,8 @@ package com.company.Comparison;
 
 import com.company.Database.dbConnector;
 import com.company.PropertyManager;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.io.File;
 
@@ -17,6 +19,9 @@ public class Result {
     private static String resultTable = "resultTable";
     private static String resultDatabase = "resultOutput";
 
+    //Log
+    private static final Logger log = LogManager.getLogger(Result.class);
+
     //Delete and recreate the DB and table
     public Result() {
         dbConnector db = new dbConnector();
@@ -26,6 +31,7 @@ public class Result {
 
         //Create a resultTable database and table
         try {
+            log.info("Attempting to insert header to the " + PropertyManager.getDefaultFileName());
             db.createDatabase(resultDatabase);
             db.sqlExecute(resultDatabase,
 
@@ -47,6 +53,8 @@ public class Result {
                             "  PRIMARY KEY (`id`)\n" +
                             ") ENGINE=InnoDB AUTO_INCREMENT=1022 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci");
         } catch (Exception e) {
+            log.error("Warning: Cannot create headers to " + PropertyManager.getDefaultFileName() +
+                    "error: " + e);
 
         } finally {
             db.close();
@@ -66,6 +74,7 @@ public class Result {
 
         //Create a resultTable database and table
         try {
+            log.info("Creating Result Database");
             db.createDatabase(resultDatabase);
             db.sqlExecute(resultDatabase,
 
@@ -87,6 +96,7 @@ public class Result {
                             "  PRIMARY KEY (`id`)\n" +
                             ") ENGINE=InnoDB AUTO_INCREMENT=1022 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci");
         } catch (Exception e) {
+            log.error("Failed to create the Result Database. Error: " + e);
 
         } finally {
             db.close();
@@ -153,6 +163,8 @@ public class Result {
         //Query to output content from the DB
         //TODO: Change the otufile in sql to the config file
         String fullPath = (fileLocation + fileName).replace("\\", "\\\\");
+        log.info("Exporting the Result Table to " + PropertyManager.getDefaultFileName());
+
         //"into outfile 'C:\\\\Users\\\\Stephen\\\\Documents\\\\ComparisonTool\\\\" + fileName + "'\n" +
         String saveToFile = "select \"Tag Name\",\"Tag Name Test\", \"Description Test\", \"Digitals Test\", \"Units Test\",\"Analogs Minimum Ratio Test\",\"Analogs Maximum Ratio Test\",\"Type Test\" ,\"OPC DNP3 Source Test\",\"Commandable Range Test\",\n" +
                 "\t\"Internal Type Check Test\",\"Producer Test\",\"Comment\"\n" +
@@ -168,11 +180,16 @@ public class Result {
                 "from resultoutput.resulttable\n" +
                 ");";
 
+        log.debug("Export query: " + saveToFile);
         dbConnector dbConnector = new dbConnector();
 
         //call query to save to file. Note that there isn't any file checks here
         //Because that's already handled in the ComparionsScneeController's fileCheck()
-        dbConnector.sqlExecute("", saveToFile);
+        try {
+            dbConnector.sqlExecute("", saveToFile);
+        } catch (Exception e) {
+            log.error("Not able to export to " + PropertyManager.getDefaultFileName() + ". error: " + e);
+        }
 
     }
 
@@ -182,10 +199,12 @@ public class Result {
     }
 
     public static boolean deleteResultFile(String filePath, String fileName) {
+        log.info("Attempting to delete  " + fileName);
         File file = getFile(filePath, fileName);
         boolean fileDeleted = file.delete();
-        //TODO: log this instead
-        System.out.println(fileDeleted ? "File has been deleted" : "File couldn't be dleeted");
+        //System.out.println(fileDeleted ? "File has been deleted" : "File couldn't be dleeted");
+        String deleteMessage = (fileDeleted ? "File has been deleted" : "File couldn't be dleeted");
+        log.info(deleteMessage);
         return fileDeleted;
     }
 
@@ -193,8 +212,9 @@ public class Result {
     public static boolean resultFileOpen(String filePath, String fileName) {
         File file = getFile(filePath, fileName);
         boolean fileIsLocked = !file.renameTo(file);
-        //TODO: log this instead
-        System.out.println(fileIsLocked ? "File is Locked and not usable" : "File usable");
+        //System.out.println(fileIsLocked ? "File is Locked and not usable" : "File usable");
+        String fileOpenMessage = (fileIsLocked ? "File is Locked and not usable" : "File usable");
+        log.info(fileOpenMessage);
         //Remember to log
         return fileIsLocked;
     }
@@ -202,6 +222,7 @@ public class Result {
 
     //Returns a file object needed for resultFile
     private static File getFile(String filePath, String fileName) {
+        log.debug("In getFile. Returning " + filePath + fileName);
         return new File(filePath + fileName);
     }
 
