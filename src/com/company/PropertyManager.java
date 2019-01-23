@@ -1,5 +1,8 @@
 package com.company;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import java.io.*;
 import java.util.Properties;
 
@@ -12,6 +15,10 @@ All it does is return the default parameters to other classes that needs them
 This Manager class really should be executed first before any other classes
  */
 public class PropertyManager {
+
+    //Log
+    private static final Logger log = LogManager.getLogger(PropertyManager.class);
+
     //Member variables. These are static so I don't need to freaking instaneate an object before using. That sounds stupid
     private static String user;
     private static String password;
@@ -51,6 +58,7 @@ public class PropertyManager {
         String propertiesConfigPath = rootPath + propertiesFileName;
         try {
 
+            log.info("Loading default settings from configuration.xml");
             //Load from XML. If it isn't available, create it I guess"
             Properties prop = new Properties();
             prop.loadFromXML(new FileInputStream(propertiesConfigPath));
@@ -73,7 +81,9 @@ public class PropertyManager {
         //If the properties file doesn't exist, then create it
         catch (Exception e) {
             System.out.println("Exception: " + e);
+            log.info("No Configuration XML found, creating one now");
             createPropertiesXML(rootPath);
+            log.info("Finsiehd creating default configuration");
 
         }
     }
@@ -99,7 +109,10 @@ public class PropertyManager {
             System.out.println("Done");
 
         } catch (Exception e) {
+            log.error("Error. Something unusual happened when creating the default property. " +
+                    "See error: ", e);
             System.out.println(e);
+
 
         }
 

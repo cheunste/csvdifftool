@@ -1,6 +1,8 @@
 package com.company.Comparison;
 
 import com.company.Database.dbConnector;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -699,6 +701,7 @@ public class ComparisonTest {
             "    result.tagName = ProducerTable.tagName;";
 
 
+    private static final Logger log = LogManager.getLogger(ComparisonTest.class);
     public ComparisonTest(String matrikonDB, String newConfigDB, String oldConfigDB, String resultDB) {
 
         ComparisonTest.matrikonDB = matrikonDB;
@@ -714,6 +717,7 @@ public class ComparisonTest {
         databaseList.add(resultDB);
 
         String databaseName = Result.resultDatabaseName();
+
 
         testList.add(initialInsert);
         testList.add(tagMatchTest);
@@ -735,7 +739,9 @@ public class ComparisonTest {
     public static void executeTest() {
         dbConnector dbConnector = new dbConnector();
         for (String test : testList) {
+            log.info("Executing test: " + test);
             dbConnector.sqlExecute(resultDB, test);
+            log.info("Finished test:" + test);
         }
     }
 
