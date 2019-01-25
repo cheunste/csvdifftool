@@ -228,6 +228,25 @@ public class dbConnector {
         }
     }
 
+    public String getTableSizeMatrikon(String databaseName) {
+        openConnection(databaseName);
+        setStatement(connect);
+        String sqlCmd = "SELECT COUNT(matrikon.matrikon_id) FROM matrikondb.matrikon;";
+        try {
+            ResultSet rs = statement.executeQuery(sqlCmd);
+            rs.next();
+            String numVarexpVariable = rs.getString(1);
+            return numVarexpVariable;
+        } catch (Exception e) {
+            dbConnectionLogger.error("Exception with fetching Table Size for Matrikon table. Error" + e);
+            e.printStackTrace();
+
+        } finally {
+            close();
+        }
+
+        return "0";
+    }
     public String getTableSize(String databaseName) {
         openConnection(databaseName);
         setStatement(connect);

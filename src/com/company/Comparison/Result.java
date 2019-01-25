@@ -139,7 +139,7 @@ public class Result {
 
         int oldDBSize = Integer.parseInt(connector.getTableSize(oldDB));
         int newDBSize = Integer.parseInt(connector.getTableSize(newDB));
-        int matrikonDBSize = Integer.parseInt(connector.getTableSize(matrikonDB));
+        int matrikonDBSize = Integer.parseInt(connector.getTableSizeMatrikon(matrikonDB));
 
         return (oldDBSize == newDBSize && matrikonDBSize == newDBSize);
     }

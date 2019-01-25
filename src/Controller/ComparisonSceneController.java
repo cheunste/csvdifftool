@@ -305,9 +305,11 @@ public class ComparisonSceneController implements Initializable {
         logger.info("DBs deleted");
         if (!debugMode) {
             logger.debug("Debug Mode is not selected. DBs will be deleted");
-            deleteDB(oldDB);
-            deleteDB(newDB);
-            deleteDB(matrikonDB);
+            if (databaseExists(oldDB, newDB, matrikonDB)) {
+                deleteDB(oldDB);
+                deleteDB(newDB);
+                deleteDB(matrikonDB);
+            }
         } else {
             logger.debug("Debug Mode is enabled. DBs will not be deleted");
         }
@@ -381,6 +383,12 @@ public class ComparisonSceneController implements Initializable {
         fileChooser.setTitle("Open Config");
         File configFile = fileChooser.showOpenDialog(stage);
         return configFile.getAbsolutePath();
+    }
+
+    public boolean databaseExists(String oldDB, String newDB, String matrikonDB) {
+
+        dbConnector db = new dbConnector();
+        return (db.verifyDBExists(oldDB) && db.verifyDBExists(newDB) && db.verifyDBExists(matrikonDB));
     }
 
     private static class ImportThreadExecutor implements Runnable {
