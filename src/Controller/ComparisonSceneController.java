@@ -239,6 +239,7 @@ public class ComparisonSceneController implements Initializable {
 
         //Create a reference to Result class. Result class is used for output. Instaniating it will create
         // the DB used to store results
+        Result.deleteResultDB();
         Result.createResultDB();
 
         //Import the Old Varexp and New Varexp into a newVarexpDB and oldVarexpDB and create a finalVarexpDB

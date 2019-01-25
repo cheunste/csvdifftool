@@ -743,6 +743,7 @@ public class ComparisonTest {
             dbConnector.sqlExecute(resultDB, test);
             log.info("Finished test:" + test);
         }
+        dbConnector.close();
     }
 
     /*

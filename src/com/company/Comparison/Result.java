@@ -226,4 +226,9 @@ public class Result {
         return new File(filePath + fileName);
     }
 
+    public static void deleteResultDB() {
+        dbConnector db = new dbConnector();
+        db.deleteDB(resultDatabase);
+    }
+
 }
