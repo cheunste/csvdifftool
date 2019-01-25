@@ -233,13 +233,24 @@ public class ComparisonSceneController implements Initializable {
         //Delete the DBs beforehand just in case. They should be deleted after everything is done, but might not
         //due to debug mode
         logger.info("Attempting to delete the three databases");
-        deleteDB(oldDB);
-        deleteDB(newDB);
-        deleteDB(matrikonDB);
+        try {
+            deleteDB(oldDB);
+            deleteDB(newDB);
+            deleteDB(matrikonDB);
+            logger.info("oldconfig DB, newconfig DB and matrikon DB Deleted");
+        } catch (Exception e) {
+            logger.info("Database cannot be deleted because it doesn't exist");
+        }
 
         //Create a reference to Result class. Result class is used for output. Instaniating it will create
         // the DB used to store results
-        Result.deleteResultDB();
+        try {
+            Result.deleteResultDB();
+            logger.info("Result DB Deleted");
+        } catch (Exception e) {
+            logger.info("Result DB already deleted");
+
+        }
         Result.createResultDB();
 
         //Import the Old Varexp and New Varexp into a newVarexpDB and oldVarexpDB and create a finalVarexpDB
