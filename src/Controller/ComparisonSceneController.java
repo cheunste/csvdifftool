@@ -9,6 +9,8 @@ import com.jfoenix.controls.JFXTextField;
 import javafx.event.ActionEvent;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
+import javafx.scene.control.Alert;
+import javafx.scene.control.ButtonType;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
@@ -18,6 +20,7 @@ import java.io.File;
 import java.io.IOException;
 import java.net.URL;
 import java.sql.SQLException;
+import java.util.Optional;
 import java.util.ResourceBundle;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -169,7 +172,6 @@ public class ComparisonSceneController implements Initializable {
             logger.info("File " + fileName + " Exists");
             boolean fileOpen = Result.resultFileOpen(filePath, fileName);
             if (fileOpen) {
-                //TODO: Add a screen to tell user to close the file
                 logger.info("File is open. Please close to continue. Program will now shut exit");
                 return false;
             }
@@ -204,7 +206,6 @@ public class ComparisonSceneController implements Initializable {
         PropertyManager pm = new PropertyManager();
         pm.getPropertyValues();
 
-
         //Debug Mode. In this mode, everything important should be logged but more importantly, the DB should not be deleted.
         boolean debugMode = debugModeBtn.isSelected();
         if (debugMode) {
@@ -223,6 +224,14 @@ public class ComparisonSceneController implements Initializable {
             logger.info("Program will not run as the " +
                     PropertyManager.getDefaultFilePath() + PropertyManager.getDefaultFileName() +
                     " is still open");
+
+            //ERROR Alert
+            Alert openFileErrorAlert = new Alert(Alert.AlertType.ERROR);
+            openFileErrorAlert.setTitle("Open File Error");
+            openFileErrorAlert.setHeaderText("File Opened Error");
+            openFileErrorAlert.setContentText("The output file: " + PropertyManager.getDefaultFileName() + " is still open." +
+                    "Please close the file and try again");
+            openFileErrorAlert.showAndWait();
             return;
         }
 
@@ -280,13 +289,23 @@ public class ComparisonSceneController implements Initializable {
         importMatrikon(matrikonFilePath.getText(), matrikonDB);
 
         //Get the number of items from the DB. If they do not match, then throw a warning and end the program.
-        //TODO: Do something about matrikon.common as that doesn't exist, but the function stil uses it
         //TODO: You need to have a pop up to verify user if they want to continue or not
         boolean equalLines = Result.compareLines(oldDB, newDB, matrikonDB);
         if (!equalLines) {
+
+            Alert equalLinesAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            equalLinesAlert.setTitle("Confirmation");
+            equalLinesAlert.setHeaderText("Lines between the three config files are not equal.");
+            equalLinesAlert.setContentText("Do you want to continue using the comparison tool?");
             logger.info("Lines between the three files are not equal");
-            //End the program
-        } else {
+
+            Optional<ButtonType> equalLinesAlertResult = equalLinesAlert.showAndWait();
+            if (equalLinesAlertResult.get() == ButtonType.OK) {
+                logger.info("Lines are not equal. Continue using the tool");
+            } else {
+                logger.info("LInes are not equal. Cancelling the tool");
+                return;
+            }
 
         }
 
