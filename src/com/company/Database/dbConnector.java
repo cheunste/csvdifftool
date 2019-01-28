@@ -101,11 +101,10 @@ public class dbConnector {
     public Connection openConnection(String databaseName) {
         try {
 
-            //TODO: Put the getConnection information into a config file
             Class.forName("com.mysql.jdbc.Driver");
+            dbConnectionLogger.info("Opening connection to: " + PropertyManager.getDatabaseIP());
             this.connect = DriverManager
-                    //.getConnection("jdbc:mysql://localhost/" + databaseName + "?" + "user=production&password=ZAQ!xsw2CDE#&useSSL=false");
-                    .getConnection("jdbc:mysql://localhost/" + databaseName, PropertyManager.getUser(), PropertyManager.getPassword());
+                    .getConnection("jdbc:mysql://" + PropertyManager.getDatabaseIP() + "/" + databaseName, PropertyManager.getUser(), PropertyManager.getPassword());
 
         } catch (Exception e) {
             e.printStackTrace();
@@ -120,8 +119,9 @@ public class dbConnector {
     private Connection newConnection(String site) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
+            dbConnectionLogger.info("Making connection to: " + PropertyManager.getDatabaseIP());
             this.connect = DriverManager
-                    .getConnection("jdbc:mysql://localhost/", PropertyManager.getUser(), PropertyManager.getPassword());
+                    .getConnection("jdbc:mysql://" + PropertyManager.getDatabaseIP() + "/", PropertyManager.getUser(), PropertyManager.getPassword());
 
         } catch (Exception e) {
             dbConnectionLogger.error("Error in making a new Connection. Error: " + e);
