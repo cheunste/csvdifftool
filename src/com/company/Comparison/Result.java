@@ -151,9 +151,7 @@ public class Result {
      */
     public static void exportResult() {
 
-        //TODO: Change the outfile location to whatever is in the config file
         String fileName = PropertyManager.getDefaultFileName();
-        //String fileLocation= "C:\\Users\\Stephen\\Documents\\ComparisonTool";
         String fileLocation = PropertyManager.getDefaultFilePath();
 
         //Create a file
@@ -161,7 +159,6 @@ public class Result {
         File csvOutput = getFile(fileLocation, fileName);
 
         //Query to output content from the DB
-        //TODO: Change the otufile in sql to the config file
         String fullPath = (fileLocation + fileName).replace("\\", "\\\\");
         log.info("Exporting the Result Table to " + PropertyManager.getDefaultFileName());
 
