@@ -30,10 +30,6 @@ public class Main extends Application {
     @Override
     public void start(Stage primaryStage) throws Exception {
 
-        //Fetch fields from the config file
-        //PropertyManager pm = new PropertyManager();
-        //pm.getPropertyValues();
-
         //1) Declare a primary Stage (Everything will be on this)
         window = primaryStage;
 

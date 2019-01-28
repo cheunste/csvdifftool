@@ -7,6 +7,8 @@ import com.company.pcvue.fields.VarexpVariable;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
+import java.net.Socket;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -26,6 +28,8 @@ public class dbConnector {
     private PreparedStatement preparedStatement = null;
     private ResultSet resultSet = null;
     private ArrayList<ArrayList<String>> resultSetArray;
+
+    private static final int PORT = 3306;
 
     public dbConnector() {
     }
@@ -67,6 +71,25 @@ public class dbConnector {
             return null;
         } finally {
             close(this.connect);
+        }
+    }
+
+    /*
+    Function to check if the mysql server is alive
+     */
+    public static boolean serverAlive() {
+
+        try {
+
+            dbConnectionLogger.info("Attempting to connect to server: " + PropertyManager.getDatabaseIP());
+            Socket socket = new Socket(PropertyManager.getDatabaseIP(), PORT);
+            socket.close();
+            dbConnectionLogger.info("Connected to server");
+            return true;
+        } catch (IOException e) {
+            dbConnectionLogger.error("Cannot connect to the mysql server. Is the server alive?");
+        } finally {
+            return false;
         }
     }
 

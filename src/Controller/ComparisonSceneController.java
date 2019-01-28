@@ -202,6 +202,18 @@ public class ComparisonSceneController implements Initializable {
 
     public void compare() throws IOException, SQLException {
 
+        //Check if the mysql server is alive. If not, show a popup to user
+        if (dbConnector.serverAlive()) {
+            //Doesn't do anything if server is alive
+        } else {
+            Alert serverAlert = new Alert(Alert.AlertType.ERROR);
+            serverAlert.setTitle("Server Error");
+            serverAlert.setHeaderText("Server Connection Error");
+            serverAlert.setContentText("There was an issue in connection to " + PropertyManager.getDatabaseIP() + ". \nIs the server online?");
+            serverAlert.showAndWait();
+            return;
+        }
+
         //Fetch fields from the config file
         PropertyManager pm = new PropertyManager();
         pm.getPropertyValues();
