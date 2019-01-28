@@ -183,20 +183,25 @@ public class ComparisonSceneController implements Initializable {
 
     private void compareBtnVisibilityEnable() {
 
-        logger.info("Old config File Path" + oldConfigFilePath.getText());
-        logger.info("Old config File Path" + newConfigFilePath.getText());
-        logger.info("Old config File Path" + matrikonFilePath.getText());
+        String oldConfigPathText = oldConfigFilePath.getText();
+        String newConfigPathText = newConfigFilePath.getText();
+        String matrikonConfigText = matrikonFilePath.getText();
+
+        logger.info("Old config File Path" + oldConfigPathText);
+        logger.info("Old config File Path" + newConfigPathText);
+        logger.info("Old config File Path" + matrikonConfigText);
 
 
-        if ((oldConfigFilePath.getText() != null &&
-                newConfigFilePath.getText() != null &&
-                matrikonFilePath.getText() != null)
+        if (
+                (oldConfigPathText != null && oldConfigPathText.equals("")) &&
+                        (newConfigPathText != null && newConfigPathText.equals("")) &&
+                        (matrikonConfigText != null && matrikonConfigText.equals(""))
         ) {
-            logger.info("Compare Btn: " + compareBtn.isDisable());
             compareBtn.setDisable(false);
-        } else {
             logger.info("Compare Btn: " + compareBtn.isDisable());
+        } else {
             compareBtn.setDisable(true);
+            logger.info("Compare Btn: " + compareBtn.isDisable());
         }
     }
 
