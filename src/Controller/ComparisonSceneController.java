@@ -57,8 +57,6 @@ public class ComparisonSceneController implements Initializable {
     //Function to import the varexp file. Ask a user if they want to overwrite a DB first and then actually import it
     private static void importFile(String fileLocation, String databaseName) throws IOException, SQLException {
 
-        dbConnector dbc = new dbConnector();
-
         boolean dbExists = dbConnector.verifyDBExists(databaseName);
 
         if (dbExists) {
@@ -100,7 +98,7 @@ public class ComparisonSceneController implements Initializable {
 
         if (dbExists) {
             dbConnector.deleteDB(databaseName);
-            dbConnector.createVarexpDB(databaseName);
+            dbConnector.createMatrikonDB(databaseName);
         }
         matrikonHelper(fileLocation, databaseName);
     }

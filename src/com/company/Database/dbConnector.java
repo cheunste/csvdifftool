@@ -156,6 +156,7 @@ public class dbConnector {
 
     //This method creates a table specifically for the Matrikon tags
     public static void createMatrikonDB(String dbName) {
+        openConnection(dbName);
         String createDBStatement = "CREATE DATABASE " + dbName;
         MatrikonVariable matrikonVariable = new MatrikonVariable(dbName);
         String createTableStatement;
@@ -184,11 +185,14 @@ public class dbConnector {
                 if (statement != null)
                     connect.close();
             } catch (SQLException se) {
+                dbConnectionLogger.error("SQL Exception error: " + se);
+                se.printStackTrace();
             }// do nothing
             try {
                 if (connect != null)
                     connect.close();
             } catch (SQLException se) {
+                dbConnectionLogger.error("SQL Exception error: " + se);
                 se.printStackTrace();
             }//end finally try
         }//end try
@@ -343,6 +347,7 @@ public class dbConnector {
     }
 
     public static void deleteDB(String DBName) {
+        openConnection(DBName);
 
         String deleteStatement = "DROP DATABASE IF EXISTS " + DBName;
 

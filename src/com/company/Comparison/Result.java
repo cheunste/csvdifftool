@@ -219,6 +219,7 @@ public class Result {
     }
 
     public static void deleteResultDB() {
+
         dbConnector.deleteDB(resultDatabase);
     }
 }
