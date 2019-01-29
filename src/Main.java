@@ -40,7 +40,7 @@ public class Main extends Application {
         //Load the document
         //Parent root = FXMLLoader.load(getClass().getResource("View/DBSelector.fxml"));
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("View/ComparisonGUI.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("main/java/View/ComparisonGUI.fxml"));
         Parent root = loader.load();
         ComparisonSceneController comparisonSceneController = loader.getController();
         comparisonSceneController.setCurrentWindow(window);

@@ -8,7 +8,7 @@
 <StackPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
            minWidth="-Infinity" prefHeight="230.0" prefWidth="260.0" xmlns="http://javafx.com/javafx/8.0.171"
 >
-    <!--fx:controller="Controller.ExportSceneController">-->
+    <!--fx:controller="ExportSceneController">-->
     <stylesheets>
         <URL value="@CSS/defaultTheme.css"/>
     </stylesheets>
