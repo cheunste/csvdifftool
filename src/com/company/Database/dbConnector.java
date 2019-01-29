@@ -23,10 +23,10 @@ public class dbConnector {
     //Log
     static final Logger dbConnectionLogger = LogManager.getLogger(dbConnector.class.getName());
 
-    private Connection connect = null;
-    private Statement statement = null;
+    private static Connection connect = null;
+    private static Statement statement = null;
     private PreparedStatement preparedStatement = null;
-    private ResultSet resultSet = null;
+    private static ResultSet resultSet = null;
     private ArrayList<ArrayList<String>> resultSetArray;
 
     private static final int PORT = 3306;
@@ -34,63 +34,41 @@ public class dbConnector {
     public dbConnector() {
     }
 
-    public ArrayList<ArrayList<String>> readDatabase(String databaseName, String sqlCmd) {
-
-        resultSetArray = new ArrayList<>();
-        String temp = "";
-        //ArrayList<String> tempArrayList = new ArrayList<>();
-        try {
-            openConnection(databaseName);
-            setStatement(connect);
-
-            resultSet = statement.executeQuery(sqlCmd);
-
-            resultSetArray = new ArrayList<>();
-            System.out.println(temp);
-            ResultSetMetaData rsmd = resultSet.getMetaData();
-            int colNum = rsmd.getColumnCount();
-
-            while (resultSet.next()) {
-                ArrayList<String> tempArrayList = new ArrayList<>();
-                tempArrayList.clear();
-                for (int j = 1; j <= colNum; j++) {
-                    tempArrayList.add(resultSet.getString(j));
-                }
-                //System.out.println(tempArrayList);
-                resultSetArray.add(tempArrayList);
-                if (tempArrayList.size() == 0) {
-                    System.out.println("Break");
-                }
-            }
-            //System.out.println(resultSetArray);
-            return resultSetArray;
-
-        } catch (Exception e) {
-
-            e.printStackTrace();
-            return null;
-        } finally {
-            close(this.connect);
-        }
-    }
-
     /*
     Function to check if the mysql server is alive
      */
-    public static boolean serverAlive() {
+    public static boolean serverAlive(String databaseIP) {
 
         try {
 
-            dbConnectionLogger.info("Attempting to connect to server: " + PropertyManager.getDatabaseIP());
-            Socket socket = new Socket(PropertyManager.getDatabaseIP(), PORT);
+            dbConnectionLogger.info("Attempting to connect to server: " + databaseIP);
+            Socket socket = new Socket(databaseIP, PORT);
             socket.close();
             dbConnectionLogger.info("Connected to server");
             return true;
         } catch (IOException e) {
             dbConnectionLogger.error("Cannot connect to the mysql server. Is the server alive?");
-        } finally {
             return false;
         }
+    }
+
+    //Open connection to DB. Warning: Requires property manager rto be used
+    public static Connection openConnection(String databaseName) {
+        try {
+
+            Class.forName("com.mysql.jdbc.Driver");
+            dbConnectionLogger.info("Opening connection to: " + PropertyManager.getDatabaseIP());
+            connect = DriverManager
+                    .getConnection("jdbc:mysql://" + PropertyManager.getDatabaseIP() + "/" + databaseName, PropertyManager.getUser(), PropertyManager.getPassword());
+
+        } catch (Exception e) {
+            e.printStackTrace();
+            dbConnectionLogger.error("Error making connection to database " + databaseName);
+            //In the case where you get an error opening, this might mean the database does not exist, In this case
+            //it will build you a new DATABAES instead
+
+        }
+        return connect;
     }
 
     public void writeDatabase(Connection connection, String insertToDBCmd, List<String> subArrayList) {
@@ -120,57 +98,28 @@ public class dbConnector {
 
     }
 
-    //Open connection to DB. Warning: Requires property manager rto be used
-    public Connection openConnection(String databaseName) {
-        try {
-
-            Class.forName("com.mysql.jdbc.Driver");
-            dbConnectionLogger.info("Opening connection to: " + PropertyManager.getDatabaseIP());
-            this.connect = DriverManager
-                    .getConnection("jdbc:mysql://" + PropertyManager.getDatabaseIP() + "/" + databaseName, PropertyManager.getUser(), PropertyManager.getPassword());
-
-        } catch (Exception e) {
-            e.printStackTrace();
-            dbConnectionLogger.error("Error making connection to database " + databaseName);
-            //In the case where you get an error opening, this might mean the database does not exist, In this case
-            //it will build you a new DATABAES instead
-
-        }
-        return this.connect;
-    }
-
-    private Connection newConnection(String site) {
+    private static Connection newConnection(String site) {
         try {
             Class.forName("com.mysql.jdbc.Driver");
             dbConnectionLogger.info("Making connection to: " + PropertyManager.getDatabaseIP());
-            this.connect = DriverManager
+            connect = DriverManager
                     .getConnection("jdbc:mysql://" + PropertyManager.getDatabaseIP() + "/", PropertyManager.getUser(), PropertyManager.getPassword());
 
         } catch (Exception e) {
             dbConnectionLogger.error("Error in making a new Connection. Error: " + e);
             e.printStackTrace();
         }
-        return this.connect;
+        return connect;
     }
 
-    public void setStatement(Connection connection) {
+    public static void setStatement(Connection connection) {
         try {
-            this.statement = connection.createStatement();
+            statement = connection.createStatement();
         } catch (Exception e) {
         }
     }
 
-    public Statement getStatement(Connection connection) {
-        try {
-            this.statement = connection.createStatement();
-        } catch (SQLException e) {
-            dbConnectionLogger.error("Error in getting statement from DB. Error: " + e);
-            e.printStackTrace();
-        }
-        return this.statement;
-    }
-
-    public void close() {
+    public static void close() {
         try {
             if (resultSet != null) {
                 resultSet.close();
@@ -184,6 +133,66 @@ public class dbConnector {
         } catch (Exception e) {
 
         }
+    }
+
+    public static boolean verifyDBExists(String dbName) {
+        openConnection(dbName);
+        setStatement(connect);
+        try {
+            ResultSet rs = connect.getMetaData().getCatalogs();
+            while (rs.next()) {
+                String databaseName = rs.getString(1);
+                if (databaseName.equalsIgnoreCase(dbName)) {
+                    return true;
+                }
+            }
+        } catch (SQLException e1) {
+            dbConnectionLogger.error("Exception with verifying DB's existance. Please panic");
+        } finally {
+            close();
+        }
+        return false;
+    }
+
+    //This method creates a table specifically for the Matrikon tags
+    public static void createMatrikonDB(String dbName) {
+        String createDBStatement = "CREATE DATABASE " + dbName;
+        MatrikonVariable matrikonVariable = new MatrikonVariable(dbName);
+        String createTableStatement;
+        try {
+            connect = newConnection(dbName);
+            statement = connect.createStatement();
+            statement.executeUpdate(createDBStatement);
+            connect = openConnection(dbName);
+            statement = connect.createStatement();
+
+            createTableStatement = matrikonVariable.createTableCmd();
+            statement.executeUpdate(createTableStatement);
+
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            dbConnectionLogger.error("SQL Exception when attempting to create Matrikon DB." +
+                    " Error: " + se);
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            dbConnectionLogger.error("Exception with creating MatrikonDB. Error: " + e);
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (statement != null)
+                    connect.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (connect != null)
+                    connect.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }//end finally try
+        }//end try
+
     }
 
     public void close(Connection connection) {
@@ -290,96 +299,7 @@ public class dbConnector {
         return "0";
     }
 
-    public boolean verifyDBExists(String dbName) {
-        openConnection(dbName);
-        setStatement(connect);
-        try {
-            ResultSet rs = this.connect.getMetaData().getCatalogs();
-            while (rs.next()) {
-                String databaseName = rs.getString(1);
-                if (databaseName.equalsIgnoreCase(dbName)) {
-                    return true;
-                }
-            }
-        } catch (SQLException e1) {
-            dbConnectionLogger.error("Exception with verifying DB's existance. Please panic");
-        } finally {
-            close();
-        }
-        return false;
-    }
-
-    //public ArrayList<ArrayList<String>> showDatabases(){
-    public ArrayList<String> showDatabases() {
-        String showDBSQL = "Show Databases;";
-        ArrayList<String> listOfDatabase = new ArrayList<>();
-        try {
-            connect = newConnection("");
-            setStatement(connect);
-
-            resultSet = statement.executeQuery(showDBSQL);
-            resultSet = statement.getResultSet();
-
-            while (resultSet.next()) {
-                String database = resultSet.getString("Database");
-                listOfDatabase.add(database);
-            }
-
-            return listOfDatabase;
-
-        } catch (Exception e) {
-
-            dbConnectionLogger.error("Exception with showing Database. Error: " + e);
-            e.printStackTrace();
-            return null;
-        } finally {
-            close(this.connect);
-        }
-    }
-
-    //This method creates a table specifically for the Matrikon tags
-    public void createMatrikonDB(String dbName) {
-        String createDBStatement = "CREATE DATABASE " + dbName;
-        MatrikonVariable matrikonVariable = new MatrikonVariable(dbName);
-        String createTableStatement;
-        try {
-            connect = newConnection(dbName);
-            statement = connect.createStatement();
-            statement.executeUpdate(createDBStatement);
-            connect = openConnection(dbName);
-            statement = connect.createStatement();
-
-            createTableStatement = matrikonVariable.createTableCmd();
-            statement.executeUpdate(createTableStatement);
-
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            dbConnectionLogger.error("SQL Exception when attempting to create Matrikon DB." +
-                    " Error: " + se);
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            dbConnectionLogger.error("Exception with creating MatrikonDB. Error: " + e);
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (statement != null)
-                    connect.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (connect != null)
-                    connect.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
-            }//end finally try
-        }//end try
-
-    }
-
-
-    public void createVarexpDB(String dbName) {
+    public static void createVarexpDB(String dbName) {
         String createDBStatement = "CREATE DATABASE " + dbName;
         VarexpFactory factory = new VarexpFactory();
         String createTableStatement;
@@ -421,6 +341,88 @@ public class dbConnector {
         }//end try
     }
 
+    public static void deleteDB(String DBName) {
+
+        String deleteStatement = "DROP DATABASE IF EXISTS " + DBName;
+
+        try {
+            connect = openConnection(DBName);
+            statement = connect.createStatement();
+            statement.executeUpdate(deleteStatement);
+        } catch (SQLException se) {
+            //Handle errors for JDBC
+            dbConnectionLogger.error("SQL Error with deleting DB " + DBName + ". Error: " + se);
+            se.printStackTrace();
+        } catch (Exception e) {
+            //Handle errors for Class.forName
+            dbConnectionLogger.error("Error with deleting DB " + DBName + ". Error: " + e);
+            e.printStackTrace();
+        } finally {
+            //finally block used to close resources
+            try {
+                if (statement != null)
+                    connect.close();
+            } catch (SQLException se) {
+            }// do nothing
+            try {
+                if (connect != null)
+                    connect.close();
+            } catch (SQLException se) {
+                se.printStackTrace();
+            }
+        }
+    }
+
+    public ArrayList<ArrayList<String>> readDatabase(String databaseName, String sqlCmd) {
+
+        resultSetArray = new ArrayList<>();
+        String temp = "";
+        //ArrayList<String> tempArrayList = new ArrayList<>();
+        try {
+            openConnection(databaseName);
+            setStatement(connect);
+
+            resultSet = statement.executeQuery(sqlCmd);
+
+            resultSetArray = new ArrayList<>();
+            System.out.println(temp);
+            ResultSetMetaData rsmd = resultSet.getMetaData();
+            int colNum = rsmd.getColumnCount();
+
+            while (resultSet.next()) {
+                ArrayList<String> tempArrayList = new ArrayList<>();
+                tempArrayList.clear();
+                for (int j = 1; j <= colNum; j++) {
+                    tempArrayList.add(resultSet.getString(j));
+                }
+                //System.out.println(tempArrayList);
+                resultSetArray.add(tempArrayList);
+                if (tempArrayList.size() == 0) {
+                    System.out.println("Break");
+                }
+            }
+            //System.out.println(resultSetArray);
+            return resultSetArray;
+
+        } catch (Exception e) {
+
+            e.printStackTrace();
+            return null;
+        } finally {
+            close(connect);
+        }
+    }
+
+    public Statement getStatement(Connection connection) {
+        try {
+            statement = connection.createStatement();
+        } catch (SQLException e) {
+            dbConnectionLogger.error("Error in getting statement from DB. Error: " + e);
+            e.printStackTrace();
+        }
+        return statement;
+    }
+
     /*
     This is a generic function used to create a database given a name
      */
@@ -459,35 +461,31 @@ public class dbConnector {
         }//end try
     }
 
-    public void deleteDB(String DBName) {
-
-        String deleteStatement = "DROP DATABASE IF EXISTS " + DBName;
-
+    //public ArrayList<ArrayList<String>> showDatabases(){
+    public ArrayList<String> showDatabases() {
+        String showDBSQL = "Show Databases;";
+        ArrayList<String> listOfDatabase = new ArrayList<>();
         try {
-            connect = openConnection(DBName);
-            statement = connect.createStatement();
-            statement.executeUpdate(deleteStatement);
-        } catch (SQLException se) {
-            //Handle errors for JDBC
-            dbConnectionLogger.error("SQL Error with deleting DB " + DBName + ". Error: " + se);
-            se.printStackTrace();
-        } catch (Exception e) {
-            //Handle errors for Class.forName
-            dbConnectionLogger.error("Error with deleting DB " + DBName + ". Error: " + e);
-            e.printStackTrace();
-        } finally {
-            //finally block used to close resources
-            try {
-                if (statement != null)
-                    connect.close();
-            } catch (SQLException se) {
-            }// do nothing
-            try {
-                if (connect != null)
-                    connect.close();
-            } catch (SQLException se) {
-                se.printStackTrace();
+            connect = newConnection("");
+            setStatement(connect);
+
+            resultSet = statement.executeQuery(showDBSQL);
+            resultSet = statement.getResultSet();
+
+            while (resultSet.next()) {
+                String database = resultSet.getString("Database");
+                listOfDatabase.add(database);
             }
+
+            return listOfDatabase;
+
+        } catch (Exception e) {
+
+            dbConnectionLogger.error("Exception with showing Database. Error: " + e);
+            e.printStackTrace();
+            return null;
+        } finally {
+            close(connect);
         }
     }
 }

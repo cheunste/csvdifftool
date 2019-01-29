@@ -59,7 +59,7 @@ public class ComparisonSceneController implements Initializable {
 
         dbConnector dbc = new dbConnector();
 
-        boolean dbExists = dbc.verifyDBExists(databaseName);
+        boolean dbExists = dbConnector.verifyDBExists(databaseName);
 
         if (dbExists) {
 
@@ -67,8 +67,8 @@ public class ComparisonSceneController implements Initializable {
             //Scanner sc = new Scanner(System.in);
             //String choice = sc.next().toLowerCase();
 
-            deleteDB(databaseName);
-            createVarexpDB(databaseName);
+            dbConnector.deleteDB(databaseName);
+            dbConnector.createVarexpDB(databaseName);
             importHelper(fileLocation, databaseName);
 
             //if (choice.equals("yes")) {
@@ -95,13 +95,12 @@ public class ComparisonSceneController implements Initializable {
 
     //This function imports a MatrikonFactory configuration file
     private static void importMatrikon(String fileLocation, String databaseName) throws IOException, SQLException {
-        dbConnector dbc = new dbConnector();
 
-        boolean dbExists = dbc.verifyDBExists(databaseName);
+        boolean dbExists = dbConnector.verifyDBExists(databaseName);
 
         if (dbExists) {
-            deleteDB(databaseName);
-            dbc.createMatrikonDB(databaseName);
+            dbConnector.deleteDB(databaseName);
+            dbConnector.createVarexpDB(databaseName);
         }
         matrikonHelper(fileLocation, databaseName);
     }
@@ -116,33 +115,6 @@ public class ComparisonSceneController implements Initializable {
         executor.execute(new ImportMatrikon(fileLocation, databaseName, buffer));
         //Shtudown
         executor.shutdown();
-    }
-
-    private static void deleteDB(String databaseName) {
-        logger.info("Attempting to delete DB " + databaseName);
-        dbConnector db = new dbConnector();
-        db.deleteDB(databaseName);
-        db.close();
-    }
-
-    private static void createVarexpDB(String databaseName) {
-        dbConnector db = new dbConnector();
-        db.createVarexpDB(databaseName);
-        db.close();
-    }
-
-    //Overloaded method solely used for Matrikon imports
-    private static void createMatrikonDB(String databaseName) {
-        dbConnector db = new dbConnector();
-        db.createMatrikonDB(databaseName);
-        db.close();
-    }
-
-    private static void createOuptutDB(String databaseName) {
-
-        dbConnector db = new dbConnector();
-        db.close();
-
     }
 
     private static void dbWait(int milliseconds) {
@@ -193,9 +165,9 @@ public class ComparisonSceneController implements Initializable {
 
 
         if (
-                (oldConfigPathText != null && oldConfigPathText.equals("")) &&
-                        (newConfigPathText != null && newConfigPathText.equals("")) &&
-                        (matrikonConfigText != null && matrikonConfigText.equals(""))
+                (oldConfigPathText != null && !oldConfigPathText.equals("")) &&
+                        (newConfigPathText != null && !newConfigPathText.equals("")) &&
+                        (matrikonConfigText != null && !matrikonConfigText.equals(""))
         ) {
             compareBtn.setDisable(false);
             logger.info("Compare Btn: " + compareBtn.isDisable());
@@ -207,8 +179,12 @@ public class ComparisonSceneController implements Initializable {
 
     public void compare() throws IOException, SQLException {
 
+        //Fetch fields from the config file
+        PropertyManager pm = new PropertyManager();
+        pm.getPropertyValues();
+
         //Check if the mysql server is alive. If not, show a popup to user
-        if (dbConnector.serverAlive()) {
+        if (dbConnector.serverAlive(PropertyManager.getDatabaseIP())) {
             //Doesn't do anything if server is alive
         } else {
             Alert serverAlert = new Alert(Alert.AlertType.ERROR);
@@ -218,10 +194,6 @@ public class ComparisonSceneController implements Initializable {
             serverAlert.showAndWait();
             return;
         }
-
-        //Fetch fields from the config file
-        PropertyManager pm = new PropertyManager();
-        pm.getPropertyValues();
 
         //Debug Mode. In this mode, everything important should be logged but more importantly, the DB should not be deleted.
         boolean debugMode = debugModeBtn.isSelected();
@@ -260,9 +232,9 @@ public class ComparisonSceneController implements Initializable {
         //due to debug mode
         logger.info("Attempting to delete the three databases");
         try {
-            deleteDB(oldDB);
-            deleteDB(newDB);
-            deleteDB(matrikonDB);
+            dbConnector.deleteDB(oldDB);
+            dbConnector.deleteDB(newDB);
+            dbConnector.deleteDB(matrikonDB);
             logger.info("oldconfig DB, newconfig DB and matrikon DB Deleted");
         } catch (Exception e) {
             logger.info("Database cannot be deleted because it doesn't exist");
@@ -281,12 +253,12 @@ public class ComparisonSceneController implements Initializable {
 
         //Import the Old Varexp and New Varexp into a newVarexpDB and oldVarexpDB and create a finalVarexpDB
         logger.info("Creating the DB for the new and old config");
-        createVarexpDB(oldDB);
-        createVarexpDB(newDB);
+        dbConnector.createVarexpDB(oldDB);
+        dbConnector.createVarexpDB(newDB);
 
 
         logger.info("Creating the DB for the matrikon config");
-        createMatrikonDB(matrikonDB);
+        dbConnector.createMatrikonDB(matrikonDB);
 
         logger.info("DBs created");
 
@@ -342,9 +314,9 @@ public class ComparisonSceneController implements Initializable {
         if (!debugMode) {
             logger.debug("Debug Mode is not selected. DBs will be deleted");
             if (databaseExists(oldDB, newDB, matrikonDB)) {
-                deleteDB(oldDB);
-                deleteDB(newDB);
-                deleteDB(matrikonDB);
+                dbConnector.deleteDB(oldDB);
+                dbConnector.deleteDB(newDB);
+                dbConnector.deleteDB(matrikonDB);
             }
         } else {
             logger.debug("Debug Mode is enabled. DBs will not be deleted");
@@ -424,7 +396,7 @@ public class ComparisonSceneController implements Initializable {
     public boolean databaseExists(String oldDB, String newDB, String matrikonDB) {
 
         dbConnector db = new dbConnector();
-        return (db.verifyDBExists(oldDB) && db.verifyDBExists(newDB) && db.verifyDBExists(matrikonDB));
+        return (dbConnector.verifyDBExists(oldDB) && dbConnector.verifyDBExists(newDB) && dbConnector.verifyDBExists(matrikonDB));
     }
 
     private static class ImportThreadExecutor implements Runnable {
