@@ -1,6 +1,6 @@
 package Controller;
 
-import com.company.Database.dbConnector;
+import VarexpInterface.Database.dbConnector;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXTextField;
@@ -42,7 +42,7 @@ public class DiffFileController {
 
         dbConnector dbc = new dbConnector();
 
-        dbc.createVarexpDB(databaseName);
+        dbConnector.createVarexpDB(databaseName);
 
         //create a database
         //TODO: Consider inserting another alert here

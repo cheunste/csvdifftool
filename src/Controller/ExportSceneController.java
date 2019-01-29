@@ -1,7 +1,7 @@
 package Controller;
 
-import com.company.Database.Buffer;
-import com.company.Database.Export;
+import VarexpInterface.Database.Buffer;
+import VarexpInterface.Database.Export;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialogLayout;

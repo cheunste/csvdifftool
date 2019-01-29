@@ -1,6 +1,6 @@
 package Controller;
 
-import com.company.Database.dbConnector;
+import VarexpInterface.Database.dbConnector;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXListView;
 import javafx.collections.FXCollections;

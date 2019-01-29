@@ -1,9 +1,9 @@
 package Controller;
 
-import com.company.Database.Buffer;
-import com.company.Database.Import;
-import com.company.Database.ImportHandler;
-import com.company.Database.dbConnector;
+import VarexpInterface.Database.Buffer;
+import VarexpInterface.Database.Import;
+import VarexpInterface.Database.ImportHandler;
+import VarexpInterface.Database.dbConnector;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXDialog;
 import com.jfoenix.controls.JFXDialogLayout;
@@ -59,7 +59,7 @@ public class ImportSceneController {
 
         dbConnector dbc = new dbConnector();
 
-        dbc.createVarexpDB(databaseName);
+        dbConnector.createVarexpDB(databaseName);
 
         //create a database
         //TODO: Consider inserting another alert here

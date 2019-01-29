@@ -1,8 +1,8 @@
 package Controller;
 
-import com.company.Comparison.Result;
-import com.company.Database.*;
-import com.company.PropertyManager;
+import VarexpInterface.Comparison.Result;
+import VarexpInterface.Database.*;
+import VarexpInterface.PropertyManager;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXTextField;

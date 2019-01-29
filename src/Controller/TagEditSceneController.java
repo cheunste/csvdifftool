@@ -1,7 +1,7 @@
 package Controller;
 
-import com.company.Database.dbConnector;
-import com.company.pcvue.fields.*;
+import VarexpInterface.Database.dbConnector;
+import VarexpInterface.pcvue.fields.*;
 import com.jfoenix.controls.JFXComboBox;
 import com.jfoenix.controls.JFXTextField;
 import javafx.beans.value.ChangeListener;
@@ -301,7 +301,7 @@ public class TagEditSceneController {
 
     private int getTableSize() {
         dbConnector connector = new dbConnector();
-        String rowNum = connector.getTableSize(databaseName);
+        String rowNum = dbConnector.getTableSize(databaseName);
         return Integer.parseInt(rowNum);
     }
 
@@ -322,7 +322,7 @@ public class TagEditSceneController {
         ArrayList<ArrayList<String>> temp;
 
         //Query the tag name in the selected DB
-        temp = conn.readDatabase(databaseName, getTagNameCmd);
+        temp = dbConnector.readDatabase(databaseName, getTagNameCmd);
 
         //Traverse the arraylist
         for (ArrayList<String> item : temp) {
