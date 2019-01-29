@@ -27,13 +27,13 @@ public class Result {
         dbConnector db = new dbConnector();
 
         //Delete the DB first
-        db.deleteDB(resultDatabase);
+        dbConnector.deleteDB(resultDatabase);
 
         //Create a resultTable database and table
         try {
             log.info("Attempting to insert header to the " + PropertyManager.getDefaultFileName());
-            db.createDatabase(resultDatabase);
-            db.sqlExecute(resultDatabase,
+            dbConnector.createDatabase(resultDatabase);
+            dbConnector.sqlExecute(resultDatabase,
 
                     "CREATE TABLE `" + resultTable + "` (\n" +
                             "  `id` int(11) NOT NULL AUTO_INCREMENT,\n" +
@@ -57,7 +57,7 @@ public class Result {
                     "error: " + e);
 
         } finally {
-            db.close();
+            dbConnector.close();
         }
     }
 
@@ -67,16 +67,15 @@ public class Result {
 
     //Delete and recreate the DB and table
     public static void createResultDB() {
-        dbConnector db = new dbConnector();
 
         //Delete the DB first
-        db.deleteDB(resultDatabase);
+        dbConnector.deleteDB(resultDatabase);
 
         //Create a resultTable database and table
         try {
             log.info("Creating Result Database");
-            db.createDatabase(resultDatabase);
-            db.sqlExecute(resultDatabase,
+            dbConnector.createDatabase(resultDatabase);
+            dbConnector.sqlExecute(resultDatabase,
 
                     "CREATE TABLE `" + resultTable + "` (\n" +
                             "  `id` int(11) NOT NULL AUTO_INCREMENT,\n" +
@@ -99,7 +98,7 @@ public class Result {
             log.error("Failed to create the Result Database. Error: " + e);
 
         } finally {
-            db.close();
+            dbConnector.close();
         }
     }
 
@@ -135,11 +134,9 @@ public class Result {
     //TODO: Fix the bug where it cannot find matrikonDB.matrikon. My guess is that you're using an incorrect call
     public static boolean compareLines(String oldDB, String newDB, String matrikonDB) {
 
-        dbConnector connector = new dbConnector();
-
-        int oldDBSize = Integer.parseInt(connector.getTableSize(oldDB));
-        int newDBSize = Integer.parseInt(connector.getTableSize(newDB));
-        int matrikonDBSize = Integer.parseInt(connector.getTableSizeMatrikon(matrikonDB));
+        int oldDBSize = Integer.parseInt(dbConnector.getTableSize(oldDB));
+        int newDBSize = Integer.parseInt(dbConnector.getTableSize(newDB));
+        int matrikonDBSize = Integer.parseInt(dbConnector.getTableSizeMatrikon(matrikonDB));
 
         return (oldDBSize == newDBSize && matrikonDBSize == newDBSize);
     }
@@ -178,7 +175,6 @@ public class Result {
                 ");";
 
         log.debug("Export query: " + saveToFile);
-        dbConnector dbConnector = new dbConnector();
 
         //call query to save to file. Note that there isn't any file checks here
         //Because that's already handled in the ComparionsScneeController's fileCheck()
@@ -224,8 +220,6 @@ public class Result {
     }
 
     public static void deleteResultDB() {
-        dbConnector db = new dbConnector();
-        db.deleteDB(resultDatabase);
+        dbConnector.deleteDB(resultDatabase);
     }
-
 }

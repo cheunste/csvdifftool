@@ -244,7 +244,7 @@ public class dbConnector {
 
     }
 
-    public void sqlExecute(String databaseName, String sqlCmd) {
+    public static void sqlExecute(String databaseName, String sqlCmd) {
         try {
             openConnection(databaseName);
             setStatement(connect);
@@ -260,7 +260,7 @@ public class dbConnector {
         }
     }
 
-    public String getTableSizeMatrikon(String databaseName) {
+    public static String getTableSizeMatrikon(String databaseName) {
         openConnection(databaseName);
         setStatement(connect);
         String sqlCmd = "SELECT COUNT(matrikon.matrikon_id) FROM matrikondb.matrikon;";
@@ -279,7 +279,8 @@ public class dbConnector {
 
         return "0";
     }
-    public String getTableSize(String databaseName) {
+
+    public static String getTableSize(String databaseName) {
         openConnection(databaseName);
         setStatement(connect);
         String sqlCmd = "SELECT COUNT(common.variable_id) FROM common;";
@@ -426,7 +427,7 @@ public class dbConnector {
     /*
     This is a generic function used to create a database given a name
      */
-    public void createDatabase(String databaseName) {
+    public static void createDatabase(String databaseName) {
         String createDBStatement = "CREATE DATABASE " + databaseName;
         try {
             connect = newConnection(databaseName);

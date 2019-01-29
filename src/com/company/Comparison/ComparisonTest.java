@@ -737,7 +737,6 @@ public class ComparisonTest {
     This calls the dbConnector class and executes all the statements in the testList array
      */
     public static void executeTest() {
-        dbConnector dbConnector = new dbConnector();
         for (String test : testList) {
             log.info("Executing test: " + test);
             dbConnector.sqlExecute(resultDB, test);
@@ -751,7 +750,6 @@ public class ComparisonTest {
      */
     public boolean checkDBExistance() {
         boolean databaseRequirement = true;
-        dbConnector dbConnector = new dbConnector();
         for (String database : databaseList) {
             databaseRequirement = databaseRequirement && dbConnector.verifyDBExists(database);
         }
