@@ -27,7 +27,7 @@ public class dbConnector {
     private static Statement statement = null;
     private PreparedStatement preparedStatement = null;
     private static ResultSet resultSet = null;
-    private ArrayList<ArrayList<String>> resultSetArray;
+    private static ArrayList<ArrayList<String>> resultSetArray;
 
     private static final int PORT = 3306;
 
@@ -195,7 +195,7 @@ public class dbConnector {
 
     }
 
-    public void close(Connection connection) {
+    public static void close(Connection connection) {
         try {
             if (resultSet != null) {
                 resultSet.close();
@@ -374,7 +374,7 @@ public class dbConnector {
         }
     }
 
-    public ArrayList<ArrayList<String>> readDatabase(String databaseName, String sqlCmd) {
+    public static ArrayList<ArrayList<String>> readDatabase(String databaseName, String sqlCmd) {
 
         resultSetArray = new ArrayList<>();
         String temp = "";
@@ -414,7 +414,7 @@ public class dbConnector {
         }
     }
 
-    public Statement getStatement(Connection connection) {
+    public static Statement getStatement(Connection connection) {
         try {
             statement = connection.createStatement();
         } catch (SQLException e) {

@@ -40,7 +40,6 @@ public class Export implements Runnable {
     public void exportDB() {
 
         //Verify that the DB exists first
-        dbConnector dbConnector = new dbConnector();
         boolean exists = dbConnector.verifyDBExists(databaseName);
 
         if (exists) {
@@ -55,11 +54,10 @@ public class Export implements Runnable {
      * @param databaseName Name of the database (ie twin_buttes_2)
      */
     private void fetch(String databaseName) {
-        dbConnector db = new dbConnector();
 
-        String numVarexpVariable = db.getTableSize(databaseName);
+        String numVarexpVariable = dbConnector.getTableSize(databaseName);
         String sqlCmd = "SELECT * FROM common ";
-        ArrayList<ArrayList<String>> resultList = db.readDatabase(databaseName, sqlCmd);
+        ArrayList<ArrayList<String>> resultList = dbConnector.readDatabase(databaseName, sqlCmd);
         ArrayList<ArrayList<String>> csvListOutput = new ArrayList<ArrayList<String>>();
 
 
@@ -94,7 +92,7 @@ public class Export implements Runnable {
                 VarexpVariable tempVar = newVariable.declareNewVariable(table);
                 String tableSqlCmd = "SELECT * FROM " + tempVar.getTableName();
 
-                ArrayList<ArrayList<String>> tableList = db.readDatabase(databaseName, tableSqlCmd);
+                ArrayList<ArrayList<String>> tableList = dbConnector.readDatabase(databaseName, tableSqlCmd);
 
                 for (ArrayList<String> innerList : tableList) {
                     String id = innerList.remove(0);

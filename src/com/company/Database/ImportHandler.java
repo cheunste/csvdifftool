@@ -19,7 +19,6 @@ import java.util.concurrent.Callable;
 public class ImportHandler implements Callable<Boolean> {
 
     //These are member variables that have to do with mysql connections
-    dbConnector db;
     Connection connection;
     Statement statement;
     //These are used for Buffer class.
@@ -34,10 +33,9 @@ public class ImportHandler implements Callable<Boolean> {
 
     public ImportHandler(Buffer buffer, String databaseName) throws SQLException {
         this.buffer = buffer;
-        this.db = new dbConnector();
-        this.connection = db.openConnection(databaseName);
+        this.connection = dbConnector.openConnection(databaseName);
         this.connection.setAutoCommit(false);
-        this.statement = db.getStatement(connection);
+        this.statement = dbConnector.getStatement(connection);
         this.databaseName = databaseName;
     }
 
