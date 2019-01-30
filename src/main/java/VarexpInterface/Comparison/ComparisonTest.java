@@ -6,6 +6,9 @@ import org.apache.logging.log4j.Logger;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class ComparisonTest {
 
@@ -716,9 +719,6 @@ public class ComparisonTest {
         databaseList.add(oldConfigDB);
         databaseList.add(resultDB);
 
-        String databaseName = Result.resultDatabaseName();
-
-
         testList.add(initialInsert);
         testList.add(tagMatchTest);
         testList.add(descriptionTest);
@@ -737,13 +737,40 @@ public class ComparisonTest {
     This calls the dbConnector class and executes all the statements in the testList array
      */
     public static void executeTest() {
+
+        ExecutorService testService = Executors.newSingleThreadExecutor();
         for (String test : testList) {
             log.info("Executing test: " + test);
-            dbConnector.sqlExecute(resultDB, test);
+            //dbConnector.sqlExecute(resultDB, test);
+            testService.submit(new testExecutorHelper(resultDB, test));
             log.info("Finished test:" + test);
+        }
+        testService.shutdown();
+
+        //Wait until all tests are completed
+        while (!testService.isTerminated()) {
+
         }
         dbConnector.close();
     }
+
+    private static class testExecutorHelper implements Callable<String> {
+
+        private String resultDB;
+        private String testName;
+
+        public testExecutorHelper(String resultDB, String test) {
+            this.resultDB = resultDB;
+            this.testName = test;
+        }
+
+        @Override
+        public String call() throws Exception {
+            dbConnector.sqlExecute(resultDB, testName);
+            return "";
+        }
+    }
+
 
     /*
     Checks to see if the databases in this class (as in set up in the constructuor) exists or not

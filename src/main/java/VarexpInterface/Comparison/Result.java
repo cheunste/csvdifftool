@@ -149,10 +149,6 @@ public class Result {
         String fileName = PropertyManager.getDefaultFileName();
         String fileLocation = PropertyManager.getDefaultFilePath();
 
-        //Create a file
-        //File csvOutput = new File(fileLocation + fileName);
-        File csvOutput = getFile(fileLocation, fileName);
-
         //Query to output content from the DB
         String fullPath = (fileLocation + fileName).replace("\\", "\\\\");
         log.info("Exporting the Result Table to " + PropertyManager.getDefaultFileName());

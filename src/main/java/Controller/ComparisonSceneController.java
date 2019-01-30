@@ -320,6 +320,11 @@ public class ComparisonSceneController implements Initializable {
         } else {
             logger.debug("Debug Mode is enabled. DBs will not be deleted");
         }
+        Alert completed = new Alert(Alert.AlertType.CONFIRMATION);
+        completed.setTitle("Comparison Done");
+        completed.setHeaderText("Config Comparison Completed!");
+        completed.setContentText("Comparison Done. Please see: " + PropertyManager.getDefaultFileName());
+        completed.showAndWait();
     }
 
     @FXML
