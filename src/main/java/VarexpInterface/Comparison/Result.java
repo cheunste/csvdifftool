@@ -130,7 +130,6 @@ public class Result {
         Checks the DBs to see if the line in the files are equal.
         SHould be called after importing the files, before calling export
      */
-    //TODO: Fix the bug where it cannot find matrikonDB.matrikon. My guess is that you're using an incorrect call
     public static boolean compareLines(String oldDB, String newDB, String matrikonDB) {
 
         int oldDBSize = Integer.parseInt(dbConnector.getTableSize(oldDB));

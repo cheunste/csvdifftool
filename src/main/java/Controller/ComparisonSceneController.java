@@ -207,7 +207,6 @@ public class ComparisonSceneController implements Initializable {
 
         //Check to see if file is open. If it is, exit the program immediately
         if (!fileCheck()) {
-            //TODO: Replace this with a popup for the user
             logger.info("Program will not run as the " +
                     PropertyManager.getDefaultFilePath() + PropertyManager.getDefaultFileName() +
                     " is still open");
@@ -276,7 +275,6 @@ public class ComparisonSceneController implements Initializable {
         importMatrikon(matrikonFilePath.getText(), matrikonDB);
 
         //Get the number of items from the DB. If they do not match, then throw a warning and end the program.
-        //TODO: You need to have a pop up to verify user if they want to continue or not
         boolean equalLines = Result.compareLines(oldDB, newDB, matrikonDB);
         if (!equalLines) {
 

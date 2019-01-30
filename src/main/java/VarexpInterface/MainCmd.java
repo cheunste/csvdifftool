@@ -115,7 +115,6 @@ public class MainCmd {
         pm.getPropertyValues();
 
         //Debug Mode. In this mode, everything important should be logged but more importantly, the DB should not be deleted.
-        //TODO: When a GUI is created, create a checkbox that allows user to select Debug mode
         boolean debugMode = true;
 
         //Create a reference to Result class. Result class is used for output. Instaniating it will create
@@ -132,19 +131,14 @@ public class MainCmd {
 
 
         //Read three files in the current directory
-        //TODO: Remove the hardcoded file names when you impelment the GUI. Throw this in a config file somewhere
-
-        //String fileDirectory = "C:\\Users\\Stephen\\Documents\\ComparisonTool\\";
         String fileDirectory = PropertyManager.getDefaultFilePath();
 
 
         //Import the varexps
-        //TODO: Remove the hardcoded file names when you impelment the GUI. Throw this in a config file somewhere
         importFile(fileDirectory + "Varexp_FE03_SHILO_OLD.csv", oldDB);
         importFile(fileDirectory + "Varexp_FE03_SHILO_NEW.csv", newDB);
 
         //Import the MatrikonFactory file
-        //TODO: Remove the hardcoded file names when you impelment the GUI. Throw this in a config file somewhere
         importMatrikon(fileDirectory + "Matrikon_FE03_SHILO.csv", matrikonDB);
 
         //Get the number of items from the DB. If they do not match, then throw a warning and end the program.
