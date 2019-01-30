@@ -22,6 +22,7 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -261,18 +262,20 @@ public class ComparisonSceneController implements Initializable {
 
         //Import the varexps.
         //TODO: The following are the thread version of importFile...still a WIP
-        //new Thread(new ImportThreadExecutor(oldConfigFilePath.getText(),oldDB)).start();
-        //new Thread(new ImportThreadExecutor(newConfigFilePath.getText(),newDB)).start();
+        ExecutorService importPool = Executors.newSingleThreadExecutor();
 
         logger.info("Importing the old config file to its DB ");
-        importFile(oldConfigFilePath.getText(), oldDB);
-
+        importPool.submit(new ImportThreadExecutor(oldConfigFilePath.getText(), oldDB, false));
         logger.info("Importing the new config file to its DB");
-        importFile(newConfigFilePath.getText(), newDB);
-
-        //Import the MatrikonFactory file
+        importPool.submit(new ImportThreadExecutor(newConfigFilePath.getText(), newDB, false));
         logger.info("Importing the matrikon file to the DB");
-        importMatrikon(matrikonFilePath.getText(), matrikonDB);
+        importPool.submit(new ImportThreadExecutor(matrikonFilePath.getText(), matrikonDB, true));
+        importPool.shutdown();
+
+        //Blocks until all import tasks are completed
+        while (!importPool.isTerminated()) {
+
+        }
 
         //Get the number of items from the DB. If they do not match, then throw a warning and end the program.
         boolean equalLines = Result.compareLines(oldDB, newDB, matrikonDB);
@@ -297,7 +300,7 @@ public class ComparisonSceneController implements Initializable {
         //Create a result Database and a  Result Table.
 
         //Wait some time in order to let mysql set up all the DB
-        //TODO: Replace this with a Future/Promise so you don't have to wait. Because that's bullshit.
+        //TODO: Replace this with a Future/Promise or a fork/join so you don't have to wait. Because that's bullshit.
         dbWait(FIVE_SECONDS);
         Result.executeTests(matrikonDB, newDB, oldDB);
 
@@ -395,24 +398,36 @@ public class ComparisonSceneController implements Initializable {
         return (dbConnector.verifyDBExists(oldDB) && dbConnector.verifyDBExists(newDB) && dbConnector.verifyDBExists(matrikonDB));
     }
 
-    private static class ImportThreadExecutor implements Runnable {
+    private static class ImportThreadExecutor implements Callable<String> {
 
         String dbName;
         String configFilePath;
+        boolean isMatrikon;
 
-        public ImportThreadExecutor(String configfilePath, String dbName) {
+        public ImportThreadExecutor(String configfilePath, String dbName, boolean isMatrikon) {
             this.dbName = dbName;
             this.configFilePath = configfilePath;
+            this.isMatrikon = isMatrikon;
         }
 
         @Override
-        public void run() {
-            try {
-                importFile(configFilePath, dbName);
-            } catch (IOException e) {
-            } catch (SQLException e) {
+        public String call() throws Exception {
+            if (!isMatrikon)
+                importFile(this.configFilePath, this.dbName);
+            else {
+                importMatrikon(this.configFilePath, this.dbName);
             }
+            return this.dbName;
         }
+
+        //@Override
+        //public void run() {
+        //    try {
+        //        importFile(configFilePath, dbName);
+        //    } catch (IOException e) {
+        //    } catch (SQLException e) {
+        //    }
+        //}
 
     }
 

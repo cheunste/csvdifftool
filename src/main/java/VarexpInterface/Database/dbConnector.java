@@ -57,13 +57,13 @@ public class dbConnector {
         try {
 
             Class.forName("com.mysql.jdbc.Driver");
-            dbConnectionLogger.info("Opening connection to: " + PropertyManager.getDatabaseIP());
+            //dbConnectionLogger.info("Opening connection to: " + PropertyManager.getDatabaseIP());
             connect = DriverManager
                     .getConnection("jdbc:mysql://" + PropertyManager.getDatabaseIP() + "/" + databaseName, PropertyManager.getUser(), PropertyManager.getPassword());
 
         } catch (Exception e) {
             e.printStackTrace();
-            dbConnectionLogger.error("Error making connection to database " + databaseName);
+            //dbConnectionLogger.error("Error making connection to database " + databaseName);
             //In the case where you get an error opening, this might mean the database does not exist, In this case
             //it will build you a new DATABAES instead
 
