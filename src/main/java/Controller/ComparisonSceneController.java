@@ -30,6 +30,9 @@ import java.util.concurrent.Future;
 public class ComparisonSceneController implements Initializable {
 
     static final Logger logger = LogManager.getLogger(ComparisonSceneController.class.getName());
+    public static final String oldDB = "oldVarexpDB";
+    public static final String newDB = "newVarexpDB";
+    public static final String matrikonDB = "matrikonDB";
 
     private static int FIVE_SECONDS = 5000;
     Stage currentWindow;
@@ -199,12 +202,6 @@ public class ComparisonSceneController implements Initializable {
         if (debugMode) {
             logger.debug("Debug Mode seelcted");
         }
-
-        //These are names of the databases that will be created. Since these are going to be dleted
-        //I really do not care if I hardcode them
-        String oldDB = "oldVarexpDB";
-        String newDB = "newVarexpDB";
-        String matrikonDB = "matrikonDB";
 
         //Check to see if file is open. If it is, exit the program immediately
         if (!fileCheck()) {
