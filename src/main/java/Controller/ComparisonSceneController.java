@@ -1,12 +1,16 @@
 package Controller;
 
+import VarexpInterface.Comparison.Compare;
+import VarexpInterface.Comparison.ConfigImportTask;
 import VarexpInterface.Comparison.Result;
 import VarexpInterface.Database.*;
 import VarexpInterface.PropertyManager;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXTextField;
+import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
+import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
@@ -22,7 +26,6 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -181,9 +184,20 @@ public class ComparisonSceneController implements Initializable {
 
     public void compare() throws IOException, SQLException {
 
-        //Fetch fields from the config file
+
+        //Import the varexps.
+        //TODO: The following are the thread version of importFile...still a WIP
+
+        //TODO: Create a runnable, thread this to the other class, Compare and then
+        // perform a callback when it is done. In said callback, you then do the other crap
+
+
+        //Get the properties in the properties file
         PropertyManager pm = new PropertyManager();
-        pm.getPropertyValues();
+        try {
+            pm.getPropertyValues();
+        } catch (IOException e) {
+        }
 
         //Check if the mysql server is alive. If not, show a popup to user
         if (dbConnector.serverAlive(PropertyManager.getDatabaseIP())) {
@@ -195,12 +209,6 @@ public class ComparisonSceneController implements Initializable {
             serverAlert.setContentText("There was an issue in connection to " + PropertyManager.getDatabaseIP() + ". \nIs the server online?");
             serverAlert.showAndWait();
             return;
-        }
-
-        //Debug Mode. In this mode, everything important should be logged but more importantly, the DB should not be deleted.
-        boolean debugMode = debugModeBtn.isSelected();
-        if (debugMode) {
-            logger.debug("Debug Mode seelcted");
         }
 
         //Check to see if file is open. If it is, exit the program immediately
@@ -220,108 +228,62 @@ public class ComparisonSceneController implements Initializable {
         }
 
 
-        //Result.exportResult();
-        //System.out.println("derp");
+        Compare compareTask = new Compare(oldDB, newDB, matrikonDB,
+                oldConfigFilePath.getText(), newConfigFilePath.getText(), matrikonFilePath.getText(),
+                debugModeBtn.isSelected());
 
-        //Delete the DBs beforehand just in case. They should be deleted after everything is done, but might not
-        //due to debug mode
-        logger.info("Attempting to delete the three databases");
-        try {
-            dbConnector.deleteDB(oldDB);
-            dbConnector.deleteDB(newDB);
-            dbConnector.deleteDB(matrikonDB);
-            logger.info("oldconfig DB, newconfig DB and matrikon DB Deleted");
-        } catch (Exception e) {
-            logger.info("Database cannot be deleted because it doesn't exist");
-        }
+        ConfigImportTask configImportTask = new ConfigImportTask(oldDB, newDB, matrikonDB,
+                oldConfigFilePath.getText(), newConfigFilePath.getText(), matrikonFilePath.getText()
+        );
 
-        //Create a reference to Result class. Result class is used for output. Instaniating it will create
-        // the DB used to store results
-        try {
-            Result.deleteResultDB();
-            logger.info("Result DB Deleted");
-        } catch (Exception e) {
-            logger.info("Result DB already deleted");
+        //Wait until the importing the config file is done.
+        //Then check the lines in the database (throw dialog if needed )
+        //Then
+        configImportTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED,
+                new EventHandler<WorkerStateEvent>() {
+                    @Override
+                    public void handle(WorkerStateEvent event) {
+                        //If false, return to user.
+                        // this means user doesn't want to continue or something happened.
+                        if (equalLineCheck() == false) {
+                            return;
+                        }
+                        //Else, you now call upon the comparison class and perform
+                        // the comparision portion. This means new threading
+                        else {
+                            new Thread(compareTask).start();
+                        }
+                    }
+                });
 
-        }
-        Result.createResultDB();
+        compareTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED,
+                new EventHandler<WorkerStateEvent>() {
+                    @Override
+                    public void handle(WorkerStateEvent event) {
 
-        //Import the Old Varexp and New Varexp into a newVarexpDB and oldVarexpDB and create a finalVarexpDB
-        logger.info("Creating the DB for the new and old config");
-        dbConnector.createVarexpDB(oldDB);
-        dbConnector.createVarexpDB(newDB);
+                    }
+                });
 
+        new Thread(configImportTask).start();
+        //ExecutorService importPool = Executors.newSingleThreadExecutor();
 
-        logger.info("Creating the DB for the matrikon config");
-        dbConnector.createMatrikonDB(matrikonDB);
+        //logger.info("Importing the old config file to its DB ");
+        //importPool.submit(new ImportThreadExecutor(oldConfigFilePath.getText(), oldDB, false));
+        //logger.info("Importing the new config file to its DB");
+        //importPool.submit(new ImportThreadExecutor(newConfigFilePath.getText(), newDB, false));
+        //logger.info("Importing the matrikon file to the DB");
+        //importPool.submit(new ImportThreadExecutor(matrikonFilePath.getText(), matrikonDB, true));
+        //importPool.shutdown();
 
-        logger.info("DBs created");
-
-        //Import the varexps.
-        //TODO: The following are the thread version of importFile...still a WIP
-        ExecutorService importPool = Executors.newSingleThreadExecutor();
-
-        logger.info("Importing the old config file to its DB ");
-        importPool.submit(new ImportThreadExecutor(oldConfigFilePath.getText(), oldDB, false));
-        logger.info("Importing the new config file to its DB");
-        importPool.submit(new ImportThreadExecutor(newConfigFilePath.getText(), newDB, false));
-        logger.info("Importing the matrikon file to the DB");
-        importPool.submit(new ImportThreadExecutor(matrikonFilePath.getText(), matrikonDB, true));
-        importPool.shutdown();
-
-        //Blocks until all import tasks are completed
-        while (!importPool.isTerminated()) {
-
-        }
-
-        //Get the number of items from the DB. If they do not match, then throw a warning and end the program.
-        boolean equalLines = Result.compareLines(oldDB, newDB, matrikonDB);
-        if (!equalLines) {
-
-            Alert equalLinesAlert = new Alert(Alert.AlertType.CONFIRMATION);
-            equalLinesAlert.setTitle("Confirmation");
-            equalLinesAlert.setHeaderText("Lines between the three config files are not equal.");
-            equalLinesAlert.setContentText("Do you want to continue using the comparison tool?");
-            logger.info("Lines between the three files are not equal");
-
-            Optional<ButtonType> equalLinesAlertResult = equalLinesAlert.showAndWait();
-            if (equalLinesAlertResult.get() == ButtonType.OK) {
-                logger.info("Lines are not equal. Continue using the tool");
-            } else {
-                logger.info("LInes are not equal. Cancelling the tool");
-                return;
-            }
-
-        }
-
-        //Create a result Database and a  Result Table.
+        ////Blocks until all import tasks are completed
+        //while (!importPool.isTerminated()) {
+        //}
+        ////Create a result Database and a  Result Table.
 
         //Wait some time in order to let mysql set up all the DB
         //TODO: Replace this with a Future/Promise or a fork/join so you don't have to wait. Because that's bullshit.
-        dbWait(FIVE_SECONDS);
-        Result.executeTests(matrikonDB, newDB, oldDB);
-
-        //Export the database.
-        Result.exportResult();
-        logger.info(PropertyManager.getDefaultFileName() + " created");
-
-        //Drop the databases (becaues at this point, you're done)
-        logger.info("DBs deleted");
-        if (!debugMode) {
-            logger.debug("Debug Mode is not selected. DBs will be deleted");
-            if (databaseExists(oldDB, newDB, matrikonDB)) {
-                dbConnector.deleteDB(oldDB);
-                dbConnector.deleteDB(newDB);
-                dbConnector.deleteDB(matrikonDB);
-            }
-        } else {
-            logger.debug("Debug Mode is enabled. DBs will not be deleted");
-        }
-        Alert completed = new Alert(Alert.AlertType.CONFIRMATION);
-        completed.setTitle("Comparison Done");
-        completed.setHeaderText("Config Comparison Completed!");
-        completed.setContentText("Comparison Done. Please see: " + PropertyManager.getDefaultFileName());
-        completed.showAndWait();
+        //dbWait(FIVE_SECONDS);
+        //Result.executeTests(matrikonDB, newDB, oldDB);
     }
 
     @FXML
@@ -395,43 +357,30 @@ public class ComparisonSceneController implements Initializable {
     }
 
     public boolean databaseExists(String oldDB, String newDB, String matrikonDB) {
-
         dbConnector db = new dbConnector();
         return (dbConnector.verifyDBExists(oldDB) && dbConnector.verifyDBExists(newDB) && dbConnector.verifyDBExists(matrikonDB));
     }
 
-    private static class ImportThreadExecutor implements Callable<String> {
 
-        String dbName;
-        String configFilePath;
-        boolean isMatrikon;
+    private boolean equalLineCheck() {
+        boolean equalLines = Result.compareLines(oldDB, newDB, matrikonDB);
+        if (!equalLines) {
 
-        public ImportThreadExecutor(String configfilePath, String dbName, boolean isMatrikon) {
-            this.dbName = dbName;
-            this.configFilePath = configfilePath;
-            this.isMatrikon = isMatrikon;
-        }
+            Alert equalLinesAlert = new Alert(Alert.AlertType.CONFIRMATION);
+            equalLinesAlert.setTitle("Confirmation");
+            equalLinesAlert.setHeaderText("Lines between the three config files are not equal.");
+            equalLinesAlert.setContentText("Do you want to continue using the comparison tool?");
+            logger.info("Lines between the three files are not equal");
 
-        @Override
-        public String call() throws Exception {
-            if (!isMatrikon)
-                importFile(this.configFilePath, this.dbName);
-            else {
-                importMatrikon(this.configFilePath, this.dbName);
+            Optional<ButtonType> equalLinesAlertResult = equalLinesAlert.showAndWait();
+            if (equalLinesAlertResult.get() == ButtonType.OK) {
+                logger.info("Lines are not equal. Continue using the tool");
+                return true;
+            } else {
+                logger.info("LInes are not equal. Cancelling the tool");
+                return false;
             }
-            return this.dbName;
         }
-
-        //@Override
-        //public void run() {
-        //    try {
-        //        importFile(configFilePath, dbName);
-        //    } catch (IOException e) {
-        //    } catch (SQLException e) {
-        //    }
-        //}
-
+        return true;
     }
-
-
 }

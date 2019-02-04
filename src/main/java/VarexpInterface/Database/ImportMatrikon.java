@@ -61,6 +61,7 @@ public class ImportMatrikon implements Runnable {
         //Actually store the tags into the DB
         //close file
         fh.closeFile(fileBR);
+        buffer.setDoneFlag();
     }
 
     public int getTotalLine() {
