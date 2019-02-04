@@ -18,7 +18,7 @@ into the mysql database. Its
  */
 public class ConfigImportTask extends Task<Void> {
 
-    static final Logger logger = LogManager.getLogger(Compare.class.getName());
+    static final Logger logger = LogManager.getLogger(CompareTask.class.getName());
     private static String oldDB;
     private static String newDB;
     private static String matrikonDB;
@@ -46,11 +46,8 @@ public class ConfigImportTask extends Task<Void> {
 
             dbConnector.deleteDB(databaseName);
             dbConnector.createVarexpDB(databaseName);
-            importHelper(fileLocation, databaseName);
-
-        } else {
-            importHelper(fileLocation, databaseName);
         }
+        importHelper(fileLocation, databaseName);
     }
 
     //This function imports a MatrikonFactory configuration file
@@ -61,10 +58,9 @@ public class ConfigImportTask extends Task<Void> {
         if (dbExists) {
             dbConnector.deleteDB(databaseName);
             dbConnector.createMatrikonDB(databaseName);
-            matrikonHelper(fileLocation, databaseName);
-        } else {
-            matrikonHelper(fileLocation, databaseName);
         }
+        matrikonHelper(fileLocation, databaseName);
+
     }
 
     private static void importHelper(String fileLocation, String databaseName) throws IOException, SQLException {

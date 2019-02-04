@@ -1,9 +1,9 @@
 package Controller;
 
-import VarexpInterface.Comparison.Compare;
+import VarexpInterface.Comparison.CompareTask;
 import VarexpInterface.Comparison.ConfigImportTask;
 import VarexpInterface.Comparison.Result;
-import VarexpInterface.Database.*;
+import VarexpInterface.Database.dbConnector;
 import VarexpInterface.PropertyManager;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
@@ -15,6 +15,7 @@ import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.scene.control.Alert;
 import javafx.scene.control.ButtonType;
+import javafx.scene.control.ProgressBar;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
@@ -26,19 +27,16 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.ResourceBundle;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 public class ComparisonSceneController implements Initializable {
 
-    static final Logger logger = LogManager.getLogger(ComparisonSceneController.class.getName());
     public static final String oldDB = "oldVarexpDB";
     public static final String newDB = "newVarexpDB";
     public static final String matrikonDB = "matrikonDB";
+    static final Logger logger = LogManager.getLogger(ComparisonSceneController.class.getName());
 
-    private static int FIVE_SECONDS = 5000;
     Stage currentWindow;
+
     //Main Buttons on GUI
     @FXML
     private JFXButton oldConfigImportBtn;
@@ -48,6 +46,10 @@ public class ComparisonSceneController implements Initializable {
     private JFXButton matrikonConfigImportBtn;
     @FXML
     private JFXButton compareBtn;
+
+    //ProgressBar
+    @FXML
+    private ProgressBar progressBar = new ProgressBar(0);
 
     //Debug Mode
     @FXML
@@ -61,75 +63,6 @@ public class ComparisonSceneController implements Initializable {
     @FXML
     private JFXTextField matrikonFilePath;
 
-    //Function to import the varexp file. Ask a user if they want to overwrite a DB first and then actually import it
-    private static void importFile(String fileLocation, String databaseName) throws IOException, SQLException {
-
-        boolean dbExists = dbConnector.verifyDBExists(databaseName);
-
-        if (dbExists) {
-
-            //System.out.println("Database already exists. Overwrite? (Y/N)");
-            //Scanner sc = new Scanner(System.in);
-            //String choice = sc.next().toLowerCase();
-
-            dbConnector.deleteDB(databaseName);
-            dbConnector.createVarexpDB(databaseName);
-            importHelper(fileLocation, databaseName);
-
-            //if (choice.equals("yes")) {
-            //} else {
-            //    System.out.println("No change will be made. Exiting tool");
-            //}
-        } else {
-            importHelper(fileLocation, databaseName);
-        }
-    }
-
-    //An assistant method to importFile. This Does the actual work of importing the DB Really needs a better name
-    private static void importHelper(String fileLocation, String databaseName) throws IOException, SQLException {
-
-        Buffer buffer = new Buffer();
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-        //This is the consumer. It consumes data in the queue
-        Future<Boolean> future = executor.submit(new ImportHandler(buffer, databaseName));
-        //This will be the producer (see producer-consumer problem if you're not familiar with hte term)
-        executor.execute(new Import(fileLocation, databaseName, buffer));
-        //Shtudown
-        executor.shutdown();
-    }
-
-    //This function imports a MatrikonFactory configuration file
-    private static void importMatrikon(String fileLocation, String databaseName) throws IOException, SQLException {
-
-        boolean dbExists = dbConnector.verifyDBExists(databaseName);
-
-        if (dbExists) {
-            dbConnector.deleteDB(databaseName);
-            dbConnector.createMatrikonDB(databaseName);
-        }
-        matrikonHelper(fileLocation, databaseName);
-    }
-
-    //An assistant method to importFile. This Does the actual work of importing the DB Really needs a better name
-    private static void matrikonHelper(String fileLocation, String databaseName) throws IOException, SQLException {
-        Buffer buffer = new Buffer();
-        ExecutorService executor = Executors.newFixedThreadPool(2);
-        //This is the consumer. It consumes data in the queue
-        //Future<Boolean> future = executor.submit(new ImportHandler(buffer, databaseName));
-        //This will be the producer (see producer-consumer problem if you're not familiar with hte term)
-        executor.execute(new ImportMatrikon(fileLocation, databaseName, buffer));
-        //Shtudown
-        executor.shutdown();
-    }
-
-    private static void dbWait(int milliseconds) {
-        try {
-            Thread.sleep(milliseconds);
-            //Result.executeTests(matrikonDB, newDB, oldDB);
-        } catch (InterruptedException e) {
-        }
-
-    }
 
     //Function to perform a file check before running the actual execute code
     /*
@@ -175,22 +108,14 @@ public class ComparisonSceneController implements Initializable {
                         (matrikonConfigText != null && !matrikonConfigText.equals(""))
         ) {
             compareBtn.setDisable(false);
-            logger.info("Compare Btn: " + compareBtn.isDisable());
+            logger.info("CompareTask Btn: " + compareBtn.isDisable());
         } else {
             compareBtn.setDisable(true);
-            logger.info("Compare Btn: " + compareBtn.isDisable());
+            logger.info("CompareTask Btn: " + compareBtn.isDisable());
         }
     }
 
     public void compare() throws IOException, SQLException {
-
-
-        //Import the varexps.
-        //TODO: The following are the thread version of importFile...still a WIP
-
-        //TODO: Create a runnable, thread this to the other class, Compare and then
-        // perform a callback when it is done. In said callback, you then do the other crap
-
 
         //Get the properties in the properties file
         PropertyManager pm = new PropertyManager();
@@ -198,6 +123,9 @@ public class ComparisonSceneController implements Initializable {
             pm.getPropertyValues();
         } catch (IOException e) {
         }
+
+        //Sett Progress bar to zero and unbind progress bar
+        progressBar.progressProperty().unbind();
 
         //Check if the mysql server is alive. If not, show a popup to user
         if (dbConnector.serverAlive(PropertyManager.getDatabaseIP())) {
@@ -228,62 +156,58 @@ public class ComparisonSceneController implements Initializable {
         }
 
 
-        Compare compareTask = new Compare(oldDB, newDB, matrikonDB,
-                oldConfigFilePath.getText(), newConfigFilePath.getText(), matrikonFilePath.getText(),
-                debugModeBtn.isSelected());
-
+        //Declare the Task objects
         ConfigImportTask configImportTask = new ConfigImportTask(oldDB, newDB, matrikonDB,
                 oldConfigFilePath.getText(), newConfigFilePath.getText(), matrikonFilePath.getText()
         );
 
+        CompareTask compareTask = new CompareTask(oldDB, newDB, matrikonDB,
+                oldConfigFilePath.getText(), newConfigFilePath.getText(), matrikonFilePath.getText(),
+                debugModeBtn.isSelected());
+
+        //Bind ProgressBar to ConfigImportTask
+        progressBar.progressProperty().bind(configImportTask.progressProperty());
+
         //Wait until the importing the config file is done.
         //Then check the lines in the database (throw dialog if needed )
         //Then
+
+        new Thread(configImportTask).start();
+
         configImportTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED,
                 new EventHandler<WorkerStateEvent>() {
                     @Override
                     public void handle(WorkerStateEvent event) {
-                        //If false, return to user.
-                        // this means user doesn't want to continue or something happened.
-                        if (equalLineCheck() == false) {
-                            return;
-                        }
-                        //Else, you now call upon the comparison class and perform
-                        // the comparision portion. This means new threading
-                        else {
-                            new Thread(compareTask).start();
-                        }
+                        //If true, continue
+                        //if(equalLineCheck()){
+                        //    progressBar.progressProperty().unbind();
+                        //    progressBar.setProgress(0);
+
+                        //    progressBar.progressProperty().bind(compareTask.progressProperty());
+
+                        //    new Thread(compareTask).start();
+                        //}
+                        return;
                     }
                 });
+
 
         compareTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED,
                 new EventHandler<WorkerStateEvent>() {
                     @Override
                     public void handle(WorkerStateEvent event) {
 
+                        progressBar.progressProperty().unbind();
+                        progressBar.setProgress(0);
+
+                        Alert completed = new Alert(Alert.AlertType.CONFIRMATION);
+                        completed.setTitle("Comparison Done");
+                        completed.setHeaderText("Config Comparison Completed!");
+                        completed.setContentText("Comparison Done. Please see: " + PropertyManager.getDefaultFileName());
+                        completed.showAndWait();
                     }
                 });
 
-        new Thread(configImportTask).start();
-        //ExecutorService importPool = Executors.newSingleThreadExecutor();
-
-        //logger.info("Importing the old config file to its DB ");
-        //importPool.submit(new ImportThreadExecutor(oldConfigFilePath.getText(), oldDB, false));
-        //logger.info("Importing the new config file to its DB");
-        //importPool.submit(new ImportThreadExecutor(newConfigFilePath.getText(), newDB, false));
-        //logger.info("Importing the matrikon file to the DB");
-        //importPool.submit(new ImportThreadExecutor(matrikonFilePath.getText(), matrikonDB, true));
-        //importPool.shutdown();
-
-        ////Blocks until all import tasks are completed
-        //while (!importPool.isTerminated()) {
-        //}
-        ////Create a result Database and a  Result Table.
-
-        //Wait some time in order to let mysql set up all the DB
-        //TODO: Replace this with a Future/Promise or a fork/join so you don't have to wait. Because that's bullshit.
-        //dbWait(FIVE_SECONDS);
-        //Result.executeTests(matrikonDB, newDB, oldDB);
     }
 
     @FXML
@@ -327,7 +251,7 @@ public class ComparisonSceneController implements Initializable {
         //This  button fires the main function
         compareBtn.setOnAction((ActionEvent e) -> {
             try {
-                logger.info("Compare Btn clicked");
+                logger.info("CompareTask Btn clicked");
                 compare();
             } catch (IOException ioe) {
                 logger.info("Error occured when comparing. Error: " + ioe);
@@ -338,6 +262,7 @@ public class ComparisonSceneController implements Initializable {
             }
 
         });
+
     }
 
     private boolean getDebugMode() {

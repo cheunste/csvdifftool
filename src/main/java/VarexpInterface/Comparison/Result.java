@@ -67,9 +67,6 @@ public class Result {
     //Delete and recreate the DB and table
     public static void createResultDB() {
 
-        //Delete the DB first
-        dbConnector.deleteDB(resultDatabase);
-
         //Create a resultTable database and table
         try {
             log.info("Creating Result Database");
