@@ -155,7 +155,6 @@ public class ComparisonSceneController implements Initializable {
             return;
         }
 
-
         //Declare the Task objects
         ConfigImportTask configImportTask = new ConfigImportTask(oldDB, newDB, matrikonDB,
                 oldConfigFilePath.getText(), newConfigFilePath.getText(), matrikonFilePath.getText()
@@ -172,30 +171,35 @@ public class ComparisonSceneController implements Initializable {
         //Then check the lines in the database (throw dialog if needed )
         //Then
 
-        new Thread(configImportTask).start();
 
         configImportTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED,
                 new EventHandler<WorkerStateEvent>() {
                     @Override
                     public void handle(WorkerStateEvent event) {
                         //If true, continue
-                        //if(equalLineCheck()){
-                        //    progressBar.progressProperty().unbind();
-                        //    progressBar.setProgress(0);
+                        try {
+                            Thread.sleep(300);
+                        } catch (InterruptedException e) {
+                        }
+                        if (equalLineCheck()) {
+                            progressBar.progressProperty().unbind();
+                            progressBar.setProgress(0);
 
-                        //    progressBar.progressProperty().bind(compareTask.progressProperty());
+                            progressBar.progressProperty().bind(compareTask.progressProperty());
 
-                        //    new Thread(compareTask).start();
-                        //}
-                        return;
+                            new Thread(compareTask).start();
+                        } else {
+                            return;
+                        }
                     }
                 });
-
 
         compareTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED,
                 new EventHandler<WorkerStateEvent>() {
                     @Override
                     public void handle(WorkerStateEvent event) {
+
+                        logger.info("Call back from compareTask event handler");
 
                         progressBar.progressProperty().unbind();
                         progressBar.setProgress(0);
@@ -208,6 +212,13 @@ public class ComparisonSceneController implements Initializable {
                     }
                 });
 
+        new Thread(configImportTask).start();
+    }
+
+    private void deleteDatabases() {
+        dbConnector.deleteDB(oldDB);
+        dbConnector.deleteDB(newDB);
+        dbConnector.deleteDB(matrikonDB);
     }
 
     @FXML
@@ -246,6 +257,14 @@ public class ComparisonSceneController implements Initializable {
 
             }
             compareBtnVisibilityEnable();
+        });
+
+        debugModeBtn.setOnAction((ActionEvent e) -> {
+            oldConfigFilePath.setText("C:\\Users\\Stephen\\IdeaProjects\\databaseCrap\\out\\artifacts\\VarexpInterface\\Varexp_FE03_SHILO_OLD.csv");
+            newConfigFilePath.setText("C:\\Users\\Stephen\\IdeaProjects\\databaseCrap\\out\\artifacts\\VarexpInterface\\Varexp_FE03_SHILO_NEW.csv");
+            matrikonFilePath.setText("C:\\Users\\Stephen\\IdeaProjects\\databaseCrap\\out\\artifacts\\VarexpInterface\\Matrikon_FE03_SHILO.csv");
+            compareBtn.setDisable(false);
+
         });
 
         //This  button fires the main function

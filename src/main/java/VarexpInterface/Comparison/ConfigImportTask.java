@@ -25,6 +25,7 @@ public class ConfigImportTask extends Task<Void> {
     private static String oldConfigFilePath;
     private static String newConfigFilePath;
     private static String matrikonFilePath;
+    private static final double MAX_TASKS = 3.0;
 
     //Constructor. All it does is set up parameters to member variables
     public ConfigImportTask(String oldDB, String newDB, String matrikonDB,
@@ -108,18 +109,24 @@ public class ConfigImportTask extends Task<Void> {
         let the main javafx thread know that some things are done.
         */
 
+        double taskTracker = 0.0;
         while (!importPool.isTerminated()) {
 
-            if (oldCOnfigFuture.isDone())
-                this.updateProgress(1, 3);
+            if (oldCOnfigFuture.isDone()) {
+                taskTracker++;
+                this.updateProgress(taskTracker, MAX_TASKS);
+            }
 
-            if (newConfigFuture.isDone())
-                this.updateProgress(1, 3);
+            if (newConfigFuture.isDone()) {
+                taskTracker++;
+                this.updateProgress(taskTracker, MAX_TASKS);
+            }
 
-            if (matrikonFuture.isDone())
-                this.updateProgress(1, 3);
+            if (matrikonFuture.isDone()) {
+                taskTracker++;
+                this.updateProgress(taskTracker, MAX_TASKS);
+            }
         }
-        this.updateProgress(3, 3);
         logger.info("Imported Configs");
 
         //At this point, return a null. Then in the callback lambda in the main javafx thread

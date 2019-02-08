@@ -44,7 +44,6 @@ public class CompareTask extends Task<Void> {
         } catch (IOException e) {
 
         }
-
         try {
             Result.deleteResultDB();
             logger.info("Result DB Deleted");

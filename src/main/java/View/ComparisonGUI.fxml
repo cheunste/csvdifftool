@@ -23,6 +23,7 @@
         <JFXButton fx:id="compareBtn" disable="true" layoutX="317.0" layoutY="282.0" text="Compare!"/>
         <Text layoutX="54.0" layoutY="80.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Varexp Comparison Tool"
               wrappingWidth="453.13671875"/>
-        <ProgressBar layoutX="281.0" layoutY="339.0" prefHeight="25.0" prefWidth="226.0" progress="0.0"/>
+        <ProgressBar id="progressBar" fx:id="progressBar" layoutX="281.0" layoutY="339.0" prefHeight="25.0"
+                     prefWidth="226.0" progress="0.0"/>
     </children>
 </AnchorPane>
