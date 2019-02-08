@@ -20,6 +20,8 @@ public class ComparisonTest {
     private static String resultDB;
     private static List<String> databaseList;
 
+    private static final int MAX_THREADS = 10;
+
 
     //This is an initial insert. All it does is insert all the tags from the new config to the output DB.
     //Must be executed before all the others
@@ -738,7 +740,8 @@ public class ComparisonTest {
      */
     public static void executeTest() {
 
-        ExecutorService testService = Executors.newSingleThreadExecutor();
+        //ExecutorService testService = Executors.newSingleThreadExecutor();
+        ExecutorService testService = Executors.newFixedThreadPool(MAX_THREADS);
         for (String test : testList) {
             log.info("Executing test: " + test);
             //dbConnector.sqlExecute(resultDB, test);
