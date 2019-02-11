@@ -7,6 +7,16 @@ import org.apache.logging.log4j.Logger;
 
 import java.io.IOException;
 
+
+/*
+
+This  class is responsible for starting a single task that executes the
+Result class in a separate thread.
+
+I have this class mainly because I can extend the Task class in order to make class to
+updateProgress
+
+ */
 public class CompareTask extends Task<Void> {
 
 
@@ -18,8 +28,11 @@ public class CompareTask extends Task<Void> {
     private static String newConfigFilePath;
     private static String matrikonFilePath;
     private static boolean debugMode;
+    private static final int MAX_TASK = 6;
+    private static int task = 0;
 
 
+    //Constructor
     public CompareTask(String oldDB, String newDB, String matrikonDB,
                        String oldFilePath, String newFilePath, String matrikonFilePath,
                        boolean debugMode) {
@@ -38,14 +51,16 @@ public class CompareTask extends Task<Void> {
     protected Void call() throws Exception {
 
         PropertyManager pm = new PropertyManager();
-
         try {
             pm.getPropertyValues();
+            this.updateProgress(task++, MAX_TASK);
         } catch (IOException e) {
 
         }
+
         try {
             Result.deleteResultDB();
+            this.updateProgress(task++, MAX_TASK);
             logger.info("Result DB Deleted");
         } catch (Exception e) {
             logger.info("Result DB already deleted");
@@ -53,12 +68,16 @@ public class CompareTask extends Task<Void> {
 
         //Create the result DB
         Result.createResultDB();
+        this.updateProgress(task++, MAX_TASK);
         exportResult();
+        this.updateProgress(task++, MAX_TASK);
         return null;
     }
 
     private void exportResult() {
         Result.executeTests(matrikonDB, newDB, oldDB);
+        this.updateProgress(task++, MAX_TASK);
         Result.exportResult();
+        this.updateProgress(task++, MAX_TASK);
     }
 }
