@@ -3,6 +3,7 @@
  */
 
 import Controller.ComparisonSceneController;
+import VarexpInterface.PropertyManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -24,6 +25,8 @@ public class Main extends Application {
     private Button button;
 
     public static void main(String[] args) {
+        //Checks the file size of the log and delete if necessary
+        PropertyManager pm = new PropertyManager();
         launch(args);
     }
 

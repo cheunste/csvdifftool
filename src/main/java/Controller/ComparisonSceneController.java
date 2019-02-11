@@ -304,6 +304,10 @@ public class ComparisonSceneController implements Initializable {
 
     private boolean equalLineCheck() {
         boolean equalLines = Result.compareLines(oldDB, newDB, matrikonDB);
+        try {
+            Thread.sleep(1000);
+        } catch (InterruptedException e) {
+        }
         if (!equalLines) {
 
             Alert equalLinesAlert = new Alert(Alert.AlertType.CONFIRMATION);

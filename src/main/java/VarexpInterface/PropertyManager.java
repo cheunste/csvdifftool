@@ -27,6 +27,7 @@ public class PropertyManager {
     private static String defaultFilePath;
     private static String currentMachine;
     private static String propertiesFileName = "properties.xml";
+    private static String logFileSize;
 
     InputStream inputStream;
 
@@ -51,6 +52,15 @@ public class PropertyManager {
         return defaultFilePath;
     }
 
+    public static String getLogFileSize() {
+        return logFileSize;
+    }
+
+    private static File getFile(String filePath, String fileName) {
+        log.debug("In getFile. Returning " + filePath + fileName);
+        return new File(filePath + fileName);
+    }
+
     public void getPropertyValues() throws IOException {
         //String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
         String rootPath = new File(".").getCanonicalPath() + "\\";
@@ -68,6 +78,7 @@ public class PropertyManager {
             databaseIP = prop.getProperty("databaseIP");
             password = prop.getProperty("password");
             defaultFileName = prop.getProperty("defaultFileName");
+            logFileSize = prop.getProperty("LogSize(MB)");
             //defaultFilePath = prop.getProperty("defaultFilePath");
 
             //Get the path on where the java app was executed
@@ -98,6 +109,7 @@ public class PropertyManager {
             props.setProperty("databaseIP", "localhost");
             props.setProperty("password", "ZAQ!xsw2CDE#");
             props.setProperty("defaultFileName", "output.csv");
+            props.setProperty("LogSize(MB)", "100");
             // save the CSV file to the same place where the JAR is executed
             props.setProperty("defaultFilePath", rootPath);
 
@@ -111,13 +123,16 @@ public class PropertyManager {
         } catch (Exception e) {
             log.error("Error. Something unusual happened when creating the default property. " +
                     "See error: ", e);
-            System.out.println(e);
-
-
         }
-
-
     }
 
-
+    //Checks the log file size and delete if needed
+    public void logFileSizeCheck() {
+        File file = null;
+        //File file = getFile();
+        boolean fileDeleted = file.delete();
+        //System.out.println(fileDeleted ? "File has been deleted" : "File couldn't be dleeted");
+        String deleteMessage = (fileDeleted ? "File has been deleted" : "File couldn't be dleeted");
+        log.info(deleteMessage);
+    }
 }
