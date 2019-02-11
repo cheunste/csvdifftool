@@ -25,7 +25,7 @@ public class ConfigImportTask extends Task<Void> {
     private static String oldConfigFilePath;
     private static String newConfigFilePath;
     private static String matrikonFilePath;
-    private static final double MAX_TASKS = 3.0;
+    private static final int MAX_TASKS = 4;
 
     //Constructor. All it does is set up parameters to member variables
     public ConfigImportTask(String oldDB, String newDB, String matrikonDB,
@@ -107,26 +107,38 @@ public class ConfigImportTask extends Task<Void> {
         Don't do anything until all the imports are done
         In the meantime, if the future gets called back, then call updateProgres. This will
         let the main javafx thread know that some things are done.
+
+        Warning: This is implemented with significant laziness on my part....you'll see what I mean
         */
 
-        double taskTracker = 0.0;
+        int taskTracker = 0;
+        logger.info("TaskTracker: " + taskTracker);
+        boolean oldFutureDone = false;
+        boolean newFutureDone = false;
+        boolean matrikonFutureDone = false;
         while (!importPool.isTerminated()) {
 
-            if (oldCOnfigFuture.isDone()) {
+            if (oldCOnfigFuture.isDone() && !oldFutureDone) {
                 taskTracker++;
+                oldFutureDone = true;
                 this.updateProgress(taskTracker, MAX_TASKS);
             }
 
-            if (newConfigFuture.isDone()) {
+            if (newConfigFuture.isDone() && !newFutureDone) {
                 taskTracker++;
+                newFutureDone = true;
                 this.updateProgress(taskTracker, MAX_TASKS);
             }
 
-            if (matrikonFuture.isDone()) {
+            if (matrikonFuture.isDone() && !matrikonFutureDone) {
                 taskTracker++;
+                matrikonFutureDone = true;
                 this.updateProgress(taskTracker, MAX_TASKS);
             }
         }
+        taskTracker++;
+        this.updateProgress(taskTracker, MAX_TASKS);
+        logger.info("TaskTracker: " + taskTracker);
         logger.info("Imported Configs");
 
         //At this point, return a null. Then in the callback lambda in the main javafx thread
