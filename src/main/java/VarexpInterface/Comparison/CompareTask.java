@@ -54,9 +54,6 @@ public class CompareTask extends Task<Void> {
         //Create the result DB
         Result.createResultDB();
         exportResult();
-        if (!debugMode) {
-            //deleteDatabases();
-        }
         return null;
     }
 

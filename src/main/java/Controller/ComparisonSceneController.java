@@ -167,24 +167,20 @@ public class ComparisonSceneController implements Initializable {
         //Bind ProgressBar to ConfigImportTask
         progressBar.progressProperty().bind(configImportTask.progressProperty());
 
-        //Wait until the importing the config file is done.
-        //Then check the lines in the database (throw dialog if needed )
-        //Then
-
-
+        /*
+        Wait until the importing the config file is done.
+        Then check the lines in the database (throw dialog if needed )
+        Afterwards, if the equalLineCheck is true, then start a new thread to execute the compareTask thread
+        */
         configImportTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED,
                 new EventHandler<WorkerStateEvent>() {
                     @Override
                     public void handle(WorkerStateEvent event) {
                         //If true, continue
-                        try {
-                            Thread.sleep(300);
-                        } catch (InterruptedException e) {
-                        }
-                        if (equalLineCheck()) {
-                            progressBar.progressProperty().unbind();
-                            progressBar.setProgress(0);
 
+                        progressBar.progressProperty().unbind();
+                        progressBar.setProgress(0);
+                        if (equalLineCheck()) {
                             progressBar.progressProperty().bind(compareTask.progressProperty());
 
                             new Thread(compareTask).start();
