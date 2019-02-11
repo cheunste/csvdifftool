@@ -8,7 +8,7 @@ import org.apache.logging.log4j.Logger;
 import java.io.File;
 
 /*
-This class is the result of the comparision Test.
+This class is the result of the SQL comparision Test.
 
 It does the following:
 1) Create a table called "resultoutput" in Mysql
