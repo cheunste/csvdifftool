@@ -252,10 +252,7 @@ public class dbConnector {
         try {
             openConnection(databaseName);
             setStatement(connect);
-            boolean rs = statement.execute(sqlCmd);
-            //System.out.println(rs);
-
-
+            statement.execute(sqlCmd);
         } catch (Exception e) {
             dbConnectionLogger.error("Exception with sqlQuery. Error" + e);
             e.printStackTrace();
