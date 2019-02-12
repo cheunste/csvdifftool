@@ -8,14 +8,14 @@ import VarexpInterface.PropertyManager;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
 import com.jfoenix.controls.JFXTextField;
+import com.jfoenix.controls.JFXToggleButton;
+import javafx.beans.value.ObservableValue;
 import javafx.concurrent.WorkerStateEvent;
 import javafx.event.ActionEvent;
 import javafx.event.EventHandler;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
-import javafx.scene.control.Alert;
-import javafx.scene.control.ButtonType;
-import javafx.scene.control.ProgressBar;
+import javafx.scene.control.*;
 import javafx.stage.FileChooser;
 import javafx.stage.Stage;
 import org.apache.logging.log4j.LogManager;
@@ -46,6 +46,8 @@ public class ComparisonSceneController implements Initializable {
     private JFXButton matrikonConfigImportBtn;
     @FXML
     private JFXButton compareBtn;
+    @FXML
+    private JFXButton verifyBtn;
 
     //ProgressBar
     @FXML
@@ -54,6 +56,9 @@ public class ComparisonSceneController implements Initializable {
     //Debug Mode
     @FXML
     private JFXCheckBox debugModeBtn;
+    //Verification Mode
+    @FXML
+    private JFXToggleButton verificationModeToggleBtn;
 
     //TextFields. These exists so I can display a file path to the user
     @FXML
@@ -91,7 +96,11 @@ public class ComparisonSceneController implements Initializable {
         return true;
     }
 
-    private void compareBtnVisibilityEnable() {
+    /*
+    BtnVisibilityEnable enables the compare/verification button depending on if the user
+    has selected the three files or not
+     */
+    private void btnVisibilityEnable() {
 
         String oldConfigPathText = oldConfigFilePath.getText();
         String newConfigPathText = newConfigFilePath.getText();
@@ -104,14 +113,20 @@ public class ComparisonSceneController implements Initializable {
 
         if (
                 (oldConfigPathText != null && !oldConfigPathText.equals("")) &&
-                        (newConfigPathText != null && !newConfigPathText.equals("")) &&
-                        (matrikonConfigText != null && !matrikonConfigText.equals(""))
+                        (newConfigPathText != null && !newConfigPathText.equals(""))
         ) {
-            compareBtn.setDisable(false);
-            logger.info("CompareTask Btn: " + compareBtn.isDisable());
+            verifyBtn.setDisable(false);
+            logger.info("VerificationTask Btn: " + verifyBtn.isDisable());
+
+            if (matrikonConfigText != null && !matrikonConfigText.equals("")) {
+                compareBtn.setDisable(false);
+                logger.info("CompareTask Btn: " + compareBtn.isDisable());
+            }
         } else {
             compareBtn.setDisable(true);
             logger.info("CompareTask Btn: " + compareBtn.isDisable());
+            verifyBtn.setDisable(true);
+            logger.info("VerificationTask Btn: " + verifyBtn.isDisable());
         }
     }
 
@@ -207,7 +222,6 @@ public class ComparisonSceneController implements Initializable {
                         completed.showAndWait();
                     }
                 });
-
         new Thread(configImportTask).start();
     }
 
@@ -217,53 +231,48 @@ public class ComparisonSceneController implements Initializable {
         dbConnector.deleteDB(matrikonDB);
     }
 
+    /*
+    The initialize function for all FXML elements. This is ran first after Main is called.
+
+    This instaniates all buttons on the ComparisonGUI.fxml GUI
+     */
     @FXML
     public void initialize(URL location, ResourceBundle resources) {
 
-        //Button mapping
+        //File Selection Buttons
 
         //The following three buttons allow user to select the old,new and matrikon config respectively
         oldConfigImportBtn.setOnAction((ActionEvent e) -> {
             try {
-
                 logger.info("oldConfig Btn clicked");
                 oldConfigFilePath.setText(getFilePath(currentWindow));
             } catch (Exception x) {
-
             }
-            compareBtnVisibilityEnable();
+            btnVisibilityEnable();
         });
         newConfigImportBtn.setOnAction((ActionEvent e) -> {
             try {
-
                 logger.info("newConfig Btn clicked");
                 newConfigFilePath.setText(getFilePath(currentWindow));
             } catch (Exception x) {
-
             }
-            compareBtnVisibilityEnable();
+            btnVisibilityEnable();
         });
         matrikonConfigImportBtn.setOnAction((ActionEvent e) -> {
             try {
-
                 logger.info("MatrikonConfig Btn clicked");
                 matrikonFilePath.setText(getFilePath(currentWindow));
-
             } catch (Exception x) {
-
             }
-            compareBtnVisibilityEnable();
+            btnVisibilityEnable();
         });
 
+        //Debug Mode Button
         debugModeBtn.setOnAction((ActionEvent e) -> {
-            oldConfigFilePath.setText("C:\\Users\\Stephen\\IdeaProjects\\databaseCrap\\out\\artifacts\\VarexpInterface\\Varexp_FE03_SHILO_OLD.csv");
-            newConfigFilePath.setText("C:\\Users\\Stephen\\IdeaProjects\\databaseCrap\\out\\artifacts\\VarexpInterface\\Varexp_FE03_SHILO_NEW.csv");
-            matrikonFilePath.setText("C:\\Users\\Stephen\\IdeaProjects\\databaseCrap\\out\\artifacts\\VarexpInterface\\Matrikon_FE03_SHILO.csv");
-            compareBtn.setDisable(false);
-
+            debugModeSetup();
         });
 
-        //This  button fires the main function
+        //This button fires the compare function
         compareBtn.setOnAction((ActionEvent e) -> {
             try {
                 logger.info("CompareTask Btn clicked");
@@ -278,10 +287,45 @@ public class ComparisonSceneController implements Initializable {
 
         });
 
+        //These lines of code are for selecting verification mode
+        ToggleGroup vfMode = new ToggleGroup();
+        verificationModeToggleBtn.setToggleGroup(vfMode);
+
+        vfMode.selectedToggleProperty().addListener(
+                (ObservableValue<? extends Toggle> ov, Toggle toggle, Toggle new_toggle) -> {
+                    //If null, that means user wants it in comparison mode.
+                    //Might be changed later
+                    if (new_toggle == null) {
+                        showVerificationButton(false);
+                    }
+                    //Otherwise, user wants it in verifciation mode
+                    else {
+                        showVerificationButton(true);
+                    }
+                }
+        );
+
+        verificationModeToggleBtn.setOnAction((ActionEvent e) -> {
+
+        });
+
+        //This fires the verification function
+        verifyBtn.setOnAction((ActionEvent e) -> {
+            verify();
+        });
     }
 
-    private boolean getDebugMode() {
-        return debugModeBtn.isSelected();
+    //Method to set up textfields and buttons with debug mode parameters.
+    //You probably shouldn't hardcode these debug file path...but then again, I really don't give a crap
+    private void debugModeSetup() {
+        oldConfigFilePath.setText("C:\\Users\\Stephen\\IdeaProjects\\databaseCrap\\out\\artifacts\\VarexpInterface\\Varexp_FE03_SHILO_OLD.csv");
+        newConfigFilePath.setText("C:\\Users\\Stephen\\IdeaProjects\\databaseCrap\\out\\artifacts\\VarexpInterface\\Varexp_FE03_SHILO_NEW.csv");
+        matrikonFilePath.setText("C:\\Users\\Stephen\\IdeaProjects\\databaseCrap\\out\\artifacts\\VarexpInterface\\Matrikon_FE03_SHILO.csv");
+        compareBtn.setDisable(false);
+        verifyBtn.setDisable(false);
+    }
+
+    private void verify() {
     }
 
     //This is used to keep track of prvevious stages so I can close them later
@@ -326,5 +370,17 @@ public class ComparisonSceneController implements Initializable {
             }
         }
         return true;
+    }
+
+    /*
+    This method is used to hide/show the compareBtn or verificationBtn depending on the
+    toggle button.
+    verificaitonMode: True if the user wants to be in verification mode. False otherwise
+     */
+    private void showVerificationButton(boolean verificationMode) {
+        verifyBtn.setVisible(verificationMode);
+        compareBtn.setVisible(!verificationMode);
+        matrikonFilePath.setVisible(!verificationMode);
+        matrikonConfigImportBtn.setVisible(!verificationMode);
     }
 }
