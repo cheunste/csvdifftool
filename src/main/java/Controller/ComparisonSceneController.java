@@ -130,7 +130,7 @@ public class ComparisonSceneController implements Initializable {
         }
     }
 
-    public void compare() throws IOException, SQLException {
+    private void compare() throws IOException, SQLException {
 
         //Get the properties in the properties file
         PropertyManager pm = new PropertyManager();
@@ -304,9 +304,7 @@ public class ComparisonSceneController implements Initializable {
                     }
                 }
         );
-
         verificationModeToggleBtn.setOnAction((ActionEvent e) -> {
-
         });
 
         //This fires the verification function
@@ -325,7 +323,76 @@ public class ComparisonSceneController implements Initializable {
         verifyBtn.setDisable(false);
     }
 
+    /*
+    Function to do verification
+    Simply put, what this does is that it imports both the new config and old config
+    and then perform a comparision between the two for anything that's different
+    There will also needs to be a way for user to ignore certain comparison as well
+    TODO: Figure out a way for user to ignore parameters before continuing
+
+     */
     private void verify() {
+        //Get the properties in the properties file
+        PropertyManager pm = new PropertyManager();
+        try {
+            pm.getPropertyValues();
+        } catch (IOException e) {
+        }
+
+        //Sett Progress bar to zero and unbind progress bar
+        progressBar.progressProperty().unbind();
+
+        //Check if the mysql server is alive. If not, show a popup to user
+        if (dbConnector.serverAlive(PropertyManager.getDatabaseIP())) {
+            //Doesn't do anything if server is alive
+        } else {
+            Alert serverAlert = new Alert(Alert.AlertType.ERROR);
+            serverAlert.setTitle("Server Error");
+            serverAlert.setHeaderText("Server Connection Error");
+            serverAlert.setContentText("There was an issue in connection to " + PropertyManager.getDatabaseIP() + ". \nIs the server online?");
+            serverAlert.showAndWait();
+            return;
+        }
+
+        //Check to see if file is open. If it is, exit the program immediately
+        if (!fileCheck()) {
+            logger.info("Program will not run as the " +
+                    PropertyManager.getDefaultFilePath() + PropertyManager.getDefaultFileName() +
+                    " is still open");
+
+            //ERROR Alert
+            Alert openFileErrorAlert = new Alert(Alert.AlertType.ERROR);
+            openFileErrorAlert.setTitle("Open File Error");
+            openFileErrorAlert.setHeaderText("File Opened Error");
+            openFileErrorAlert.setContentText("The output file: " + PropertyManager.getDefaultFileName() + " is still open." +
+                    "Please close the file and try again");
+            openFileErrorAlert.showAndWait();
+            return;
+        }
+
+        //Declare the Task objects
+        ConfigImportTask configImportTask = new ConfigImportTask(oldDB, newDB, matrikonDB,
+                oldConfigFilePath.getText(), newConfigFilePath.getText(), matrikonFilePath.getText()
+        );
+
+        //Bind ProgressBar to ConfigImportTask
+        progressBar.progressProperty().bind(configImportTask.progressProperty());
+
+        /*
+        Wait until the importing the config file is done.
+        Then check the lines in the database (throw dialog if needed )
+        Afterwards, if the equalLineCheck is true, then start a new thread to execute the compareTask thread
+        */
+        configImportTask.addEventHandler(WorkerStateEvent.WORKER_STATE_SUCCEEDED,
+                new EventHandler<WorkerStateEvent>() {
+                    @Override
+                    public void handle(WorkerStateEvent event) {
+                        progressBar.progressProperty().unbind();
+                        progressBar.setProgress(0);
+                    }
+                });
+
+        new Thread(configImportTask).start();
     }
 
     //This is used to keep track of prvevious stages so I can close them later
