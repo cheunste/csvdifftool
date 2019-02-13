@@ -185,6 +185,7 @@ public class ComparisonSceneController implements Initializable {
 
                             new Thread(compareTask).start();
                         } else {
+                            dbConnector.close();
                             return;
                         }
                     }

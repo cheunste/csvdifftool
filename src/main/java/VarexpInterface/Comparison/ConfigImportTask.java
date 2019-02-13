@@ -41,25 +41,25 @@ public class ConfigImportTask extends Task<Void> {
 
     private static void importFile(String fileLocation, String databaseName) throws IOException, SQLException {
 
-        boolean dbExists = dbConnector.verifyDBExists(databaseName);
+        //boolean dbExists = dbConnector.verifyDBExists(databaseName);
 
-        if (dbExists) {
-
-            dbConnector.deleteDB(databaseName);
-            dbConnector.createVarexpDB(databaseName);
-        }
+        //if (dbExists) {
+        //    dbConnector.deleteDB(databaseName);
+        //}
+        dbConnector.deleteDB(databaseName);
+        dbConnector.createVarexpDB(databaseName);
         importHelper(fileLocation, databaseName);
     }
 
     //This function imports a MatrikonFactory configuration file
     private static void importMatrikon(String fileLocation, String databaseName) throws IOException, SQLException {
 
-        boolean dbExists = dbConnector.verifyDBExists(databaseName);
-
-        if (dbExists) {
-            dbConnector.deleteDB(databaseName);
-            dbConnector.createMatrikonDB(databaseName);
-        }
+        //boolean dbExists = dbConnector.verifyDBExists(databaseName);
+        //if (dbExists) {
+        //    dbConnector.deleteDB(databaseName);
+        //}
+        dbConnector.deleteDB(databaseName);
+        dbConnector.createMatrikonDB(databaseName);
         matrikonHelper(fileLocation, databaseName);
 
     }

@@ -147,7 +147,7 @@ public class dbConnector {
                 }
             }
         } catch (SQLException e1) {
-            dbConnectionLogger.error("Exception with verifying DB's existance. Please panic");
+            dbConnectionLogger.error("Exception with verifying DB's existance. Going to assuming DB doesn't exist");
         } finally {
             close();
         }
