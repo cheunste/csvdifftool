@@ -20,7 +20,7 @@ public class ComparisonTest {
     private static String resultDB;
     private static List<String> databaseList;
 
-    private static final int MAX_THREADS = 20;
+    private static final int MAX_THREADS = 2;
 
 
     //This is an initial insert. All it does is insert all the tags from the new config to the output DB.
@@ -119,8 +119,8 @@ public class ComparisonTest {
             "\ton oldConfigTable.tagName = newConfigTable.tagName\n" +
             ") DescriptionTable\n" +
             "set result.`Description Test` = if(DescriptionTable.newConfigDesc1 =DescriptionTable.oldConfigDesc1 and DescriptionTable.newConfigDesc2 =DescriptionTable.oldConfigDesc2,'PASS','FAIL'),\n" +
-            "    result.`Comment` = if(newConfigDesc1 != oldConfigDesc1, concat(result.`Comment`,\"\\n New Tag description doesn't match old config's description\"), result.`Comment`),\n" +
-            "    result.`Comment` = if(newConfigDesc2 != oldConfigDesc2, concat(result.`Comment`,\"\\n New Tag description (lang2) doesn't match old config's description (lang2)\"), result.`Comment`)\n" +
+            "    result.`Comment` = if(newConfigDesc1 != oldConfigDesc1, concat(result.`Comment`,\"\\n New Tag description (10) doesn't match old config's description\"), result.`Comment`),\n" +
+            "    result.`Comment` = if(newConfigDesc2 != oldConfigDesc2, concat(result.`Comment`,\"\\n New Tag description lang2 (11) doesn't match old config's description (lang2)\"), result.`Comment`)\n" +
             "where result.tagName = DescriptionTable.tagName;";
 
     //Test for the digital bits. Only for digital tags
@@ -304,23 +304,23 @@ public class ComparisonTest {
                     "    result.`Comment` = CONCAT(result.`Comment`,\n" +
                     "            IF((DigitalTable.bitLog01_1 <=> DigitalTable.bitLog01_2) = 0,\n" +
                     "                '\n" +
-                    "                 bitlog01 does not match between old and new config',\n" +
+                    "                 bitlog01 (41) does not match between old and new config',\n" +
                     "                ''),\n" +
                     "            IF((DigitalTable.bitLog10_1 <=> DigitalTable.bitLog10_2) = 0,\n" +
                     "                '\n" +
-                    "                 bitlog10 does not match between old and new config',\n" +
+                    "                 bitlog10 (42) does not match between old and new config',\n" +
                     "                ''),\n" +
                     "            IF((DigitalTable.bitReserved1 <=> DigitalTable.bitReserved2) = 0,\n" +
                     "                '\n" +
-                    "                 bitReserved does not match between old and new config',\n" +
+                    "                 bitReserved (43) does not match between old and new config',\n" +
                     "                ''),\n" +
                     "            IF((DigitalTable.authorisationLevel1 <=> DigitalTable.authorisationLevel2) = 0,\n" +
                     "                '\n" +
-                    "                 authorization level does not match between old and new config',\n" +
+                    "                 authorization level (44) does not match between old and new config',\n" +
                     "                ''),\n" +
                     "            IF((DigitalTable.alarmLevel1 <=> DigitalTable.alarmLevel2) = 0,\n" +
                     "                '\n" +
-                    "                 alarm level does not match between old and new config',\n" +
+                    "                 alarm level (45) does not match between old and new config',\n" +
                     "                ''))\n" +
                     "WHERE\n" +
                     "    result.tagName = DigitalTable.newTagName;\n";
@@ -406,7 +406,7 @@ public class ComparisonTest {
             "    result.`Comment` = CONCAT(result.`Comment`,\n" +
             "            IF(UnitsTable.MeasurementUnits1 <> UnitsTable.MeasurementUnits2,\n" +
             "                '\n" +
-            "                 Units do not match between new and old configs',\n" +
+                    "                 Units (60) do not match between new and old configs',\n" +
             "                ''))\n" +
             "WHERE\n" +
             "    result.tagName = UnitsTable.tagName;";
@@ -502,15 +502,15 @@ public class ComparisonTest {
                     "                ''),\n" +
                     "            IF(AnalogsRatioTable.newConfigMinRatio <> AnalogsRatioTable.matrikonLowRatio,\n" +
                     "                '\n" +
-                    "                 min equipment val and min display val does not match between new nad matrikon config',\n" +
+                    "                 min equipment val (65) and min display val (62) does not match between new nad matrikon config',\n" +
                     "                ''),\n" +
                     "            IF(AnalogsRatioTable.matrikonHiRatio <> AnalogsRatioTable.newConfigMaxRatio,\n" +
                     "                '\n" +
-                    "                 max equipment val and max display val does not match between new and matrikon config',\n" +
+                    "                 max equipment val (66) and max display val (63) does not match between new and matrikon config',\n" +
                     "                ''),\n" +
                     "            IF(AnalogsRatioTable.matrikonTagName IS NULL,\n" +
                     "                '\n" +
-                    "                 tag name doesn\\'t exist in matrikon config',\n" +
+                    "                 tag doesn\\'t exist in matrikon config',\n" +
                     "                ''))\n" +
                     "WHERE\n" +
                     "    result.tagName = AnalogsRatioTable.newTagName;";
@@ -545,7 +545,7 @@ public class ComparisonTest {
             "    result.`Comment` = CONCAT(result.`Comment`,\n" +
             "            IF(oldSource = 'O' AND newSource <> '3',\n" +
             "                '\n" +
-            "                 Source hasn\\'t been updated to \\'3\\' in new config',\n" +
+                    "                 Source (17) hasn\\'t been updated to \\'3\\' in new config',\n" +
             "                ''))\n" +
             "WHERE\n" +
             "    result.tagName = Dnp3TypeTable.tagName;";
@@ -621,11 +621,11 @@ public class ComparisonTest {
             "    result.`Comment` = CONCAT(result.`Comment`,\n" +
             "            IF(minControlValue <> minDisplayValue,\n" +
             "                '\n" +
-            "                 min commandable ranges does not match',\n" +
+                    "                 min commandable ranges (70) does not match with min display value (62)',\n" +
             "                ''),\n" +
             "            IF(maxDisplayValue <> maxControlValue,\n" +
             "                '\n" +
-            "                 max commandable ranges does not match',\n" +
+                    "                 max commandable ranges (71) does not match with max display value (63)',\n" +
             "                ''))\n" +
             "WHERE\n" +
             "    result.tagName = RangeTable.tagName;";
@@ -751,6 +751,12 @@ public class ComparisonTest {
         //Wait until all tests are completed
         while (!testService.isTerminated()) {
         }
+
+        //This clears up the testList list. This is so if user needs to run it again, it will prevent double
+        //entries. Holy shit, did I program myself into a ditch.
+        testList.clear();
+
+        //Close the dbConnection
         dbConnector.close();
     }
 

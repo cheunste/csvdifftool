@@ -132,6 +132,7 @@ public class Result {
         int oldDBSize = Integer.parseInt(dbConnector.getTableSize(oldDB));
         int newDBSize = Integer.parseInt(dbConnector.getTableSize(newDB));
         int matrikonDBSize = Integer.parseInt(dbConnector.getTableSizeMatrikon(matrikonDB));
+        log.info("lines in old Config:" + oldDBSize + " new config: " + newDBSize + " matrikon config: " + matrikonDBSize);
 
         return (oldDBSize == newDBSize && matrikonDBSize == newDBSize);
     }
@@ -211,7 +212,6 @@ public class Result {
     }
 
     public static void deleteResultDB() {
-
         dbConnector.deleteDB(resultDatabase);
     }
 }

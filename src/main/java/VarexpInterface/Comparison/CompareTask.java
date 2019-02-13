@@ -48,14 +48,15 @@ public class CompareTask extends Task<Void> {
     }
 
     @Override
-    protected Void call() throws Exception {
+    protected Void call() throws IOException {
 
         PropertyManager pm = new PropertyManager();
         try {
             pm.getPropertyValues();
             this.updateProgress(task++, MAX_TASK);
         } catch (IOException e) {
-
+            logger.info("Issue with getting the property values");
+            throw e;
         }
 
         try {
@@ -63,7 +64,7 @@ public class CompareTask extends Task<Void> {
             this.updateProgress(task++, MAX_TASK);
             logger.info("Result DB Deleted");
         } catch (Exception e) {
-            logger.info("Result DB already deleted");
+            logger.info("Error with attempting to delete Result DB: " + e);
         }
 
         //Create the result DB
@@ -79,5 +80,8 @@ public class CompareTask extends Task<Void> {
         this.updateProgress(task++, MAX_TASK);
         Result.exportResult();
         this.updateProgress(task++, MAX_TASK);
+
+        //Reset task
+        task = 0;
     }
 }

@@ -147,7 +147,7 @@ public class dbConnector {
                 }
             }
         } catch (SQLException e1) {
-            dbConnectionLogger.error("Exception with verifying DB's existance. Please panic");
+            dbConnectionLogger.error("Exception with verifying DB's existance. Going to assuming DB doesn't exist");
         } finally {
             close();
         }
@@ -252,10 +252,7 @@ public class dbConnector {
         try {
             openConnection(databaseName);
             setStatement(connect);
-            boolean rs = statement.execute(sqlCmd);
-            //System.out.println(rs);
-
-
+            statement.execute(sqlCmd);
         } catch (Exception e) {
             dbConnectionLogger.error("Exception with sqlQuery. Error" + e);
             e.printStackTrace();

@@ -25,7 +25,7 @@ public class ConfigImportTask extends Task<Void> {
     private static String oldConfigFilePath;
     private static String newConfigFilePath;
     private static String matrikonFilePath;
-    private static final int MAX_TASKS = 4;
+    private static final int MAX_TASKS = 3;
 
     //Constructor. All it does is set up parameters to member variables
     public ConfigImportTask(String oldDB, String newDB, String matrikonDB,
@@ -41,25 +41,25 @@ public class ConfigImportTask extends Task<Void> {
 
     private static void importFile(String fileLocation, String databaseName) throws IOException, SQLException {
 
-        boolean dbExists = dbConnector.verifyDBExists(databaseName);
+        //boolean dbExists = dbConnector.verifyDBExists(databaseName);
 
-        if (dbExists) {
-
-            dbConnector.deleteDB(databaseName);
-            dbConnector.createVarexpDB(databaseName);
-        }
+        //if (dbExists) {
+        //    dbConnector.deleteDB(databaseName);
+        //}
+        dbConnector.deleteDB(databaseName);
+        dbConnector.createVarexpDB(databaseName);
         importHelper(fileLocation, databaseName);
     }
 
     //This function imports a MatrikonFactory configuration file
     private static void importMatrikon(String fileLocation, String databaseName) throws IOException, SQLException {
 
-        boolean dbExists = dbConnector.verifyDBExists(databaseName);
-
-        if (dbExists) {
-            dbConnector.deleteDB(databaseName);
-            dbConnector.createMatrikonDB(databaseName);
-        }
+        //boolean dbExists = dbConnector.verifyDBExists(databaseName);
+        //if (dbExists) {
+        //    dbConnector.deleteDB(databaseName);
+        //}
+        dbConnector.deleteDB(databaseName);
+        dbConnector.createMatrikonDB(databaseName);
         matrikonHelper(fileLocation, databaseName);
 
     }
@@ -74,6 +74,8 @@ public class ConfigImportTask extends Task<Void> {
         executor.execute(new Import(fileLocation, databaseName, buffer));
         //Shtudown
         executor.shutdown();
+
+        while (!future.isDone()) ;
     }
 
     //An assistant method to importFile. This Does the actual work of importing the DB Really needs a better name
@@ -86,6 +88,9 @@ public class ConfigImportTask extends Task<Void> {
         executor.execute(new ImportMatrikon(fileLocation, databaseName, buffer));
         //Shtudown
         executor.shutdown();
+
+        while (!future.isDone()) ;
+
     }
 
     @Override
@@ -136,8 +141,7 @@ public class ConfigImportTask extends Task<Void> {
                 this.updateProgress(taskTracker, MAX_TASKS);
             }
         }
-        taskTracker++;
-        this.updateProgress(taskTracker, MAX_TASKS);
+        taskTracker = 0;
         logger.info("TaskTracker: " + taskTracker);
         logger.info("Imported Configs");
 
