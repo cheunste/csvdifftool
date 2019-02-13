@@ -751,6 +751,12 @@ public class ComparisonTest {
         //Wait until all tests are completed
         while (!testService.isTerminated()) {
         }
+
+        //This clears up the testList list. This is so if user needs to run it again, it will prevent double
+        //entries. Holy shit, did I program myself into a ditch.
+        testList.clear();
+
+        //Close the dbConnection
         dbConnector.close();
     }
 

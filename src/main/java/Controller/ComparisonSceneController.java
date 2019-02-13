@@ -205,6 +205,8 @@ public class ComparisonSceneController implements Initializable {
                         completed.setHeaderText("Config Comparison Completed!");
                         completed.setContentText("Comparison Done. Please see: " + PropertyManager.getDefaultFileName());
                         completed.showAndWait();
+
+                        dbConnector.close();
                     }
                 });
 
@@ -303,11 +305,11 @@ public class ComparisonSceneController implements Initializable {
 
 
     private boolean equalLineCheck() {
-        boolean equalLines = Result.compareLines(oldDB, newDB, matrikonDB);
         try {
             Thread.sleep(1000);
         } catch (InterruptedException e) {
         }
+        boolean equalLines = Result.compareLines(oldDB, newDB, matrikonDB);
         if (!equalLines) {
 
             Alert equalLinesAlert = new Alert(Alert.AlertType.CONFIRMATION);
