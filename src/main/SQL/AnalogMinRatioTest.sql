@@ -145,10 +145,6 @@ SET
             IF(AnalogsRatioTable.matrikonHiRatio <> AnalogsRatioTable.newConfigMaxRatio,
                 '
                  max equipment val (66) and max display val (64) does not match between new and matrikon config',
-                ''),
-            IF(AnalogsRatioTable.matrikonTagName IS NULL,
-                '
-                 tag name doesn\'t exist in matrikon config',
                 ''))
 WHERE
     result.tagName = AnalogsRatioTable.newTagName;
