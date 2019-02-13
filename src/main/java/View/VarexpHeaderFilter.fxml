@@ -1,16 +1,49 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
 
-<?import com.jfoenix.controls.JFXTextField?>
-<?import javafx.scene.control.ListView?>
-<?import javafx.scene.layout.AnchorPane?>
+<?import com.jfoenix.controls.*?>
+<?import javafx.geometry.Insets?>
+<?import javafx.scene.control.ScrollPane?>
+<?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
-<AnchorPane xmlns:fx="http://javafx.com/fxml/1" prefHeight="400.0" prefWidth="600.0"
-            xmlns="http://javafx.com/javafx/8.0.171" fx:controller="Controller.VarexpFilterSceneController">
-    <children>
-        <JFXTextField layoutX="165.0" layoutY="58.0" prefHeight="25.0" prefWidth="322.0"/>
-        <Text layoutX="76.0" layoutY="71.0" strokeType="OUTSIDE" strokeWidth="0.0" text="Filter:"
-              wrappingWidth="60.787109375"/>
-        <ListView layoutX="24.0" layoutY="100.0" prefHeight="283.0" prefWidth="235.0"/>
-    </children>
-</AnchorPane>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+            minWidth="-Infinity" prefHeight="400.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.171">
+    <right>
+        <VBox prefHeight="200.0" prefWidth="150.0" BorderPane.alignment="CENTER">
+            <children>
+                <JFXButton fx:id="saveBtn" prefHeight="25.0" prefWidth="102.0" text="Save" textAlignment="CENTER"/>
+                <JFXButton fx:id="cancelBtn" prefHeight="25.0" prefWidth="99.0" text="Cancel" textAlignment="CENTER"/>
+                <JFXButton fx:id="clearBtn" layoutX="10.0" layoutY="10.0" prefHeight="25.0" prefWidth="112.0"
+                           text="Clear Filter" textAlignment="CENTER"/>
+            </children>
+        </VBox>
+    </right>
+    <left>
+        <VBox prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+            <children>
+                <JFXListView>
+                    <VBox.margin>
+                        <Insets bottom="20.0" left="15.0" right="15.0" top="20.0"/>
+                    </VBox.margin>
+                </JFXListView>
+            </children>
+        </VBox>
+    </left>
+    <center>
+        <VBox prefHeight="400.0" prefWidth="358.0" BorderPane.alignment="CENTER">
+            <children>
+                <HBox prefHeight="100.0" prefWidth="200.0">
+                    <children>
+                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Text"/>
+                        <JFXTextArea fx:id="filterField" prefHeight="53.0" prefWidth="427.0"/>
+                    </children>
+                </HBox>
+                <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+                    <children>
+                        <ScrollPane fx:id="scrollPane" prefHeight="300.0" prefWidth="502.0"/>
+                    </children>
+                </HBox>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>
