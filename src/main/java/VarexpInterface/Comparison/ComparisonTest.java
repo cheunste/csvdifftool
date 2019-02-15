@@ -297,7 +297,7 @@ public class ComparisonTest {
                     "        ats.ats_variable_id = common.variable_id) AS newConfigTable) AS t2 ON t2.tagName = t1.tagName) DigitalTable \n" +
                     "SET \n" +
                     "    result.`Digitals Test` = IF(" +
-                    "            AND DigitalTable.bitReserved1 <=> DigitalTable.bitReserved2\n" +
+                    "            DigitalTable.bitReserved1 <=> DigitalTable.bitReserved2\n" +
                     "            AND DigitalTable.authorisationLevel1 <=> DigitalTable.authorisationLevel2\n" +
                     "            AND DigitalTable.alarmLevel1 <=> DigitalTable.alarmLevel2,\n" +
                     "        'PASS',\n" +
