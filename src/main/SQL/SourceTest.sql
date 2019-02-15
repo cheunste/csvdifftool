@@ -1,7 +1,17 @@
  /*
- This is for testing the digitals
+ This is for testing the DNP3 related columns. This is known as the OPC/DNP3 Test under DNP3 Varialbes
 
-This matches the digital columns between the new configuration and hte old configureation. Specifically, coluns 40,41,42,43,45 and 46 must match between the old configuration and the new configuration
+This matches the SEL item path between the old configuration and the new configuration. It references the following columns:
+
+PcVue Config:
+208,
+209
+210
+211
+
+Matrikon:
+C
+
  */         
 #update outputvarexpdb.result set Comment=concat(Comment, "[Comment]") where id =480;
 select * from resultOutput.resultTable;

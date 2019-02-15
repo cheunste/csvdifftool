@@ -1,7 +1,10 @@
  /*
  This is for matching description
 
-This matches the description between the new config, old config and the matrikon config
+This matches the description between the new config, old config 
+
+Uses the following columns:
+PcVue:  10,11
  */         
 #update outputvarexpdb.result set Comment=concat(Comment, "[Comment]") where id =480;
 select * from resultOutput.resultTable;

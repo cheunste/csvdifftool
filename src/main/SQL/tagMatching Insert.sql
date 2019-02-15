@@ -1,7 +1,9 @@
 /*
-This is the query for matching tag names.
+This is the query for matching tag names as well as inserting the tag names into the Result Database
 
-If the tagName matches between all three databases, then the result is thrown into outputvarexpdb database
+Checks to see if the tagName matches between all three databases, then the result is thrown into the Result database.
+
+That being said, it really should only check the matrikon tag if the PcVue tag is DNP3 or OPC
 
 */                 
 select * from outputvarexpdb.result;

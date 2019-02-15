@@ -1,7 +1,9 @@
  /*
- This is for testing the digitals
+ This is for testing the Producer/Consumer section of PcVue
 
-This matches the digital columns between the new configuration and hte old configureation. Specifically, coluns 40,41,42,43,45 and 46 must match between the old configuration and the new configuration
+This compares column 28 on PcVue configs.
+
+Note that Producer needs to be the same for internal variables. Recall Producer is the UCC and NOTthe FES in the field Varexps. So pretty much just replace all 'FE' With 'ST'
  */         
 #update outputvarexpdb.result set Comment=concat(Comment, "[Comment]") where id =480;
 select * from resultOutput.resultTable;

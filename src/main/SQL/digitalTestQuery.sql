@@ -309,17 +309,12 @@ UPDATE resultOutput.resultTable result,
         ats.ats_variable_id = common.variable_id) AS newConfigTable) AS t2 ON t2.tagName = t1.tagName) DigitalTable 
 SET 
     result.`Digitals Test` = IF(DigitalTable.bitLog01_1 <=> DigitalTable.bitLog01_2
-            AND DigitalTable.bitLog10_1 <=> DigitalTable.bitLog10_2
             AND DigitalTable.bitReserved1 <=> DigitalTable.bitReserved2
             AND DigitalTable.authorisationLevel1 <=> DigitalTable.authorisationLevel2
             AND DigitalTable.alarmLevel1 <=> DigitalTable.alarmLevel2,
         'PASS',
         'FAIL'),
     result.`Comment` = CONCAT(result.`Comment`,
-            IF((DigitalTable.bitLog01_1 <=> DigitalTable.bitLog01_2) = 0,
-                '
-                 bitlog01 (41) does not match between old and new config',
-                ''),
             IF((DigitalTable.bitLog10_1 <=> DigitalTable.bitLog10_2) = 0,
                 '
                  bitlog10 (42) does not match between old and new config',

@@ -1,7 +1,10 @@
 /*
- This is for testing the digitals
+ This is for testing the Units
 
-This matches the digital columns between the new configuration and hte old configureation. Specifically, coluns 40,41,42,43,45 and 46 must match between the old configuration and the new configuration
+This checks the units for all the analog tags and see if the units between the old config and new configs agres with each other
+
+Uses column: 
+PcVue config: 60
  */         
 SELECT 
     *

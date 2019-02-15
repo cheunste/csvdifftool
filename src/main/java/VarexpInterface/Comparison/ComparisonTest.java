@@ -296,22 +296,13 @@ public class ComparisonTest {
                     "    WHERE\n" +
                     "        ats.ats_variable_id = common.variable_id) AS newConfigTable) AS t2 ON t2.tagName = t1.tagName) DigitalTable \n" +
                     "SET \n" +
-                    "    result.`Digitals Test` = IF(DigitalTable.bitLog01_1 <=> DigitalTable.bitLog01_2\n" +
-                    "            AND DigitalTable.bitLog10_1 <=> DigitalTable.bitLog10_2\n" +
+                    "    result.`Digitals Test` = IF(" +
                     "            AND DigitalTable.bitReserved1 <=> DigitalTable.bitReserved2\n" +
                     "            AND DigitalTable.authorisationLevel1 <=> DigitalTable.authorisationLevel2\n" +
                     "            AND DigitalTable.alarmLevel1 <=> DigitalTable.alarmLevel2,\n" +
                     "        'PASS',\n" +
                     "        'FAIL'),\n" +
                     "    result.`Comment` = CONCAT(result.`Comment`,\n" +
-                    "            IF((DigitalTable.bitLog01_1 <=> DigitalTable.bitLog01_2) = 0,\n" +
-                    "                '\n" +
-                    "                 bitlog01 (41) does not match between old and new config',\n" +
-                    "                ''),\n" +
-                    "            IF((DigitalTable.bitLog10_1 <=> DigitalTable.bitLog10_2) = 0,\n" +
-                    "                '\n" +
-                    "                 bitlog10 (42) does not match between old and new config',\n" +
-                    "                ''),\n" +
                     "            IF((DigitalTable.bitReserved1 <=> DigitalTable.bitReserved2) = 0,\n" +
                     "                '\n" +
                     "                 bitReserved (43) does not match between old and new config',\n" +

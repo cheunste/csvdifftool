@@ -1,7 +1,7 @@
  /*
- This is for testing the digitals
+ This is for testing the Internal tags
 
-This matches the digital columns between the new configuration and hte old configureation. Specifically, coluns 40,41,42,43,45 and 46 must match between the old configuration and the new configuration
+This matches the Internal between the new configuration and hte old configureation. this is only used for PcVue tags that are solely internal tags
  */         
 #update outputvarexpdb.result set Comment=concat(Comment, "[Comment]") where id =480;
 select * from resultOutput.resultTable;
