@@ -1,9 +1,11 @@
 package VarexpInterface.Comparison;
 
 import VarexpInterface.Database.dbConnector;
+import VarexpInterface.PropertyManager;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.concurrent.Callable;
@@ -739,8 +741,15 @@ public class ComparisonTest {
     This calls the dbConnector class and executes all the statements in the testList array
      */
     public static void executeTest() {
+        ExecutorService testService;
+        try {
+            PropertyManager.getPropertyValues();
+            testService = Executors.newFixedThreadPool(PropertyManager.getResultThreads());
+        } catch (IOException e) {
 
-        ExecutorService testService = Executors.newFixedThreadPool(MAX_THREADS);
+            testService = Executors.newFixedThreadPool(MAX_THREADS);
+        }
+
         for (String test : testList) {
             log.info("Executing test: " + test);
             testService.submit(new testExecutorHelper(resultDB, test));

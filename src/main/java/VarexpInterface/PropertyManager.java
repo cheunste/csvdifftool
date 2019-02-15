@@ -27,7 +27,8 @@ public class PropertyManager {
     private static String defaultFilePath;
     private static String currentMachine;
     private static String propertiesFileName = "properties.xml";
-    private static String logFileSize;
+    private static int logFileSize;
+    private static int resultThreadNum;
 
     InputStream inputStream;
 
@@ -52,8 +53,12 @@ public class PropertyManager {
         return defaultFilePath;
     }
 
-    public static String getLogFileSize() {
+    public static int getLogFileSize() {
         return logFileSize;
+    }
+
+    public static int getResultThreads() {
+        return resultThreadNum;
     }
 
     private static File getFile(String filePath, String fileName) {
@@ -61,7 +66,7 @@ public class PropertyManager {
         return new File(filePath + fileName);
     }
 
-    public void getPropertyValues() throws IOException {
+    public static void getPropertyValues() throws IOException {
         //String rootPath = Thread.currentThread().getContextClassLoader().getResource("").getPath();
         String rootPath = new File(".").getCanonicalPath() + "\\";
         System.out.println(rootPath);
@@ -78,7 +83,8 @@ public class PropertyManager {
             databaseIP = prop.getProperty("databaseIP");
             password = prop.getProperty("password");
             defaultFileName = prop.getProperty("defaultFileName");
-            logFileSize = prop.getProperty("LogSize(MB)");
+            logFileSize = Integer.parseInt(prop.getProperty("LogSize(MB)"));
+            resultThreadNum = Integer.parseInt(prop.getProperty("resultThread"));
             //defaultFilePath = prop.getProperty("defaultFilePath");
 
             //Get the path on where the java app was executed
@@ -101,7 +107,7 @@ public class PropertyManager {
 
     //Create a XML. SHould only be used if XML doesn't exist.
     // While you're at it, set the variables
-    private void createPropertiesXML(String rootPath) {
+    private static void createPropertiesXML(String rootPath) {
         try {
             Properties props = new Properties();
 
@@ -110,6 +116,7 @@ public class PropertyManager {
             props.setProperty("password", "ZAQ!xsw2CDE#");
             props.setProperty("defaultFileName", "output.csv");
             props.setProperty("LogSize(MB)", "100");
+            props.setProperty("resultThread", "5");
             // save the CSV file to the same place where the JAR is executed
             props.setProperty("defaultFilePath", rootPath);
 
