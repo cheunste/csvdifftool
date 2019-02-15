@@ -83,7 +83,18 @@ public class IEC61850_Master extends VarexpVariable {
     @Override
     public Map<String, VarexpTuple> getFieldMap() {
         //TODO: Impliment this when user actually uses this
-        return null;
+        fieldMap.put("Mapping Type", new VarexpTuple(190, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("61850 master network alias", new VarexpTuple(191, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("61850 master physical device alias", new VarexpTuple(192, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("61850 master data group alias", new VarexpTuple(193, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("61850 master data group member", new VarexpTuple(194, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Field", new VarexpTuple(195, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Reserved", new VarexpTuple(196, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Data object identifier", new VarexpTuple(197, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Control model", new VarexpTuple(198, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Control model", new VarexpTuple(199, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Use quality provided by the device", new VarexpTuple(200, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        return fieldMap;
     }
 
     @Override

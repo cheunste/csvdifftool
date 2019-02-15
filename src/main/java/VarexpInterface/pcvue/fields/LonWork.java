@@ -81,8 +81,16 @@ public class LonWork extends VarexpVariable {
 
     @Override
     public Map<String, VarexpTuple> getFieldMap() {
-        //TODO: Impliment this when user actually uses this
-        return null;
+        fieldMap.put("Network Alias", new VarexpTuple(110, "TF", new String[]{""}, new String[]{""}, true, 30));
+        fieldMap.put("Node Alias", new VarexpTuple(111, "TF", new String[]{""}, new String[]{""}, true, 30));
+        fieldMap.put("Variable Name", new VarexpTuple(112, "TF", new String[]{""}, new String[]{""}, true, 30));
+        fieldMap.put("Network Scanning Mode", new VarexpTuple(113, "TF", new String[]{""}, new String[]{""}, true, 30));
+        fieldMap.put("Reserved", new VarexpTuple(114, "TF", new String[]{""}, new String[]{""}, true, 30));
+        fieldMap.put("Netowkr Variable Field Name", new VarexpTuple(115, "TF", new String[]{""}, new String[]{""}, true, 30));
+        fieldMap.put("Reserved", new VarexpTuple(116, "TF", new String[]{""}, new String[]{""}, true, 30));
+        fieldMap.put("Monitoring definition", new VarexpTuple(117, "CB", new String[]{""}, new String[]{""}, true, 30));
+        fieldMap.put("Monitoring Type", new VarexpTuple(118, "CB", new String[]{""}, new String[]{""}, true, 30));
+        return fieldMap;
     }
 
     @Override

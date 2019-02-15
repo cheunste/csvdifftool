@@ -85,7 +85,19 @@ public class IEC60870_Master extends VarexpVariable {
     @Override
     public Map<String, VarexpTuple> getFieldMap() {
         //TODO: Impliment this when user actually uses this
-        return null;
+        fieldMap.put("Metwork Name", new VarexpTuple(180, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Device Name", new VarexpTuple(181, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Sector Name", new VarexpTuple(182, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("IO Address", new VarexpTuple(183, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Type", new VarexpTuple(184, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Writing Address", new VarexpTuple(185, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Select before Operate", new VarexpTuple(186, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Qualifier", new VarexpTuple(187, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Write Time Tagged", new VarexpTuple(188, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Mapping Bit", new VarexpTuple(189, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Signed", new VarexpTuple(206, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+
+        return fieldMap;
     }
 
     @Override

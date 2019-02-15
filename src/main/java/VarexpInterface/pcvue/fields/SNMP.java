@@ -82,8 +82,17 @@ public class SNMP extends VarexpVariable {
 
     @Override
     public Map<String, VarexpTuple> getFieldMap() {
-        //TODO: Impliment this when user actually uses this
-        return null;
+        fieldMap.put("Network Name", new VarexpTuple(230, "TF", new String[]{""}, new String[]{""}, true, 10));
+        fieldMap.put("Device Name", new VarexpTuple(231, "TF", new String[]{""}, new String[]{""}, true, 10));
+        fieldMap.put("Polling Group", new VarexpTuple(232, "TF", new String[]{""}, new String[]{""}, true, 10));
+        fieldMap.put("Data Type", new VarexpTuple(233, "TF", new String[]{""}, new String[]{""}, true, 10));
+        fieldMap.put("OID", new VarexpTuple(234, "TF", new String[]{""}, new String[]{""}, true, 10));
+        fieldMap.put("Disable reading", new VarexpTuple(235, "TF", new String[]{""}, new String[]{""}, true, 10));
+        fieldMap.put("With initial value", new VarexpTuple(236, "TF", new String[]{""}, new String[]{""}, true, 10));
+        fieldMap.put("Initial value", new VarexpTuple(237, "TF", new String[]{""}, new String[]{""}, true, 10));
+        fieldMap.put("Offset ", new VarexpTuple(238, "TF", new String[]{""}, new String[]{""}, true, 10));
+        fieldMap.put("Extraction Field", new VarexpTuple(239, "TF", new String[]{""}, new String[]{""}, true, 10));
+        return fieldMap;
     }
 
     @Override

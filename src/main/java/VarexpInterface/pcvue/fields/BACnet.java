@@ -92,8 +92,22 @@ public class BACnet extends VarexpVariable {
 
     @Override
     public Map<String, VarexpTuple> getFieldMap() {
-        //TODO: Impliment this when user actually uses this
-        return null;
+        fieldMap.put("Network Alias", new VarexpTuple(163, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Device alias", new VarexpTuple(164, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Object TYpe", new VarexpTuple(165, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Object Instance", new VarexpTuple(166, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Property", new VarexpTuple(167, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("FIelds", new VarexpTuple(168, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Frequency", new VarexpTuple(169, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Change of Value Type", new VarexpTuple(170, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Priority", new VarexpTuple(171, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("EDE file exist", new VarexpTuple(172, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("Reserved", new VarexpTuple(173, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("EDE file name", new VarexpTuple(204, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("EDE Keyname", new VarexpTuple(205, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("BACnet variable type", new VarexpTuple(218, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        fieldMap.put("BACnet alarm type", new VarexpTuple(219, "TF", new String[]{""}, new String[]{"0", "29"}, true, 2));
+        return fieldMap;
     }
 
     @Override
