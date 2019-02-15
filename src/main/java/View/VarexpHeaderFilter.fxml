@@ -1,49 +1,78 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-
 <?import com.jfoenix.controls.*?>
-<?import javafx.geometry.Insets?>
+<?import javafx.geometry.*?>
 <?import javafx.scene.control.ScrollPane?>
 <?import javafx.scene.layout.*?>
 <?import javafx.scene.text.Text?>
+<?import java.net.URL?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-            minWidth="-Infinity" prefHeight="400.0" prefWidth="800.0" xmlns="http://javafx.com/javafx/8.0.171">
-    <right>
-        <VBox prefHeight="200.0" prefWidth="150.0" BorderPane.alignment="CENTER">
-            <children>
-                <JFXButton fx:id="saveBtn" prefHeight="25.0" prefWidth="102.0" text="Save" textAlignment="CENTER"/>
-                <JFXButton fx:id="cancelBtn" prefHeight="25.0" prefWidth="99.0" text="Cancel" textAlignment="CENTER"/>
-                <JFXButton fx:id="clearBtn" layoutX="10.0" layoutY="10.0" prefHeight="25.0" prefWidth="112.0"
-                           text="Clear Filter" textAlignment="CENTER"/>
-            </children>
-        </VBox>
-    </right>
-    <left>
-        <VBox prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
-            <children>
-                <JFXListView>
-                    <VBox.margin>
-                        <Insets bottom="20.0" left="15.0" right="15.0" top="20.0"/>
-                    </VBox.margin>
-                </JFXListView>
-            </children>
-        </VBox>
-    </left>
-    <center>
-        <VBox prefHeight="400.0" prefWidth="358.0" BorderPane.alignment="CENTER">
-            <children>
-                <HBox prefHeight="100.0" prefWidth="200.0">
-                    <children>
-                        <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Text"/>
-                        <JFXTextArea fx:id="filterField" prefHeight="53.0" prefWidth="427.0"/>
-                    </children>
-                </HBox>
-                <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
-                    <children>
-                        <ScrollPane fx:id="scrollPane" prefHeight="300.0" prefWidth="502.0"/>
-                    </children>
-                </HBox>
-            </children>
-        </VBox>
-    </center>
+            minWidth="-Infinity" prefHeight="800.0"
+            prefWidth="1000.0" xmlns="http://javafx.com/javafx/8.0.171"
+            fx:controller="Controller.VarexpFilterSceneController">
+   <stylesheets>
+      <URL value="@CSS/defaultTheme.css"/>
+   </stylesheets>
+   <right>
+      <VBox prefHeight="200.0" prefWidth="150.0" BorderPane.alignment="CENTER">
+         <children>
+            <JFXButton fx:id="saveBtn" prefHeight="25.0" prefWidth="102.0" text="Save" textAlignment="CENTER">
+               <VBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+               </VBox.margin>
+            </JFXButton>
+            <JFXButton fx:id="cancelBtn" prefHeight="25.0" prefWidth="99.0" styleClass="cancelButton" text="Cancel"
+                       textAlignment="CENTER">
+               <VBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+               </VBox.margin>
+            </JFXButton>
+            <JFXButton fx:id="clearBtn" layoutX="10.0" layoutY="10.0" prefHeight="25.0" prefWidth="112.0"
+                       text="Clear Filter" textAlignment="CENTER">
+               <VBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+               </VBox.margin>
+            </JFXButton>
+         </children>
+      </VBox>
+   </right>
+   <left>
+      <VBox prefHeight="200.0" prefWidth="200.0" BorderPane.alignment="CENTER">
+         <children>
+            <JFXListView prefHeight="505.0" prefWidth="170.0">
+               <VBox.margin>
+                  <Insets bottom="20.0" left="15.0" right="15.0" top="20.0"/>
+               </VBox.margin>
+            </JFXListView>
+         </children>
+      </VBox>
+   </left>
+   <center>
+      <VBox prefHeight="400.0" prefWidth="358.0" BorderPane.alignment="CENTER">
+         <children>
+            <HBox prefHeight="50.0" prefWidth="200.0">
+               <children>
+                  <Text strokeType="OUTSIDE" strokeWidth="0.0" text="Filter" textAlignment="CENTER"/>
+                  <JFXTextArea fx:id="filterField" prefHeight="40.0" prefWidth="587.0">
+                     <HBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                     </HBox.margin>
+                  </JFXTextArea>
+               </children>
+               <VBox.margin>
+                  <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+               </VBox.margin>
+            </HBox>
+            <HBox prefHeight="100.0" prefWidth="200.0" VBox.vgrow="ALWAYS">
+               <children>
+                  <ScrollPane fx:id="scrollPane" prefHeight="740.0" prefWidth="663.0">
+                     <HBox.margin>
+                        <Insets/>
+                     </HBox.margin>
+                  </ScrollPane>
+               </children>
+            </HBox>
+         </children>
+      </VBox>
+   </center>
 </BorderPane>

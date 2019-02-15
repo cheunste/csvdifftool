@@ -2,7 +2,7 @@
  * Created by Stephen on 7/28/2018.
  */
 
-import Controller.ComparisonSceneController;
+import Controller.VarexpFilterSceneController;
 import VarexpInterface.PropertyManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
@@ -43,11 +43,16 @@ public class Main extends Application {
         //Load the document
         //Parent root = FXMLLoader.load(getClass().getResource("View/DBSelector.fxml"));
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("main/java/View/ComparisonGUI.fxml"));
-        Parent root = loader.load();
-        ComparisonSceneController comparisonSceneController = loader.getController();
-        comparisonSceneController.setCurrentWindow(window);
+        //FXMLLoader loader = new FXMLLoader(getClass().getResource("main/java/View/ComparisonGUI.fxml"));
+        //Parent root = loader.load();
+        //ComparisonSceneController comparisonSceneController = loader.getController();
+        //comparisonSceneController.setCurrentWindow(window);
+        //window.setScene(new Scene(root, 600, 400));
 
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("main/java/View/VarexpHeaderFilter.fxml"));
+        Parent root = loader.load();
+        VarexpFilterSceneController varexpFilterSceneController = loader.getController();
+        varexpFilterSceneController.setCurrentWindow(window);
         window.setScene(new Scene(root, 600, 400));
         window.show();
 
