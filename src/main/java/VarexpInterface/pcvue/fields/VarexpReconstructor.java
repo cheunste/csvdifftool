@@ -14,14 +14,16 @@ public class VarexpReconstructor {
 
         return result;
     }
+
     /**
      * This function reconstructs a Varexp Array from the database. It takes three Strings for each piece of the varexp.
-     * @param commonResult  The common varexp String from the database...along with its ID
-     * @param sourceResult  The source String. Can vary in length depending on variable
-     * @param  sourceVariableName The name of the source variable. This is so I don't have to perform another rquery
-     * @param commandResult The command String. Can vary in length depending on variable
+     *
+     * @param commonResult        The common varexp String from the database...along with its ID
+     * @param sourceResult        The source String. Can vary in length depending on variable
+     * @param sourceVariableName  The name of the source variable. This is so I don't have to perform another rquery
+     * @param commandResult       The command String. Can vary in length depending on variable
      * @param commandVariableName The name of the command variable.
-     * @param allAlarmResult This is the all_alarms string from the all_alamrms table
+     * @param allAlarmResult      This is the all_alarms string from the all_alamrms table
      */
     public static List<String> reconstructVarexpArray(String commonResult,
                                                       String commandResult, String commandVariableName,
@@ -116,5 +118,17 @@ public class VarexpReconstructor {
 
         //In the reconstructed Variable
         return reconstructedVarexpArray;
+    }
+
+    /**
+     * Reconstruct a VarexpVariable given a the table id and the databaseName
+     *
+     * @param idList:       A list of ids from the database that houses the VarexpVariable that needs to be reconstructed
+     * @param databaseName: Name of the database. For this case, it most likely would be "oldvarexpdb" and "newvarexpdb"
+     * @return A List of VarexpVariables
+     */
+    public List<String> reconstructVarexpTag(List<Integer> idList, String databaseName) {
+
+        return null;
     }
 }

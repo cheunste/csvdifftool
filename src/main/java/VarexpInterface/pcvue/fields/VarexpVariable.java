@@ -25,12 +25,11 @@ import java.util.Map;
  */
 
 public abstract class VarexpVariable {
+    public static int SOURCE_FIELD_NUM = 17;
+    public static int COMMAND_FIELD_NUM = 1;
     //Member variable. This represents the maximum amount of fields that PcVue will have.
     //IMPORTANT: If you do by chance need to add additional functionality, you MUST expand this FIELD_NUM field
     private static int FIELD_NUM = 250;
-    public static int SOURCE_FIELD_NUM = 17;
-    public static int COMMAND_FIELD_NUM = 1;
-
     //This is a member variable to the VarexpMap, fieldMap. This is used to store and pass certain details of the VarexpVariable
     public Map<String, VarexpTuple> fieldMap = new LinkedHashMap<>();
     //The name of the table. This is limited to 12 options (BIT, CMD, ALA, ACM, TSH, ATS, REG, CTV, CNT, CHR, TXT ,CXT), etc. Refer to the SQL file for details
@@ -38,15 +37,14 @@ public abstract class VarexpVariable {
     //This is the list you'll be using to keep track of what position a varexp variable uses;
     //TODO: Implement the associated method
     protected List<Integer> varexpPositionList = new ArrayList<Integer>();
-    //This is the same varexpArrayList, but splitted based on ','
-    private ArrayList<String> varexpArrayList = new ArrayList<>(FIELD_NUM);
-
     //return command and source positions
     //THis is used for the getVariableIdName. I'm too lazy to constantly type _variable_id over and over again
     protected String ID = "_variable_id";
+    //This is the same varexpArrayList, but splitted based on ','
+    private ArrayList<String> varexpArrayList = new ArrayList<>(FIELD_NUM);
 
     //return FIELD_NUM
-    public int getFieldNum() {
+    public static int getFieldNum() {
         return FIELD_NUM;
     }
 
