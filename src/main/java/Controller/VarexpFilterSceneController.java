@@ -5,6 +5,8 @@ import VarexpInterface.pcvue.fields.VarexpTuple;
 import VarexpInterface.pcvue.fields.VarexpVariable;
 import com.jfoenix.controls.JFXButton;
 import com.jfoenix.controls.JFXCheckBox;
+import javafx.collections.FXCollections;
+import javafx.collections.ObservableList;
 import javafx.fxml.FXML;
 import javafx.fxml.Initializable;
 import javafx.geometry.Pos;
@@ -37,6 +39,7 @@ public class VarexpFilterSceneController implements Initializable {
     private JFXButton cancelBtn;
     @FXML
     private JFXButton clearBtn;
+    private final int OFFSET = 1;
 
     //Member variables. All private
     private final int COLUMN_NUM = 4;
@@ -44,6 +47,9 @@ public class VarexpFilterSceneController implements Initializable {
     private final int FIELD_NUM_INDEX = 1;
     private final int DESCRIPTION_INDEX = 2;
     private final int CHECK_BOX_INDEX = 3;
+    @FXML
+    private JFXButton selectAllBtn;
+
     //Grid panes
     @FXML
     private GridPane col1;
@@ -53,11 +59,14 @@ public class VarexpFilterSceneController implements Initializable {
     private GridPane col3;
     @FXML
     private GridPane col4;
+
     //Scroll Pane
     @FXML
     private ScrollPane scrollPane;
     @FXML
     private HBox columnContainer;
+
+    //This is an ObservableList for filtering
 
     /**
      * This method initializes the GUI  by setting up button actions, event listeners, etc.
@@ -79,6 +88,8 @@ public class VarexpFilterSceneController implements Initializable {
         cancelBtn.setOnAction(e -> {
         });
         clearBtn.setOnAction(e -> {
+        });
+        selectAllBtn.setOnAction(e -> {
         });
 
         //Set up all the varexp field HBoxes
@@ -107,9 +118,20 @@ public class VarexpFilterSceneController implements Initializable {
          */
 
 
+        //TODO: Set up an observable list
         /*
-        TODO: ScrollPane
+        TODO: Think about filtering.
+        - You need to filter all of the columns
+        - Retain the checkboxes (this is kinda tricky as I'm assuming you'll have to recreate the column views after an onclick is executed);
+        - You need an observablist List. But what exactly are you adding into this list? The map you get from the call to VarexpVariable? Or something more?
+        - Do you ACTUALLY need this? Or are you trying to satisfy your ego? After all, this is most likely a one time deal
+
          */
+
+        ObservableList<Map<String, VarexpTuple>> data = FXCollections.observableArrayList();
+        ObservableList<Map<String, VarexpTuple>> sortedData = FXCollections.observableArrayList();
+
+        //Scroll pane set up
         scrollPane.setContent(columnContainer);
 
         /*
@@ -123,6 +145,7 @@ public class VarexpFilterSceneController implements Initializable {
 
         for (String variable : factory.listOfTables) {
             Map<String, VarexpTuple> variableFieldMap = factory.declareNewVariable(variable).getFieldMap();
+            data.add(variableFieldMap);
 
             for (String key : variableFieldMap.keySet()) {
                 //Get the position
@@ -136,6 +159,7 @@ public class VarexpFilterSceneController implements Initializable {
 
                 JFXCheckBox filterCheckbox = new JFXCheckBox();
                 filterCheckbox.setAlignment(Pos.CENTER_LEFT);
+
 
                 //Add all the above widgets into the VBOXes
                 if (columnCount <= ITEMS_PER_COLUMN) {
@@ -152,32 +176,40 @@ public class VarexpFilterSceneController implements Initializable {
                     System.out.println("Column 2: " + columnCount + " : " + (columnCount - ITEMS_PER_COLUMN) + " : " + key);
 
                     //col2.add(filterHBox,1,0);
-                    col2.add(fieldNum, FIELD_NUM_INDEX, columnCount - (ITEMS_PER_COLUMN));
-                    col2.add(fieldDescription, DESCRIPTION_INDEX, columnCount - (ITEMS_PER_COLUMN));
-                    col2.add(filterCheckbox, CHECK_BOX_INDEX, columnCount - (ITEMS_PER_COLUMN));
+                    col2.add(fieldNum, FIELD_NUM_INDEX, columnCount - (ITEMS_PER_COLUMN) - OFFSET);
+                    col2.add(fieldDescription, DESCRIPTION_INDEX, columnCount - (ITEMS_PER_COLUMN) - OFFSET);
+                    col2.add(filterCheckbox, CHECK_BOX_INDEX, columnCount - (ITEMS_PER_COLUMN) - OFFSET);
                 } else if (columnCount <= (3 * ITEMS_PER_COLUMN) &&
                         columnCount > (2 * ITEMS_PER_COLUMN)
                 ) {
                     System.out.println("Column 3: " + columnCount + " : " + (columnCount - (2 * ITEMS_PER_COLUMN)) + " : " + key);
                     //col3.add(filterHBox,1,0);
 
-                    col3.add(fieldNum, FIELD_NUM_INDEX, columnCount - (2 * ITEMS_PER_COLUMN));
-                    col3.add(fieldDescription, DESCRIPTION_INDEX, columnCount - (2 * ITEMS_PER_COLUMN));
-                    col3.add(filterCheckbox, CHECK_BOX_INDEX, columnCount - (2 * ITEMS_PER_COLUMN));
+                    col3.add(fieldNum, FIELD_NUM_INDEX, columnCount - (2 * ITEMS_PER_COLUMN) - OFFSET);
+                    col3.add(fieldDescription, DESCRIPTION_INDEX, columnCount - (2 * ITEMS_PER_COLUMN) - OFFSET);
+                    col3.add(filterCheckbox, CHECK_BOX_INDEX, columnCount - (2 * ITEMS_PER_COLUMN) - OFFSET);
                 } else {
                     System.out.println("Column 4: " + columnCount + " : " + (columnCount - (3 * ITEMS_PER_COLUMN)) + " : " + key);
                     //col4.add(filterHBox,1,0);
-                    col4.add(fieldNum, FIELD_NUM_INDEX, columnCount - (3 * ITEMS_PER_COLUMN));
-                    col4.add(fieldDescription, DESCRIPTION_INDEX, columnCount - (3 * ITEMS_PER_COLUMN));
-                    col4.add(filterCheckbox, CHECK_BOX_INDEX, columnCount - (3 * ITEMS_PER_COLUMN));
+                    col4.add(fieldNum, FIELD_NUM_INDEX, columnCount - (3 * ITEMS_PER_COLUMN) - OFFSET);
+                    col4.add(fieldDescription, DESCRIPTION_INDEX, columnCount - (3 * ITEMS_PER_COLUMN) - OFFSET);
+                    col4.add(filterCheckbox, CHECK_BOX_INDEX, columnCount - (3 * ITEMS_PER_COLUMN) - OFFSET);
                 }
                 columnCount++;
             }
         }
+
+        System.out.println(data);
     }
 
     //This is used to keep track of prvevious stages so I can close them later
     public void setCurrentWindow(Stage window) {
         this.currentWindow = window;
+    }
+
+
+    //function that clears up the Observable Array
+    private void dataCleanup() {
+
     }
 }

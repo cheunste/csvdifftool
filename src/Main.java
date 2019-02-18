@@ -53,7 +53,7 @@ public class Main extends Application {
         Parent root = loader.load();
         VarexpFilterSceneController varexpFilterSceneController = loader.getController();
         varexpFilterSceneController.setCurrentWindow(window);
-        window.setScene(new Scene(root, 600, 400));
+        window.setScene(new Scene(root, 1500, 800));
         window.show();
 
     }
