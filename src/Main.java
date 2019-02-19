@@ -54,6 +54,7 @@ public class Main extends Application {
         VarexpFilterSceneController varexpFilterSceneController = loader.getController();
         varexpFilterSceneController.setCurrentWindow(window);
         window.setScene(new Scene(root, 1500, 800));
+
         window.show();
 
     }

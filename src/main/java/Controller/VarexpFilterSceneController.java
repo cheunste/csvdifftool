@@ -20,6 +20,8 @@ import javafx.stage.Stage;
 import java.net.URL;
 import java.util.Map;
 import java.util.ResourceBundle;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 /*
 
@@ -31,22 +33,20 @@ the old PcVue config and the new PcVue configs
  */
 public class VarexpFilterSceneController implements Initializable {
 
-    Stage currentWindow;
-
-    @FXML
-    private JFXButton saveBtn;
-    @FXML
-    private JFXButton cancelBtn;
-    @FXML
-    private JFXButton clearBtn;
     private final int OFFSET = 1;
-
     //Member variables. All private
     private final int COLUMN_NUM = 4;
     private final int ITEMS_PER_COLUMN = VarexpVariable.getFieldNum() / COLUMN_NUM;
     private final int FIELD_NUM_INDEX = 1;
     private final int DESCRIPTION_INDEX = 2;
     private final int CHECK_BOX_INDEX = 3;
+    Stage currentWindow;
+    @FXML
+    private JFXButton saveBtn;
+    @FXML
+    private JFXButton cancelBtn;
+    @FXML
+    private JFXButton clearBtn;
     @FXML
     private JFXButton selectAllBtn;
 
@@ -66,7 +66,8 @@ public class VarexpFilterSceneController implements Initializable {
     @FXML
     private HBox columnContainer;
 
-    //This is an ObservableList for filtering
+    //This is an ordered Map. Its main purpose is to store the position and the field description of the PcVue field
+    private SortedMap<Integer, String> sm = new TreeMap<Integer, String>();
 
     /**
      * This method initializes the GUI  by setting up button actions, event listeners, etc.
@@ -140,9 +141,7 @@ public class VarexpFilterSceneController implements Initializable {
          */
         VarexpFactory factory = new VarexpFactory();
 
-        int columnCount = 0;
-        int temp = 0;
-
+        //This is to create a more sorted observable map
         for (String variable : factory.listOfTables) {
             Map<String, VarexpTuple> variableFieldMap = factory.declareNewVariable(variable).getFieldMap();
             data.add(variableFieldMap);
@@ -150,56 +149,12 @@ public class VarexpFilterSceneController implements Initializable {
             for (String key : variableFieldMap.keySet()) {
                 //Get the position
                 int position = (Integer) variableFieldMap.get(key).getPosition();
-
-                Label fieldNum = new Label(Integer.toString(position));
-                fieldNum.setTextAlignment(TextAlignment.LEFT);
-
-                Label fieldDescription = new Label(key);
-                fieldDescription.setTextAlignment(TextAlignment.CENTER);
-
-                JFXCheckBox filterCheckbox = new JFXCheckBox();
-                filterCheckbox.setAlignment(Pos.CENTER_LEFT);
-
-
-                //Add all the above widgets into the VBOXes
-                if (columnCount <= ITEMS_PER_COLUMN) {
-
-                    System.out.println("Column 1: " + columnCount + " : " + key);
-                    //col1.add(filterHBox,1,columnCount);
-                    col1.add(fieldNum, FIELD_NUM_INDEX, columnCount);
-                    col1.add(fieldDescription, DESCRIPTION_INDEX, columnCount);
-                    col1.add(filterCheckbox, CHECK_BOX_INDEX, columnCount);
-                } else if (columnCount <= (2 * ITEMS_PER_COLUMN) &&
-                        columnCount > ITEMS_PER_COLUMN
-
-                ) {
-                    System.out.println("Column 2: " + columnCount + " : " + (columnCount - ITEMS_PER_COLUMN) + " : " + key);
-
-                    //col2.add(filterHBox,1,0);
-                    col2.add(fieldNum, FIELD_NUM_INDEX, columnCount - (ITEMS_PER_COLUMN) - OFFSET);
-                    col2.add(fieldDescription, DESCRIPTION_INDEX, columnCount - (ITEMS_PER_COLUMN) - OFFSET);
-                    col2.add(filterCheckbox, CHECK_BOX_INDEX, columnCount - (ITEMS_PER_COLUMN) - OFFSET);
-                } else if (columnCount <= (3 * ITEMS_PER_COLUMN) &&
-                        columnCount > (2 * ITEMS_PER_COLUMN)
-                ) {
-                    System.out.println("Column 3: " + columnCount + " : " + (columnCount - (2 * ITEMS_PER_COLUMN)) + " : " + key);
-                    //col3.add(filterHBox,1,0);
-
-                    col3.add(fieldNum, FIELD_NUM_INDEX, columnCount - (2 * ITEMS_PER_COLUMN) - OFFSET);
-                    col3.add(fieldDescription, DESCRIPTION_INDEX, columnCount - (2 * ITEMS_PER_COLUMN) - OFFSET);
-                    col3.add(filterCheckbox, CHECK_BOX_INDEX, columnCount - (2 * ITEMS_PER_COLUMN) - OFFSET);
-                } else {
-                    System.out.println("Column 4: " + columnCount + " : " + (columnCount - (3 * ITEMS_PER_COLUMN)) + " : " + key);
-                    //col4.add(filterHBox,1,0);
-                    col4.add(fieldNum, FIELD_NUM_INDEX, columnCount - (3 * ITEMS_PER_COLUMN) - OFFSET);
-                    col4.add(fieldDescription, DESCRIPTION_INDEX, columnCount - (3 * ITEMS_PER_COLUMN) - OFFSET);
-                    col4.add(filterCheckbox, CHECK_BOX_INDEX, columnCount - (3 * ITEMS_PER_COLUMN) - OFFSET);
-                }
-                columnCount++;
+                String fieldDescription = key;
+                sm.put(position, fieldDescription);
             }
         }
 
-        System.out.println(data);
+        renderColumns();
     }
 
     //This is used to keep track of prvevious stages so I can close them later
@@ -211,5 +166,65 @@ public class VarexpFilterSceneController implements Initializable {
     //function that clears up the Observable Array
     private void dataCleanup() {
 
+    }
+
+
+    //This method renders the PcVue fields onto the JavaFX Filter GUI
+    private void renderColumns() {
+        int columnCount = 0;
+        for (int fieldPosition : sm.keySet()) {
+
+            System.out.println(fieldPosition + " : " + sm.get(fieldPosition));
+            String fieldDescriptionText = sm.get(fieldPosition);
+
+            Label fieldNum = new Label(Integer.toString(fieldPosition));
+            fieldNum.setTextAlignment(TextAlignment.LEFT);
+            fieldNum.setAlignment(Pos.CENTER_LEFT);
+
+            Label fieldDescription = new Label(fieldDescriptionText);
+            fieldDescription.setTextAlignment(TextAlignment.CENTER);
+            fieldDescription.setAlignment(Pos.CENTER);
+
+            JFXCheckBox filterCheckbox = new JFXCheckBox();
+            filterCheckbox.setAlignment(Pos.CENTER);
+            //This is important. This gives the checkbox a unique fx:id
+            filterCheckbox.setId("checkBoxFieldNum" + fieldPosition);
+
+            //Add all the above widgets into the VBOXes
+            if (columnCount <= ITEMS_PER_COLUMN) {
+
+                System.out.println("Column 1: " + fieldPosition + " : " + fieldDescriptionText);
+                //col1.add(filterHBox,1,fieldPosition);
+                col1.add(fieldNum, FIELD_NUM_INDEX, fieldPosition);
+                col1.add(fieldDescription, DESCRIPTION_INDEX, fieldPosition);
+                col1.add(filterCheckbox, CHECK_BOX_INDEX, fieldPosition);
+            } else if (columnCount <= (2 * ITEMS_PER_COLUMN) &&
+                    columnCount > ITEMS_PER_COLUMN
+
+            ) {
+                System.out.println("Column 2: " + fieldPosition + " : " + (fieldPosition - ITEMS_PER_COLUMN) + " : " + fieldDescriptionText);
+
+                //col2.add(filterHBox,1,0);
+                col2.add(fieldNum, FIELD_NUM_INDEX, fieldPosition - (ITEMS_PER_COLUMN) - OFFSET);
+                col2.add(fieldDescription, DESCRIPTION_INDEX, fieldPosition - (ITEMS_PER_COLUMN) - OFFSET);
+                col2.add(filterCheckbox, CHECK_BOX_INDEX, fieldPosition - (ITEMS_PER_COLUMN) - OFFSET);
+            } else if (columnCount <= (3 * ITEMS_PER_COLUMN) &&
+                    columnCount > (2 * ITEMS_PER_COLUMN)
+            ) {
+                System.out.println("Column 3: " + fieldPosition + " : " + (fieldPosition - (2 * ITEMS_PER_COLUMN)) + " : " + fieldDescriptionText);
+                //col3.add(filterHBox,1,0);
+
+                col3.add(fieldNum, FIELD_NUM_INDEX, fieldPosition - (2 * ITEMS_PER_COLUMN) - OFFSET);
+                col3.add(fieldDescription, DESCRIPTION_INDEX, fieldPosition - (2 * ITEMS_PER_COLUMN) - OFFSET);
+                col3.add(filterCheckbox, CHECK_BOX_INDEX, fieldPosition - (2 * ITEMS_PER_COLUMN) - OFFSET);
+            } else {
+                System.out.println("Column 4: " + fieldPosition + " : " + (fieldPosition - (3 * ITEMS_PER_COLUMN)) + " : " + fieldDescriptionText);
+                //col4.add(filterHBox,1,0);
+                col4.add(fieldNum, FIELD_NUM_INDEX, fieldPosition - (3 * ITEMS_PER_COLUMN) - OFFSET);
+                col4.add(fieldDescription, DESCRIPTION_INDEX, fieldPosition - (3 * ITEMS_PER_COLUMN) - OFFSET);
+                col4.add(filterCheckbox, CHECK_BOX_INDEX, fieldPosition - (3 * ITEMS_PER_COLUMN) - OFFSET);
+            }
+            columnCount++;
+        }
     }
 }
