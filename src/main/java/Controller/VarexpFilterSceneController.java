@@ -49,6 +49,14 @@ public class VarexpFilterSceneController implements Initializable {
     private JFXButton clearBtn;
     @FXML
     private JFXButton selectAllBtn;
+    @FXML
+    private JFXButton openFilterBtn;
+    @FXML
+    private JFXButton copyFilterBtn;
+    @FXML
+    private JFXButton deleteFilterBtn;
+    @FXML
+    private JFXButton createFilterBtn;
 
     //Grid panes
     @FXML
@@ -84,6 +92,7 @@ public class VarexpFilterSceneController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
 
+        //The right pane buttons
         saveBtn.setOnAction(e -> {
         });
         cancelBtn.setOnAction(e -> {
@@ -92,13 +101,24 @@ public class VarexpFilterSceneController implements Initializable {
         });
         selectAllBtn.setOnAction(e -> {
         });
+        createFilterBtn.setOnAction(e -> {
+        });
+
+        //The three left pane buttons
+        openFilterBtn.setOnAction(e -> {
+        });
+        copyFilterBtn.setOnAction(e -> {
+        });
+        deleteFilterBtn.setOnAction(e -> {
+        });
+
 
         //Set up all the varexp field HBoxes
         /*
         TODO: THe following
-        1) Get the field number as well as field name
-        2) Create a HBox
-        3) Stuff the HBoxes into the Grid View. Note that there are four columns, so divide them equally
+        X) Get the field number as well as field name
+        X) Create a HBox
+        X) Stuff the HBoxes into the Grid View. Note that there are four columns, so divide them equally
         4) Have a way to map and store all of the filters into the property file...or another file
          */
 
@@ -161,13 +181,6 @@ public class VarexpFilterSceneController implements Initializable {
     public void setCurrentWindow(Stage window) {
         this.currentWindow = window;
     }
-
-
-    //function that clears up the Observable Array
-    private void dataCleanup() {
-
-    }
-
 
     //This method renders the PcVue fields onto the JavaFX Filter GUI
     private void renderColumns() {
