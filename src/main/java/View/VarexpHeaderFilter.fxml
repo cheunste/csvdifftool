@@ -7,8 +7,7 @@
 <?import javafx.scene.text.Text?>
 <?import java.net.URL?>
 <BorderPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
-            minWidth="-Infinity"
-            prefHeight="800.0" prefWidth="1500.0" xmlns="http://javafx.com/javafx/8.0.171"
+            minWidth="-Infinity" prefHeight="800.0" prefWidth="1500.0" xmlns="http://javafx.com/javafx/8.0.171"
             fx:controller="Controller.VarexpFilterSceneController">
     <stylesheets>
         <URL value="@CSS/defaultTheme.css"/>
@@ -28,13 +27,19 @@
                     </VBox.margin>
                 </JFXButton>
                 <JFXButton fx:id="clearBtn" layoutX="10.0" layoutY="10.0" prefHeight="25.0" prefWidth="112.0"
-                           text="Clear Filter" textAlignment="CENTER">
+                           text="Clear All" textAlignment="CENTER">
                     <VBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                     </VBox.margin>
                 </JFXButton>
                 <JFXButton fx:id="selectAllBtn" layoutX="10.0" layoutY="10.0" prefHeight="25.0" prefWidth="112.0"
                            text="Select All" textAlignment="CENTER">
+                    <VBox.margin>
+                        <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
+                    </VBox.margin>
+                </JFXButton>
+                <JFXButton fx:id="createFilterBtn" layoutX="15.0" layoutY="156.0" prefHeight="25.0" prefWidth="112.0"
+                           text="Create Filter" textAlignment="CENTER">
                     <VBox.margin>
                         <Insets bottom="5.0" left="5.0" right="5.0" top="5.0"/>
                     </VBox.margin>
@@ -50,6 +55,24 @@
                         <Insets bottom="20.0" left="15.0" right="15.0" top="20.0"/>
                     </VBox.margin>
                 </JFXListView>
+                <JFXButton fx:id="openFilterBtn" prefHeight="37.0" prefWidth="169.0" text="Open Filter"
+                           textAlignment="CENTER">
+                    <VBox.margin>
+                        <Insets bottom="5.0" left="15.0" right="15.0" top="5.0"/>
+                    </VBox.margin>
+                </JFXButton>
+                <JFXButton fx:id="copyFilterBtn" layoutX="25.0" layoutY="560.0" prefHeight="37.0" prefWidth="169.0"
+                           text="Copy Filter" textAlignment="CENTER">
+                    <VBox.margin>
+                        <Insets bottom="5.0" left="15.0" right="15.0" top="5.0"/>
+                    </VBox.margin>
+                </JFXButton>
+                <JFXButton fx:id="deleteFilterBtn" layoutX="25.0" layoutY="560.0" prefHeight="37.0" prefWidth="169.0"
+                           styleClass="cancel-button" text="Delete Filter" textAlignment="CENTER">
+                    <VBox.margin>
+                        <Insets bottom="5.0" left="15.0" right="15.0" top="5.0"/>
+                    </VBox.margin>
+                </JFXButton>
             </children>
         </VBox>
     </left>
@@ -80,8 +103,8 @@
                                             <children>
                                                 <VBox>
                                                     <children>
-                                                        <GridPane fx:id="col1" HBox.hgrow="ALWAYS" VBox.vgrow="ALWAYS"
-                                                                  hgap="5.0">
+                                                        <GridPane fx:id="col1" hgap="5.0" HBox.hgrow="ALWAYS"
+                                                                  VBox.vgrow="ALWAYS">
                                                             <columnConstraints>
                                                                 <ColumnConstraints hgrow="ALWAYS" minWidth="-Infinity"/>
                                                                 <ColumnConstraints hgrow="ALWAYS" minWidth="-Infinity"/>
@@ -101,7 +124,7 @@
                                                     </HBox.margin>
                                                 </VBox>
                                                 <VBox>
-                                                    <GridPane fx:id="col2" VBox.vgrow="ALWAYS" hgap="5.0">
+                                                    <GridPane fx:id="col2" hgap="5.0" VBox.vgrow="ALWAYS">
                                                         <columnConstraints>
                                                             <ColumnConstraints fillWidth="true" hgrow="NEVER"
                                                                                minWidth="-Infinity"/>
@@ -123,7 +146,7 @@
                                                 </VBox>
                                                 <VBox>
                                                     <children>
-                                                        <GridPane fx:id="col3" VBox.vgrow="ALWAYS" hgap="5.0">
+                                                        <GridPane fx:id="col3" hgap="5.0" VBox.vgrow="ALWAYS">
                                                             <columnConstraints>
                                                                 <ColumnConstraints hgrow="ALWAYS" minWidth="-Infinity"/>
                                                                 <ColumnConstraints hgrow="NEVER" minWidth="-Infinity"/>
@@ -143,7 +166,7 @@
                                                     </HBox.margin>
                                                 </VBox>
                                                 <VBox>
-                                                    <GridPane fx:id="col4" VBox.vgrow="ALWAYS" hgap="5.0">
+                                                    <GridPane fx:id="col4" hgap="5.0" VBox.vgrow="ALWAYS">
                                                         <columnConstraints>
                                                             <ColumnConstraints hgrow="ALWAYS" minWidth="-Infinity"/>
                                                             <ColumnConstraints hgrow="NEVER" minWidth="-Infinity"/>
