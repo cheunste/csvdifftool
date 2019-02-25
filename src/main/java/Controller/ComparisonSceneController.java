@@ -120,7 +120,7 @@ public class ComparisonSceneController implements Initializable {
         //Get the properties in the properties file
         PropertyManager pm = new PropertyManager();
         try {
-            pm.getPropertyValues();
+            PropertyManager.getPropertyValues();
         } catch (IOException e) {
         }
 
@@ -294,8 +294,21 @@ public class ComparisonSceneController implements Initializable {
 
     public String getFilePath(Stage stage) {
         FileChooser fileChooser = new FileChooser();
+
+        //For Directory
+        String userDirectoryString = System.getProperty("user.dir");
+        File userDirectory = new File(userDirectoryString);
+
+        if (!userDirectory.canRead()) {
+            userDirectory = new File("C:/");
+        }
+        fileChooser.setInitialDirectory(userDirectory);
+
+
         fileChooser.setTitle("Open Config");
-        File configFile = fileChooser.showOpenDialog(stage);
+        //File configFile = fileChooser.showOpenDialog(stage);
+        File configFile = fileChooser.showOpenDialog(null);
+
         return configFile.getAbsolutePath();
     }
 

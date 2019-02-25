@@ -21,6 +21,7 @@ public class ComparisonTest {
     private static String matrikonDB;
     private static String resultDB;
     private static List<String> databaseList;
+    private static List<String> testNameList;
 
     private static final int MAX_THREADS = 2;
 
@@ -708,6 +709,7 @@ public class ComparisonTest {
         ComparisonTest.resultDB = resultDB;
 
         databaseList = new ArrayList<>();
+        testNameList = new ArrayList<>();
 
         databaseList.add(matrikonDB);
         databaseList.add(newConfigDB);
@@ -726,6 +728,17 @@ public class ComparisonTest {
         testList.add(internalTest);
         testList.add(producerTest);
 
+
+        testNameList.add(0, "testMatchTest");
+        testNameList.add(1, "descriptionTest");
+        testNameList.add(2, "digitalsTest");
+        testNameList.add(3, "unitsTest");
+        testNameList.add(4, "analogRatioTest");
+        testNameList.add(5, "dnp3TypeTest");
+        testNameList.add(6, "sourceTest");
+        testNameList.add(7, "ctvRangeTest");
+        testNameList.add(8, "internalTest");
+        testNameList.add(9, "producerTest");
     }
 
     /*
@@ -741,10 +754,12 @@ public class ComparisonTest {
             testService = Executors.newFixedThreadPool(MAX_THREADS);
         }
 
+        int testNumber = 0;
         for (String test : testList) {
-            log.info("Executing test: " + test);
+            log.info("Executing test: " + testNameList.get(testNumber));
             testService.submit(new testExecutorHelper(resultDB, test));
-            log.info("Finished test:" + test);
+            log.info("Finished test:" + testNameList.get(testNumber));
+            testNumber++;
         }
         testService.shutdown();
 
