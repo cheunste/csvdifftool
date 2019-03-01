@@ -18,8 +18,34 @@ to be updated as such
 
 - Make sure the MySQL installation has write access to an output folder. To
   double check this, do the following:
+    * Right click on the output folder
+    * Select the security tab
+    * Make sure The Users Group have _Modify_ and _Write_ access
+
+- Disable the Secure-Priv File option in mysql.
+  Because of how I use MySQL itself to write the output, you have to disable the secure-priv option in MySQL's my.ini file. To do this, do the following:
+    * Open up the my.ini file in "C:\ProgramData\MySQL\MySQL Server 8.0\"
+        * Note that if the file isn't there, then it might be installed else where depending on installation.
+         To find out where it is, open the mysql terminal window and enter the following:
+            - show variables like "%datadir%";
+            - Go to the directory outputed from the terminal
+
+    * Remove the content between the two quotation marks.
+       ie change secure-file-priv="C:/ProgramData/MySQL/MySQL Server 8.0/Uploads to secure-file-priv=""
+    * Restart the MySQL service in services.msc
+
+- Change Excel Columns to use Numbers instead of Letters (Optional):
+    This isn't required, but because of there are too many columns to a varexp file and refering them by letter isn't
+    helpful.
+
+    To do this:
+    1) File -> Options
+    2) Select Formulas
+    3) Under the "Working with formulas" section, select the "R1C1 reference style" checkbox
 
 ## Basic Usage
+
+### Execution
 
 - Copy the Folder "VarexpComparison" from "\\files.wosrpt.us\NCC-ACC\Stephen C\varexp\" to anywhere on
   PT1-SV-GEPORA (or any other machine on WOSRPT). This is where the latest
@@ -34,6 +60,12 @@ version should be until further notice
   choosing
 
 - Click the Compare! button and let it run
+
+### Post-Execution
+- Open up the output.csv file (preferably in libreoffice)
+- Set Freeze pane on the header
+- Perform a 'left align' on the comments section. **If you don't do this, none of the comments will show up in excel**
+-
 
 ## Tests Columns in the Result File
 
@@ -64,49 +96,49 @@ config
 
 ### Tests
 
-  * Tag Name Test: This tests matches the tag name between the three config
+  * **Tag Name Test**: This tests matches the tag name between the three config
     files. 
 	* PASS: If the concatenated OPC tag name matches between the old, new
 	  and matrikon config
 	* FAIL: If the concatenated OPC tag is missing in matrikon or the old
 	  config
 
-  * Description Test: Test to check the description (columns 10,11) between the old config and
+  * **Description Test**: Test to check the description (columns 10,11) between the old config and
     new config
 	* PASS: If the description matches (word for word)
 	* FAIL: If the description doesn't match
 
-  * Digitals Test: **Used for digital tags only**. Test to see if columns 40,41,42,43,45 and 46
+  * **Digitals Test**: __Used for digital tags only__ Test to see if columns 40,41,42,43,45 and 46
     matches between the old config and the new config
 	* PASS: If the content in the noted columns matches between the old
 	  and new config for an OPC tag
 	* FAIL: Otherwise
 
-  * Units Test: **Used for analog tags only**. Test to see if the units
+  * **Units Test**: __Used for analog tags only__. Test to see if the units
     (column 60) matches between the new config and the matrikon config matches
 	* PASS: If the units matches between the new and old config
 	* FAIL: Otherwise
 
-  * Analogs Minimum Ratio Test: **Used for analog tags only**. Test to see if the ratio of min equip value and min display values in PcVue is equal to the same ratio in the matrikon config (columns 65/62 = columns J/L).
+  * **Analogs Minimum Ratio Test**: __Used for analog tags only__ Test to see if the ratio of min equip value and min display values in PcVue is equal to the same ratio in the matrikon config (columns 65/62 = columns J/L).
 	**Note that min equap value (col 62) can be zero, which may cause some
 ambiguity**
 	* PASS: If the ratio matches
 	* FAIL: Otherwise
 
-  * Analogs Maximum  Ratio Test: **Used for analog tags only**: Test to see if
+  * **Analogs Maximum  Ratio Test**: __Used for analog tags only__ Test to see if
     the ratio of max equip value and max display values in PcVue is equal to
 the same ratio in the matrikon config (columns 66/63 = columns I/K).
 	* PASS: If the ratio matches
 	* FAIL: Otherwise
 
-  * Type Test: **Used only for OPC/DNP3 Tags**. 
+  * **Type Test**: __Used only for OPC/DNP3 Tags.__
 	Test to see if tags with source 'O' in old config have been changed to
 '3' in the new config
 	* PASS: If a tag with source 'O' in the old config have been updated
 	  with source '3' in the new config
 	* FAIL: Otherwise
 
-  * OPC DNP3 Source Test: **Used only for OPC tags**
+  * **OPC DNP3 Source Test**: __Used only for OPC tags__
 	Test  if the full SEL path in the new config (column 208,209,210,211) matches with the SEL path
 in the matrikon config (Column C)
 	* PASS: if the OPC tag is found in the matrikon file and the
@@ -114,19 +146,19 @@ in the matrikon config (Column C)
 config
 	* FAIL: Otherwise
 
-  * Commandable Range Test: **Used for CTV Tags only and only in new config**
+  * **Commandable Range Test**: __Used for CTV Tags only and only in new config__
 	Checks the commandable range in column 70,71 matches with
 columns 62 and 63 in the new config file
 	* PASS: For a CTV tag If columns 70 matches with 62 and column 71 matches with 63.
 	* FAIL: Otherwise
 
-  * Internal Type Check Test: **Used for Internal tags only**
+  * **Internal Type Check Test**: __Used for Internal tags only__
 	Checks to see if the interanl tags between the new config and the old
 config still matches
 	* PASS: If there has been no change in internal tag
 	* FAIL: Otherwise
 
-  * Producer Test: **used only for internal tags** Test to see if the Producer matches between the new config
+  * **Producer Test**: __used only for internal tags__ Test to see if the Producer matches between the new config
     and old config (Column 28). However, because the station this field varies between field and
 FEs, what this test actually does is compare to see if the station matches and
 if the station number matches. (Ex: ST08 compare with WF08 will result in a
