@@ -13,7 +13,7 @@ The Varexp Interface is currently a tool that allows a user to compare between s
 
 - A production account called "Production" created on MySQL. You can
   technically call it something else, but if you do, the properties.xml file
-(more on this in ABOUT_PROPERTIES) needs
+(more on this in Properties) needs
 to be updated as such
 
 - Make sure the MySQL installation has write access to an output folder. To
@@ -24,7 +24,7 @@ to be updated as such
 - Copy the Folder "VarexpComparison" from "\\files.wosrpt.us\NCC-ACC\Stephen C\varexp\" to anywhere on
   PT1-SV-GEPORA (or any other machine on WOSRPT). This is where the latest
 version should be until further notice
-- Update the properties.xml file if needed (More on this in ABOUT_PROPERTIES)
+- Update the properties.xml file if needed (More on this in Properties)
 - Double click on the VarexpInterface.jar file 
 - Click on the Old Config button and open up the PcVue 9 varexp file of your
   choosing
@@ -135,7 +135,7 @@ pass)
 	  internal and the 'station' matches
 	* FAIL: Otherwise
 
-## ABOUT_PROPERTIES
+## Properties
 
 The properties file is a basic configuration file for the VarexpInterface.jar
 file. More importantly, the VarexpInterface.jar might not work correctly
