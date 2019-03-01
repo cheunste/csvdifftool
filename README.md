@@ -1,5 +1,7 @@
 # Varexp Interface
 
+The Varexp Interface is currently a tool that allows a user to compare between several Varexp.txt config files and a Matrikon config file and conduct a series of tests.
+
 ## Prerequities 
 
 ### Required Software Installation:
