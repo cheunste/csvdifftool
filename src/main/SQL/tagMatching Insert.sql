@@ -205,10 +205,10 @@ Update resultOutput.resultTable result,
 ) as TagNameTable
 set 
 	result.`Tag Name Test` = if((newSource like "E" OR newSource like "I") OR (newTagName = oldTagName and newTagName = matrikonTagName) ,'PASS','FAIL'),	
-    result.`Comment` = if(matrikonTagName is null, concat(result.`Comment`,"\nTag doesn't exist in matrikon config"), result.`Comment`),
+    result.`Comment` = if(matrikonTagName is null AND NOT (newSource like "E" OR newSource like "I"), concat(result.`Comment`,"\nTag doesn't exist in matrikon config"), result.`Comment`),
     result.`Comment` = if(oldTagName is null, concat(result.`Comment`,"\nTag doesn't exist in old config"), result.`Comment`),
     result.`Comment` = if(newTagName != oldTagName and oldTagName is not null,concat(result.`Comment`,"\nNew Tag doesn't match with old config"), result.`Comment`),
-    result.`Comment` = if(newTagName != matrikonTagName and matrikonTagName is not null,concat(result.`Comment`,"\nNew Tag doesn't match with matrikon config"), result.`Comment`)
+    result.`Comment` = if(newTagName != matrikonTagName and matrikonTagName is not null AND NOT (newSource like "E" OR newSource like "I"),concat(result.`Comment`,"\nNew Tag doesn't match with matrikon config"), result.`Comment`)
 where result.tagName = TagNameTable.newTagName;
 
 select * from resultoutput.resulttable;
