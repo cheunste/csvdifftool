@@ -5,6 +5,9 @@ Checks to see if the tagName matches between all three databases, then the resul
 
 That being said, it really should only check the matrikon tag if the PcVue tag is DNP3 or OPC
 
+Update rule exceptions:
+
+Excludes checking Internal and Equipment variables
 */                 
 select * from outputvarexpdb.result;
 
@@ -174,19 +177,19 @@ select newTagName,if(newTagName=oldTagName and newTagName=matrikonTagName,'PASS'
     
 Update resultOutput.resultTable result,
 (
-	select *
-	from
+	select * 
+    from
 	(
-		select newConfigTable.newVariableId, oldConfigTable.oldVariableId,newConfigTable.newTagName, oldConfigTable.oldTagName
+		select newConfigTable.newVariableId, oldConfigTable.oldVariableId, newConfigTable.newSource, oldConfigTable.oldSource, newConfigTable.newTagName, oldConfigTable.oldTagName
 		from
 		(
-			select variable_id as newVariableId,trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as newTagName
+			select variable_id as newVariableId, source as newSource, trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as newTagName
 			from newvarexpdb.common as common
 		order by newTagName
 		) as newConfigTable
 		left join  
 		(
-			select variable_id as oldVariableId,trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as oldTagName
+			select variable_id as oldVariableId, source as oldSource, trim(TRAILING '.' FROM concat(common.1st_element,'.',common.2nd_element,'.',common.3rd_element,'.',common.4th_element,'.',common.5th_element,'.',common.6th_element,'.',common.7th_to_12th)) as oldTagName
 			from oldvarexpdb.common as common
 		order by oldTagName
 		) as oldConfigTable
@@ -201,14 +204,14 @@ Update resultOutput.resultTable result,
 	on tempTable1.newTagName = matrikonTagName
 ) as TagNameTable
 set 
-	result.`Tag Name Test` = if(newTagName = oldTagName and newTagName = matrikonTagName ,'PASS','FAIL'),	
+	result.`Tag Name Test` = if((newSource like "E" OR newSource like "I") OR (newTagName = oldTagName and newTagName = matrikonTagName) ,'PASS','FAIL'),	
     result.`Comment` = if(matrikonTagName is null, concat(result.`Comment`,"\nTag doesn't exist in matrikon config"), result.`Comment`),
     result.`Comment` = if(oldTagName is null, concat(result.`Comment`,"\nTag doesn't exist in old config"), result.`Comment`),
     result.`Comment` = if(newTagName != oldTagName and oldTagName is not null,concat(result.`Comment`,"\nNew Tag doesn't match with old config"), result.`Comment`),
     result.`Comment` = if(newTagName != matrikonTagName and matrikonTagName is not null,concat(result.`Comment`,"\nNew Tag doesn't match with matrikon config"), result.`Comment`)
 where result.tagName = TagNameTable.newTagName;
 
-select * from resulttable;
+select * from resultoutput.resulttable;
 
 #Comment command
 #result.`Comment` = if(, concat(result.`Comment`,"\n"), result.`Comment`),

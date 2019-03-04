@@ -54,6 +54,7 @@ on matrikonTable.matrikonTag = new_config.tagName;
 UPDATE resultOutput.resultTable result,
     (SELECT 
         tagName AS newTagName,
+			units,
             matrikonTag AS matrikonTagName,
             matrikonLowRatio,
             matrikonHiRatio,
@@ -74,6 +75,7 @@ UPDATE resultOutput.resultTable result,
     RIGHT JOIN (SELECT 
         TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,
             variable_id,
+            reg_Measurement_Units AS units,
             reg_Minimium_display_value AS minDisplayVal,
             reg_Minimum_equipment_value AS minEquipmentVal,
             reg_Maximum_display_value AS maxDisplayVal,
@@ -85,6 +87,7 @@ UPDATE resultOutput.resultTable result,
         reg.reg_variable_id = common.variable_id UNION ALL SELECT 
         TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,
             variable_id,
+            ctv_Measurement_Units AS units,
             ctv_Minimium_display_value AS minDisplayVal,
             ctv_Minimum_equipment_value AS minEquipmentVal,
             ctv_Maximum_display_value AS maxDisplayVal,
@@ -96,6 +99,7 @@ UPDATE resultOutput.resultTable result,
         ctv.ctv_variable_id = common.variable_id UNION ALL SELECT 
         TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,
             variable_id,
+            cnt_Measurement_Units AS units,
             cnt_Minimium_display_value AS minDisplayVal,
             cnt_Minimum_equipment_value AS minEquipmentVal,
             cnt_Maximum_display_value AS maxDisplayVal,
@@ -107,6 +111,7 @@ UPDATE resultOutput.resultTable result,
         cnt.cnt_variable_id = common.variable_id UNION ALL SELECT 
         TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,
             variable_id,
+            chr_Measurement_Units AS units,
             chr_Minimium_display_value AS minDisplayVal,
             chr_Minimum_equipment_value AS minEquipmentVal,
             chr_Maximum_display_value AS maxDisplayVal,
@@ -124,13 +129,14 @@ SET
             (matrikonLowRatio <=> newConfigMinRatio)
                 AND (AnalogsRatioTable.newTagName IS NOT NULL)),
         'PASS',
-        'FAIL'),
+        IF(units LIKE "A" or units LIKE "kV",'PASS','FAIL')
+        ),
     result.`Analogs Maximum Ratio Test` = IF((AnalogsRatioTable.matrikonHiRatio <=> AnalogsRatioTable.newConfigMaxRatio)
             AND (AnalogsRatioTable.matrikonTagName IS NOT NULL),
         'PASS',
         'FAIL'),
     result.`Comment` = CONCAT(result.`Comment`,
-            IF(AnalogsRatioTable.newConfigMinRatio IS NULL,
+            IF(AnalogsRatioTable.newConfigMinRatio IS NULL and NOT (units LIKE "A" or units LIKE "kV"),
                 '
                  min display value (62) is zero',
                 ''),

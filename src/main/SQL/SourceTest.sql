@@ -50,6 +50,8 @@ UPDATE resultOutput.resultTable result,
         commonTable.variable_id,
             commonTable.source,
             commonTable.tagName,
+            dnp3_master_network_name AS networkName,
+            dnp3_master_device_name AS deviceName,
             CONCAT(dnp3_master_device_name, '.', LPAD(dnp3_master_type, 3, '0'), '.', dnp3_master_AOB_PointVariation, '.', dnp3_master_point_address) AS newConfigItemPath
     FROM
         (SELECT 
@@ -70,13 +72,17 @@ UPDATE resultOutput.resultTable result,
     FROM
         matrikondb.matrikon) AS matrikonTable ON newConfigTable.tagName = matrikonTable.matrikonTag) SourceTable 
 SET 
-    result.`OPC DNP3 Source Test` = IF(newConfigItemPath = itemPath,
+    result.`OPC DNP3 Source Test` = IF(newConfigItemPath = itemPath
+            OR (INSTR(itemPath, SUBSTRING(networkName, 4))
+            AND (INSTR(itemPath, deviceName) <=> 0)),
         'PASS',
         'FAIL'),
-    result.`Comment` = IF(newConfigItemPath <> itemPath,
+    result.`Comment` = IF((newConfigItemPath <> itemPath)
+            AND NOT (INSTR(itemPath, SUBSTRING(networkName, 4))
+            AND (INSTR(itemPath, deviceName) <=> 0)),
         CONCAT(result.`Comment`,
                 '
-                 SEL item path does not match for tag'),
+                                 SEL item path does not match for tag'),
         result.`Comment`)
 WHERE
     result.tagName = SourceTable.tagName;

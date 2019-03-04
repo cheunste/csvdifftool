@@ -141,15 +141,15 @@ on t2.tagName = t1.tagName;
 #Update the resultOutput DB's result table's DescriptionTest Column
 UPDATE resultOutput.resultTable result,
     (SELECT 
-        t2.tagName AS oldTagName,
-            t2.variable_id,
-            t2.variable_type as oldVariableType,
-            t1.variable_type as newVariableType,
+        t1.variable_type AS newVariableType,
             t1.bit_log_bit_0_to_1 AS bitLog01_1,
             t1.bit_log_bit_1_to_0 AS bitLog10_1,
             t1.bit_reserved bitReserved1,
             t1.authorisation_level AS authorisationLevel1,
             t1.alarm_level AS alarmLevel1,
+            t2.tagName AS oldTagName,
+            t2.variable_id,
+            t2.variable_type AS oldVariableType,
             t2.tagName AS newTagName,
             t2.bit_log_bit_0_to_1 AS bitLog01_2,
             t2.bit_log_bit_1_to_0 AS bitLog10_2,
@@ -327,23 +327,36 @@ SET
             AND DigitalTable.authorisationLevel1 <=> DigitalTable.authorisationLevel2
             AND DigitalTable.alarmLevel1 <=> DigitalTable.alarmLevel2,
         'PASS',
-        if (DigitalTable.oldVariableType like "CTV" and DigitalTable.newVariableType LIKE "CMD" AND DigitalTable.bitReserved2 LIKE "HI",'PASS','FAIL')),
+        IF((DigitalTable.oldVariableType LIKE 'CTV'
+                AND DigitalTable.newVariableType LIKE 'CMD'
+                AND DigitalTable.bitReserved2 LIKE 'HI')
+                OR (DigitalTable.oldTagName LIKE 'ALA'
+                AND DigitalTable.newTagName LIKE 'ACM'
+                AND DigitalTable.authorisationLevel2 = 0),
+            'PASS',
+            'FAIL')),
     result.`Comment` = CONCAT(result.`Comment`,
             IF((DigitalTable.bitLog10_1 <=> DigitalTable.bitLog10_2) = 0,
                 '
-                 bitlog10 (42) does not match between old and new config',
+                                                                 bitlog10 (42) does not match between old and new config',
                 ''),
-            IF((DigitalTable.bitReserved1 <=> DigitalTable.bitReserved2) = 0,
+            IF((DigitalTable.bitReserved1 <=> DigitalTable.bitReserved2) = 0
+                    AND NOT (DigitalTable.oldVariableType LIKE 'CTV'
+                    AND DigitalTable.newVariableType LIKE 'CMD'
+                    AND DigitalTable.bitReserved2 LIKE 'HI'),
                 '
-                 bitReserved (43)does not match between old and new config',
+                                                                 bitReserved (43)does not match between old and new config',
                 ''),
-            IF((DigitalTable.authorisationLevel1 <=> DigitalTable.authorisationLevel2) = 0,
+            IF((DigitalTable.authorisationLevel1 <=> DigitalTable.authorisationLevel2) = 0
+                    AND NOT (DigitalTable.oldTagName LIKE 'ALA'
+                    AND DigitalTable.newTagName LIKE 'ACM'
+                    AND DigitalTable.authorisationLevel2 = 0),
                 '
-                 authorization level does not match between old and new config',
+                                                                 authorization level (44) does not match between old and new config',
                 ''),
             IF((DigitalTable.alarmLevel1 <=> DigitalTable.alarmLevel2) = 0,
                 '
-                 alarm level does not match between old and new config',
+                                                                 alarm level (45) does not match between old and new config',
                 ''))
 WHERE
     result.tagName = DigitalTable.newTagName;
