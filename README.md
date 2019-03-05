@@ -187,6 +187,7 @@ However, the only ones that are of important are as follows:
   server, then the program will fail. The default is "production"
 * Password. This is the password for the production account on MySQL. If the
   passsword doesn't match, then the program will not work as intented. The password is not hashed and the default is ZAQ!xsw2 
+  Note that the password isn't hashed as I literally do not care.
 
 * databaseIP: This is the IP or Hostname of where MySQL is installed. If this
   is changed, to a different IP where there is no MYSQL installed, then the
@@ -196,4 +197,4 @@ However, the only ones that are of important are as follows:
   pass/fail tests. The default is "output.csv"
 
 * defaultFilePath: This is the location the pass/fail test will be saved at.
-  **Important**: You need to add the '\' at the end of the path
+  **Important**: You need to add the '\\' at the end of the path
