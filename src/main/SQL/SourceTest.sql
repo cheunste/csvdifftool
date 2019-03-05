@@ -74,12 +74,12 @@ UPDATE resultOutput.resultTable result,
 SET 
     result.`OPC DNP3 Source Test` = IF(newConfigItemPath = itemPath
             OR (INSTR(itemPath, SUBSTRING(networkName, 4))
-            AND (INSTR(itemPath, deviceName) <=> 0)),
+            AND (INSTR(itemPath, deviceName) > 0)),
         'PASS',
         'FAIL'),
     result.`Comment` = IF((newConfigItemPath <> itemPath)
             AND NOT (INSTR(itemPath, SUBSTRING(networkName, 4))
-            AND (INSTR(itemPath, deviceName) <=> 0)),
+            AND (INSTR(itemPath, deviceName) > 0)),
         CONCAT(result.`Comment`,
                 '
                                  SEL item path does not match for tag'),
@@ -87,4 +87,7 @@ SET
 WHERE
     result.tagName = SourceTable.tagName;
 
-select * from resultOutput.resultTable;
+SELECT 
+    TagName, `OPC DNP3 Source Test`, Comment
+FROM
+    resultOutput.resultTable;

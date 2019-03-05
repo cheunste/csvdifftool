@@ -146,7 +146,7 @@ SET
                 ''),
             IF(AnalogsRatioTable.newConfigMinRatio <> AnalogsRatioTable.matrikonLowRatio,
                 '
-                 min equipment val (65) and min display val (63) does not match between new nad matrikon config',
+                 min equipment val (65) and min display val (63) does not match between new and matrikon config',
                 ''),
             IF(AnalogsRatioTable.matrikonHiRatio <> AnalogsRatioTable.newConfigMaxRatio,
                 '

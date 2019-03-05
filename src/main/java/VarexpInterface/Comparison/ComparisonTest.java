@@ -124,15 +124,15 @@ public class ComparisonTest {
     private String digitalsTest =
             "UPDATE " + Result.resultDatabaseName() + " result,\n" +
                     "    (SELECT \n" +
-                    "        t1.variable_type AS newVariableType,\n" +
+                    "        t1.variable_type AS oldVariableType,\n" +
                     "            t1.bit_log_bit_0_to_1 AS bitLog01_1,\n" +
                     "            t1.bit_log_bit_1_to_0 AS bitLog10_1,\n" +
                     "            t1.bit_reserved bitReserved1,\n" +
                     "            t1.authorisation_level AS authorisationLevel1,\n" +
                     "            t1.alarm_level AS alarmLevel1,\n" +
-                    "            t2.tagName AS oldTagName,\n" +
+                    "            t1.tagName AS oldTagName,\n" +
                     "            t2.variable_id,\n" +
-                    "            t2.variable_type AS oldVariableType,\n" +
+                    "            t2.variable_type AS newVariableType,\n" +
                     "            t2.tagName AS newTagName,\n" +
                     "            t2.bit_log_bit_0_to_1 AS bitLog01_2,\n" +
                     "            t2.bit_log_bit_1_to_0 AS bitLog10_2,\n" +
@@ -221,7 +221,18 @@ public class ComparisonTest {
                     "        oldvarexpdb.common AS common\n" +
                     "    RIGHT JOIN oldvarexpdb.ats AS ats ON ats_variable_id = common.variable_id\n" +
                     "    WHERE\n" +
-                    "        ats.ats_variable_id = common.variable_id) AS oldConfigTable) AS t1\n" +
+                    "        ats.ats_variable_id = common.variable_id UNION ALL SELECT \n" +
+                    "        TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS tagName,\n" +
+                    "            variable_id,\n" +
+                    "            variable_type,\n" +
+                    "            NULL,\n" +
+                    "            NULL,\n" +
+                    "            NULL,\n" +
+                    "            NULL,\n" +
+                    "            NULL\n" +
+                    "    FROM\n" +
+                    "        oldvarexpdb.common AS common\n" +
+                    "    RIGHT JOIN oldvarexpdb.ctv AS ctv ON ctv_variable_id = common.variable_id) AS oldConfigTable) AS t1\n" +
                     "    RIGHT JOIN (SELECT \n" +
                     "        *\n" +
                     "    FROM\n" +
@@ -313,37 +324,34 @@ public class ComparisonTest {
                     "        IF((DigitalTable.oldVariableType LIKE 'CTV'\n" +
                     "                AND DigitalTable.newVariableType LIKE 'CMD'\n" +
                     "                AND DigitalTable.bitReserved2 LIKE 'HI')\n" +
-                    "                OR (DigitalTable.oldTagName LIKE 'ALA'\n" +
-                    "                AND DigitalTable.newTagName LIKE 'ACM'\n" +
-                    "                AND DigitalTable.authorisationLevel2 = 0),\n" +
+                    "                OR (DigitalTable.oldVariableType LIKE 'ACM'\n" +
+                    "                AND DigitalTable.newVariableType LIKE 'ALA'),\n" +
                     "            'PASS',\n" +
                     "            'FAIL')),\n" +
                     "    result.`Comment` = CONCAT(result.`Comment`,\n" +
                     "            IF((DigitalTable.bitLog10_1 <=> DigitalTable.bitLog10_2) = 0,\n" +
                     "                '\n" +
-                    "                                                                 bitlog10 (42) does not match between old and new config',\n" +
+                    "                                                                                                 bitlog10 (42) does not match between old and new config',\n" +
                     "                ''),\n" +
                     "            IF((DigitalTable.bitReserved1 <=> DigitalTable.bitReserved2) = 0\n" +
                     "                    AND NOT (DigitalTable.oldVariableType LIKE 'CTV'\n" +
                     "                    AND DigitalTable.newVariableType LIKE 'CMD'\n" +
                     "                    AND DigitalTable.bitReserved2 LIKE 'HI'),\n" +
                     "                '\n" +
-                    "                                                                 bitReserved (43)does not match between old and new config',\n" +
+                    "                                                                                                 bitReserved (43)does not match between old and new config',\n" +
                     "                ''),\n" +
                     "            IF((DigitalTable.authorisationLevel1 <=> DigitalTable.authorisationLevel2) = 0\n" +
-                    "                    AND NOT (DigitalTable.oldTagName LIKE 'ALA'\n" +
-                    "                    AND DigitalTable.newTagName LIKE 'ACM'\n" +
-                    "                    AND DigitalTable.authorisationLevel2 = 0),\n" +
+                    "                    AND NOT (DigitalTable.oldVariableType LIKE 'ACM'\n" +
+                    "                    AND DigitalTable.newVariableType LIKE 'ALA'),\n" +
                     "                '\n" +
-                    "                                                                 authorization level (44) does not match between old and new config',\n" +
+                    "                                                                                                 authorization level (44) does not match between old and new config',\n" +
                     "                ''),\n" +
                     "            IF((DigitalTable.alarmLevel1 <=> DigitalTable.alarmLevel2) = 0,\n" +
                     "                '\n" +
-                    "                                                                 alarm level (45) does not match between old and new config',\n" +
+                    "                                                                                                 alarm level (45) does not match between old and new config',\n" +
                     "                ''))\n" +
                     "WHERE\n" +
                     "    result.tagName = DigitalTable.newTagName;";
-
     //Matches the units column for analog tags
     private String unitsTest =
             "Update " + Result.resultDatabaseName() + " result,\n" +
@@ -609,12 +617,12 @@ public class ComparisonTest {
                     "SET \n" +
                     "    result.`OPC DNP3 Source Test` = IF(newConfigItemPath = itemPath\n" +
                     "            OR (INSTR(itemPath, SUBSTRING(networkName, 4))\n" +
-                    "            AND (INSTR(itemPath, deviceName) <=> 0)),\n" +
+                    "            AND (INSTR(itemPath, deviceName) > 0)),\n" +
                     "        'PASS',\n" +
                     "        'FAIL'),\n" +
                     "    result.`Comment` = IF((newConfigItemPath <> itemPath)\n" +
                     "            AND NOT (INSTR(itemPath, SUBSTRING(networkName, 4))\n" +
-                    "            AND (INSTR(itemPath, deviceName) <=> 0)),\n" +
+                    "            AND (INSTR(itemPath, deviceName) > 0)),\n" +
                     "        CONCAT(result.`Comment`,\n" +
                     "                '\n" +
                     "                                 SEL item path does not match for tag'),\n" +

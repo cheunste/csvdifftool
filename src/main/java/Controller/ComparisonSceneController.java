@@ -259,9 +259,9 @@ public class ComparisonSceneController implements Initializable {
         });
 
         debugModeBtn.setOnAction((ActionEvent e) -> {
-            oldConfigFilePath.setText("C:\\Users\\Stephen\\IdeaProjects\\databaseCrap\\out\\artifacts\\VarexpInterface\\Varexp_FE03_SHILO_OLD.csv");
-            newConfigFilePath.setText("C:\\Users\\Stephen\\IdeaProjects\\databaseCrap\\out\\artifacts\\VarexpInterface\\Varexp_FE03_SHILO_NEW.csv");
-            matrikonFilePath.setText("C:\\Users\\Stephen\\IdeaProjects\\databaseCrap\\out\\artifacts\\VarexpInterface\\Matrikon_FE03_SHILO.csv");
+            oldConfigFilePath.setText("C:\\Users\\Stephen\\IdeaProjects\\databaseCrap\\out\\artifacts\\VarexpInterface\\PcVue9.csv");
+            newConfigFilePath.setText("C:\\Users\\Stephen\\IdeaProjects\\databaseCrap\\out\\artifacts\\VarexpInterface\\PcVue11.csv");
+            matrikonFilePath.setText("C:\\Users\\Stephen\\IdeaProjects\\databaseCrap\\out\\artifacts\\VarexpInterface\\MANZA.csv");
             compareBtn.setDisable(false);
 
         });
