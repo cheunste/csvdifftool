@@ -230,6 +230,19 @@ public class dbConnector {
         }
     }
 
+    public static void sqlExecute(String databaseName, String sqlCmd) {
+        try {
+            openConnection(databaseName);
+            setStatement(connect);
+            statement.execute(sqlCmd);
+        } catch (Exception e) {
+            dbConnectionLogger.error("Exception with sqlExecute. Error" + e + "\nWhen executing " + sqlCmd);
+            e.printStackTrace();
+        } finally {
+            close(connect);
+        }
+    }
+
     public String sqlQuery(String databaseName, String sqlCmd) {
 
         try {
@@ -239,26 +252,13 @@ public class dbConnector {
             String resultString = writeResultSet(rs);
             return resultString;
         } catch (Exception e) {
-            dbConnectionLogger.error("Exception with sqlQuery. Error" + e);
+            dbConnectionLogger.error("Exception with sqlQuery. Error:" + e + "\nWhen executing " + sqlCmd);
             e.printStackTrace();
             return "";
         } finally {
             close(connect);
         }
 
-    }
-
-    public static void sqlExecute(String databaseName, String sqlCmd) {
-        try {
-            openConnection(databaseName);
-            setStatement(connect);
-            statement.execute(sqlCmd);
-        } catch (Exception e) {
-            dbConnectionLogger.error("Exception with sqlQuery. Error" + e);
-            e.printStackTrace();
-        } finally {
-            close(connect);
-        }
     }
 
     public static String getTableSizeMatrikon(String databaseName) {

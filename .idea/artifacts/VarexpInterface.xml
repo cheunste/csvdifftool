@@ -36,6 +36,10 @@
           <element id="library" level="project" name="Maven: org.slf4j:jcl-over-slf4j:1.7.12" />
           <element id="library" level="project" name="Maven: org.slf4j:slf4j-api:1.7.12" />
           <element id="library" level="project" name="mysql-connector-java-8.0.11" />
+          <element id="file-copy" path="$MAVEN_REPOSITORY$/com/jfoenix/jfoenix/8.0.7/jfoenix-8.0.7.jar" />
+          <element id="file-copy" path="$MAVEN_REPOSITORY$/com/google/protobuf/protobuf-java/3.6.1/protobuf-java-3.6.1.jar" />
+          <element id="file-copy" path="$MAVEN_REPOSITORY$/org/apache/commons/commons-lang3/3.8.1/commons-lang3-3.8.1.jar" />
+          <element id="file-copy" path="$MAVEN_REPOSITORY$/mysql/mysql-connector-java/8.0.15/mysql-connector-java-8.0.15.jar" />
         </element>
       </element>
     </root>
