@@ -741,6 +741,67 @@ public class ComparisonTest {
                     "WHERE\n" +
                     "    result.tagName = ProducerTable.tagName;";
 
+    /*
+        The following isn't a test, but is needed irregardless. This SQL Statement fills the resulttable DB with
+        tags that DOES NOT show up in the new config but still exists in the other two configs (old config and matrikon)
+
+        THIS MUST BE EXECUTED AFTER ALL OTHER TEST
+    */
+    private static String fillMissingTag =
+            "insert into " + Result.resultDatabaseName() + " (TagName,\n" +
+                    "\t`Tag Name Test`,`Description Test`,`Digitals Test`,\n" +
+                    "    `Units Test`,`Analogs Minimum Ratio Test`,`Analogs Maximum Ratio Test`,\n" +
+                    "    `Type Test`,`OPC DNP3 Source Test`,`Commandable Range Test`,\n" +
+                    "    `Internal Type Check Test`,`Producer Test`,`Comment`)\n" +
+                    "Select if(oldTagName<=>null,matrikonTagName,oldTagName),'FAIL','','','','','','','','','','',IF(oldTagName <=> NULL,'Tag only exists in Matrikon config. No further tests conducted','Tag only exists in old config. No further tests conducted') from\n" +
+                    "(\t\n" +
+                    "    SELECT \n" +
+                    "    *\n" +
+                    "    FROM\n" +
+                    "    (SELECT \n" +
+                    "        newConfigTable.newVariableId,\n" +
+                    "            oldConfigTable.oldVariableId,\n" +
+                    "            newConfigTable.newTagName,\n" +
+                    "            oldConfigTable.oldTagName\n" +
+                    "    FROM\n" +
+                    "        (SELECT \n" +
+                    "        variable_id AS newVariableId,\n" +
+                    "            TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS newTagName\n" +
+                    "    FROM\n" +
+                    "        newvarexpdb.common AS common\n" +
+                    "    ORDER BY newTagName) AS newConfigTable\n" +
+                    "    LEFT JOIN (SELECT \n" +
+                    "        variable_id AS oldVariableId,\n" +
+                    "            TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS oldTagName\n" +
+                    "    FROM\n" +
+                    "        oldvarexpdb.common AS common\n" +
+                    "    ORDER BY oldTagName) AS oldConfigTable ON oldConfigTable.oldTagName = newConfigTable.newTagName UNION SELECT \n" +
+                    "        newConfigTableR.newVariableId,\n" +
+                    "            oldConfigTableR.oldVariableId,\n" +
+                    "            newConfigTableR.newTagName,\n" +
+                    "            oldConfigTableR.oldTagName\n" +
+                    "    FROM\n" +
+                    "        (SELECT \n" +
+                    "        variable_id AS newVariableId,\n" +
+                    "            TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS newTagName\n" +
+                    "    FROM\n" +
+                    "        newvarexpdb.common AS common\n" +
+                    "    ORDER BY newTagName) AS newConfigTableR\n" +
+                    "    RIGHT JOIN (SELECT \n" +
+                    "        variable_id AS oldVariableId,\n" +
+                    "            TRIM(TRAILING '.' FROM CONCAT(common.1st_element, '.', common.2nd_element, '.', common.3rd_element, '.', common.4th_element, '.', common.5th_element, '.', common.6th_element, '.', common.7th_to_12th)) AS oldTagName\n" +
+                    "    FROM\n" +
+                    "        oldvarexpdb.common AS common\n" +
+                    "    ORDER BY oldTagName) AS oldConfigTableR ON oldConfigTableR.oldTagName = newConfigTableR.newTagName) AS tempTable1\n" +
+                    "        LEFT JOIN\n" +
+                    "    (SELECT \n" +
+                    "        matrikon.matrikon_id AS matrikonID,\n" +
+                    "            CONCAT(matrikon.matrikon_group_name, '.', matrikon_name) AS matrikonTagName\n" +
+                    "    FROM\n" +
+                    "        matrikondb.matrikon AS matrikon) AS matrikonTable ON tempTable1.newTagName = matrikonTagName\n" +
+                    "        WHERE newTagName<=>null\n" +
+                    ") as missingTagTable;";
+
     public ComparisonTest(String matrikonDB, String newConfigDB, String oldConfigDB, String resultDB) {
 
         ComparisonTest.matrikonDB = matrikonDB;
@@ -811,6 +872,10 @@ public class ComparisonTest {
         //entries. Holy shit, did I program myself into a ditch.
         testList.clear();
 
+        //Execute the missing tag query.
+        log.info("Filling in Missing tags (if any)");
+        dbConnector.sqlExecute(resultDB, fillMissingTag);
+        log.info("Done filling in missing tags in DB (if any)");
         //Close the dbConnection
         dbConnector.close();
     }

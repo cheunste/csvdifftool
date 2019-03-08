@@ -27,12 +27,17 @@ import java.net.URL;
 import java.sql.SQLException;
 import java.util.Optional;
 import java.util.ResourceBundle;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public class ComparisonSceneController implements Initializable {
 
     public static final String oldDB = "oldVarexpDB";
     public static final String newDB = "newVarexpDB";
     public static final String matrikonDB = "matrikonDB";
+
+    private static String lastUsedPath = null;
+
     static final Logger logger = LogManager.getLogger(ComparisonSceneController.class.getName());
 
     Stage currentWindow;
@@ -220,6 +225,9 @@ public class ComparisonSceneController implements Initializable {
         dbConnector.deleteDB(matrikonDB);
     }
 
+    /*
+    Initializes the GUI. This is essentually a main function for this controller
+     */
     @FXML
     public void initialize(URL location, ResourceBundle resources) {
 
@@ -302,12 +310,33 @@ public class ComparisonSceneController implements Initializable {
         if (!userDirectory.canRead()) {
             userDirectory = new File("C:/");
         }
-        fileChooser.setInitialDirectory(userDirectory);
+
+        //If the last usedPath isn't empty, then just set it to whatever the user opened last
+        if (lastUsedPath != null) {
+
+            /*
+                This Regex matches everything up to the last "\" or "/" of a file.
+                Ex:
+                 Given: C:\Gepora\DNP3 Comparison\Groton\Varexp_GROTO.csv
+                 Returns: C:\Gepora\DNP3 Comparison\Groton\
+
+             */
+            Pattern lastFilePath = Pattern.compile("^(.*[\\\\\\/])");
+            Matcher matcher = lastFilePath.matcher(lastUsedPath);
+
+            if (matcher.find()) {
+                System.out.println("Full match: " + matcher.group(0));
+                fileChooser.setInitialDirectory(new File(matcher.group(0)));
+            }
+        } else {
+            fileChooser.setInitialDirectory(userDirectory);
+        }
 
 
         fileChooser.setTitle("Open Config");
         //File configFile = fileChooser.showOpenDialog(stage);
         File configFile = fileChooser.showOpenDialog(null);
+        lastUsedPath = configFile.getAbsolutePath();
 
         return configFile.getAbsolutePath();
     }
