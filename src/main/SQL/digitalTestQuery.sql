@@ -212,7 +212,12 @@ SET
             'PASS',
             'FAIL')),
     result.`Comment` = CONCAT(result.`Comment`,
-            IF((DigitalTable.bitLog10_1 <=> DigitalTable.bitLog10_2) = 0,
+            IF((DigitalTable.bitLog10_1 <=> DigitalTable.bitLog10_2) = 0 
+				AND NOT (DigitalTable.oldVariableType LIKE 'CTV'
+                AND DigitalTable.newVariableType LIKE 'CMD'
+                AND DigitalTable.bitReserved2 LIKE 'HI')
+                OR (DigitalTable.oldVariableType LIKE 'ACM'
+                AND DigitalTable.newVariableType LIKE 'ALA'),
                 '
                 bitlog10 (42) does not match between old and new config',
                 ''),
