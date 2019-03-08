@@ -539,11 +539,7 @@ public class ComparisonTest {
                     "            IF(AnalogsRatioTable.matrikonHiRatio <> AnalogsRatioTable.newConfigMaxRatio,\n" +
                     "                '\n" +
                     "                 max equipment val (66) and max display val (64) does not match between new and matrikon config',\n" +
-                    "                ''),\n" +
-                    "            IF(AnalogsRatioTable.matrikonTagName IS NULL,\n" +
-                    "                '\n" +
-                    "                 tag name doesn\\'t exist in matrikon config',\n" +
-                    "                ''))\n" +
+                    "                '')\n" +
                     "WHERE\n" +
                     "    result.tagName = AnalogsRatioTable.newTagName;";
     //This test is to update DNP3 Type. It checks to see if the oldSource is 'O' and for the same tags, check if the new source in the new config is '3'
@@ -867,15 +863,18 @@ public class ComparisonTest {
         //Wait until all tests are completed
         while (!testService.isTerminated()) {
         }
+        if (testService.isTerminated()) {
+            //Execute the missing tag query.
+            log.info("Filling in Missing tags (if any)");
+            dbConnector.sqlExecute(resultDB, fillMissingTag);
+            log.info("Done filling in missing tags in DB (if any)");
+        }
 
         //This clears up the testList list. This is so if user needs to run it again, it will prevent double
         //entries. Holy shit, did I program myself into a ditch.
         testList.clear();
 
-        //Execute the missing tag query.
-        log.info("Filling in Missing tags (if any)");
-        dbConnector.sqlExecute(resultDB, fillMissingTag);
-        log.info("Done filling in missing tags in DB (if any)");
+
         //Close the dbConnection
         dbConnector.close();
     }
