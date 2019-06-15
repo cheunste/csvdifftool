@@ -1,0 +1,58 @@
+.button{
+    -fx-background-color:green;
+    -fx-font-weight:bold;
+    -fx-text-fill:white;
+    -fx-font-size:16;
+    -fx-pref-width:150;
+}
+
+.label{
+    -fx-font-size:16;
+}
+.cancel-button{
+    -fx-font-size:16;
+    -fx-pref-width:150;
+    -fx-background-color:red;
+}
+#welcome{
+    -fx-alignment:center;
+    -fx-font-weight:bold;
+    -fx-text:"Welcome to Varexp DB";
+    -fx-font-size:18;
+}
+
+.text-label{
+    -fx-font-size:14;
+    -fx-padding: 15 15 15 15;
+}
+.Title{
+    -fx-font-size: 30;
+    -fx-font-color: mediumseagreen;
+    -fx-padding: 15 15 15 15;
+    -fx-font-weight: bold;
+}
+
+#dbSelectorPane{
+
+}
+
+.cancelButton{
+    -fx-background-color:red;
+    -fx-text-fill:white;
+    -fx-font-weight:bold;
+}
+
+.warning{
+    -fx-border-color:yellow;
+    -fx-border-width:3;
+}
+
+.error{
+    -fx-border-color:red;
+    -fx-border-width:3;
+}
+
+.header{
+    -fx-font-weight:bold;
+    -fx-font-size:18;
+}

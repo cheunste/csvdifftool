@@ -1,0 +1,156 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<?import com.jfoenix.controls.JFXButton?>
+<?import javafx.geometry.*?>
+<?import javafx.scene.control.*?>
+<?import javafx.scene.layout.*?>
+<?import java.net.URL?>
+<BorderPane xmlns:fx="http://javafx.com/fxml/1" maxHeight="-Infinity" maxWidth="-Infinity" minHeight="-Infinity"
+            minWidth="-Infinity" prefHeight="1200.0" prefWidth="1271.0" xmlns="http://javafx.com/javafx/8.0.171">
+    <stylesheets>
+        <URL value="@CSS/defaultTheme.css"/>
+    </stylesheets>
+    <left>
+        <VBox prefHeight="775.0" prefWidth="305.0" BorderPane.alignment="CENTER">
+            <children>
+                <Label text="Tag Filter:"/>
+                <TextField fx:id="TagFilterField"/>
+                <Label text="Tag List:"/>
+                <ListView fx:id="TagListView" prefHeight="1078.0" prefWidth="265.0"/>
+            </children>
+            <padding>
+                <Insets bottom="20.0" left="20.0" right="20.0" top="20.0"/>
+            </padding>
+        </VBox>
+    </left>
+    <top>
+        <MenuBar BorderPane.alignment="CENTER">
+            <menus>
+                <Menu mnemonicParsing="false" text="File">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Close"/>
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Edit">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="Delete"/>
+                    </items>
+                </Menu>
+                <Menu mnemonicParsing="false" text="Help">
+                    <items>
+                        <MenuItem mnemonicParsing="false" text="About"/>
+                    </items>
+                </Menu>
+            </menus>
+        </MenuBar>
+    </top>
+    <right>
+        <VBox alignment="TOP_CENTER" prefHeight="775.0" prefWidth="186.0" BorderPane.alignment="CENTER">
+            <children>
+                <JFXButton fx:id="saveBtn" text="Save"/>
+                <JFXButton buttonType="RAISED" text="Mass Copy"/>
+                <HBox alignment="CENTER"/>
+            </children>
+        </VBox>
+    </right>
+    <center>
+        <VBox prefHeight="200.0" prefWidth="100.0" BorderPane.alignment="CENTER">
+            <children>
+                <HBox>
+                    <children>
+                        <Label text="Tag Name:"/>
+                    </children>
+                    <VBox.margin>
+                        <Insets bottom="10.0" left="10.0" right="10.0" top="10.0"/>
+                    </VBox.margin>
+                </HBox>
+                <HBox layoutX="10.0" layoutY="10.0" prefHeight="677.0" prefWidth="726.0">
+                    <children>
+
+                        <!-- Common Variable View-->
+                        <HBox>
+                            <VBox>
+                                <GridPane fx:id="commonViewLeftGridPane" VBox.vgrow="ALWAYS">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="NEVER" minWidth="-Infinity"/>
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="-Infinity" prefHeight="30.0" vgrow="NEVER"/>
+                                    </rowConstraints>
+                                </GridPane>
+                                <HBox.margin>
+                                    <Insets right="10.0"/>
+                                </HBox.margin>
+                            </VBox>
+                            <VBox HBox.hgrow="ALWAYS">
+                                <GridPane fx:id="commonViewRightGridPane">
+                                    <columnConstraints>
+                                        <ColumnConstraints hgrow="NEVER" minWidth="-Infinity"/>
+                                        <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
+                                    </columnConstraints>
+                                    <rowConstraints>
+                                        <RowConstraints minHeight="-Infinity" prefHeight="30.0" vgrow="NEVER"/>
+                                    </rowConstraints>
+                                </GridPane>
+                            </VBox>
+                        </HBox>
+                        <!--
+                         <Region prefHeight="200.0" prefWidth="200.0"/>
+                         <Region layoutX="30.0" layoutY="20.0" prefHeight="200.0" prefWidth="200.0"/>
+                         <Region prefHeight="200.0" prefWidth="200.0"/>
+                         -->
+
+
+                    </children>
+                    <padding>
+                        <Insets bottom="10.0" left="20.0" right="20.0" top="10.0"/>
+                    </padding>
+                    <VBox.margin>
+                        <Insets left="10.0" right="10.0" top="10.0"/>
+                    </VBox.margin>
+                </HBox>
+                <!-- Command/TKype Variable View -->
+                <HBox>
+                    <padding>
+                        <Insets bottom="20.0" left="20.0" right="20.0" top="10.0"/>
+                    </padding>
+                    <VBox.margin>
+                        <Insets left="10.0" right="10.0" top="10.0"/>
+                    </VBox.margin>
+                    <VBox fx:id="CommandView">
+                        <GridPane fx:id="CommandGridPane" VBox.vgrow="ALWAYS">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="NEVER" minWidth="-Infinity"/>
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints minHeight="-Infinity" prefHeight="30.0" vgrow="NEVER"/>
+                            </rowConstraints>
+                        </GridPane>
+                        <HBox.margin>
+                            <Insets right="10.0"/>
+                        </HBox.margin>
+                    </VBox>
+
+                    <!-- Source Variable View-->
+                    <VBox fx:id="SourceView">
+                        <GridPane fx:id="SourceGridPane" VBox.vgrow="ALWAYS">
+                            <columnConstraints>
+                                <ColumnConstraints hgrow="NEVER" minWidth="-Infinity"/>
+                                <ColumnConstraints hgrow="SOMETIMES" minWidth="10.0"/>
+                            </columnConstraints>
+                            <rowConstraints>
+                                <RowConstraints minHeight="-Infinity" prefHeight="30.0" vgrow="NEVER"/>
+                            </rowConstraints>
+                        </GridPane>
+                        <HBox.margin>
+                            <Insets right="10.0"/>
+                        </HBox.margin>
+
+                    </VBox>
+                </HBox>
+            </children>
+        </VBox>
+    </center>
+</BorderPane>

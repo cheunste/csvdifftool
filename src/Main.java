@@ -3,6 +3,7 @@
  */
 
 import Controller.ComparisonSceneController;
+import VarexpInterface.PropertyManager;
 import javafx.application.Application;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Parent;
@@ -24,15 +25,13 @@ public class Main extends Application {
     private Button button;
 
     public static void main(String[] args) {
+        //Checks the file size of the log and delete if necessary
+        PropertyManager pm = new PropertyManager();
         launch(args);
     }
 
     @Override
     public void start(Stage primaryStage) throws Exception {
-
-        //Fetch fields from the config file
-        //PropertyManager pm = new PropertyManager();
-        //pm.getPropertyValues();
 
         //1) Declare a primary Stage (Everything will be on this)
         window = primaryStage;
@@ -44,7 +43,7 @@ public class Main extends Application {
         //Load the document
         //Parent root = FXMLLoader.load(getClass().getResource("View/DBSelector.fxml"));
 
-        FXMLLoader loader = new FXMLLoader(getClass().getResource("View/ComparisonGUI.fxml"));
+        FXMLLoader loader = new FXMLLoader(getClass().getResource("main/java/View/ComparisonGUI.fxml"));
         Parent root = loader.load();
         ComparisonSceneController comparisonSceneController = loader.getController();
         comparisonSceneController.setCurrentWindow(window);
